@@ -47,7 +47,7 @@ class UserImportFormConfiguration implements FormConfigurationInterface
     {
         return [
             'age' => new FormFieldDefinition(
-                'name', IntegerType::class, [
+                'age', IntegerType::class, [
                     'attr' => [
                         'min' => 0,
                         'max' => 999,
