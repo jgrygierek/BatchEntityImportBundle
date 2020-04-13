@@ -1,16 +1,16 @@
-BatchImporterBundle
+BatchImportBundle
 =
 
 Bundle adds feature of batch inserting of data provided from different files. 
 Data can be viewed and edited before saving to database.
 
-###Supported extensions:
+### Supported extensions:
 * CSV
 * XLS
 * XLSX
 * ODS
 
-###Prepare form configuration:
+### Prepare form configuration:
 
 You have to create configuration class. You can add here definitions for dynamic fields loaded from file. 
 Field name is the same as column name. If no definition for field will be provided, `TextType` class will be used as default.
@@ -68,14 +68,14 @@ class UserImportFormConfiguration implements FormConfigurationInterface
 }
 ```
 
-###Create your controller:
+### Create your controller:
 
 Most part of job is done inside trait, but you still need add some configuration.
 
 ```php
 namespace App\Controller\Game;
 
-use App\Form\Configuration\UserFormConfiguration;
+use App\Form\Configuration\UserImportFormConfiguration;
 use JG\BatchImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -115,12 +115,12 @@ class ImportController extends AbstractController
     
     private function getImportConfigurationClassName(): string
     {
-       return UserFormConfiguration::class;
+       return UserImportFormConfiguration::class;
     }
 }
 ```
 
-###Overriding templates:
+### Overriding templates:
 
 You can override default templates globally by adding them to directory:
 
@@ -130,7 +130,7 @@ templates/budles/BatchImportBundle
 
 If you have controller-specific templates, you can override them in controller:
 
-```
+```php
 private function getSelectFileTemplateName(): string
 {
     return 'your/path/to/select_file.html.twig';
