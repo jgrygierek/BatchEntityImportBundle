@@ -1,0 +1,43 @@
+{
+    "name": "jg/batch-import-bundle",
+    "type": "symfony-bundle",
+    "description": "Importing data with preview and edit features.",
+    "keywords": [
+        "import",
+        "preview",
+        "excel",
+        "csv",
+        "ods",
+        "symfony"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jarosław Grygierek",
+            "email": "jaroslawgrygierek@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4.0",
+        "symfony/doctrine-bridge": "^4.0",
+        "symfony/form": "^4.0",
+        "symfony/http-foundation": "^4.0",
+        "symfony/http-kernel": "^4.0",
+        "symfony/options-resolver": "^4.0",
+        "symfony/validator": "^4.0",
+        "yectep/phpspreadsheet-bundle": "^0.1.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "JG\\BatchImportBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JG\\BatchImportBundle\\Tests\\": "tests/"
+        }
+    }
+}

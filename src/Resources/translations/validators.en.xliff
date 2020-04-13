@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file source-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="validation.file.extension">
+                <source>validation.file.extension</source>
+                <target>Wrong file extension. Allowed extensions: %extensions.</target>
+            </trans-unit>
+            <trans-unit id="validation.matrix.fields_number">
+                <source>validation.matrix.fields_number</source>
+                <target>All records should have exact number of fields.</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
