@@ -2,7 +2,8 @@ BatchImportBundle
 =
 
 Bundle adds feature of batch inserting of data provided from different files. 
-Data can be viewed and edited before saving to database.
+* Data can be viewed and edited before saving to database.
+* Supports translations from KnpLabs Translatable extension.
 
 ### Supported extensions:
 * CSV
@@ -16,19 +17,21 @@ You have to create configuration class. You can add here definitions for dynamic
 Field name is the same as column name. If no definition for field will be provided, `TextType` class will be used as default.
 
 ```php
-namespace App\Form\Configuration;
+namespace App\Configuration;
 
 use App\Entity\User;
-use JG\BatchImportBundle\Model\Form\FormConfigurationInterface;
+use JG\BatchImportBundle\Model\Configuration\AbstractImportConfiguration;
+use JG\BatchImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchImportBundle\Model\Form\FormFieldDefinition;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class UserImportFormConfiguration implements FormConfigurationInterface
+class UserImportFormConfiguration extends AbstractImportConfiguration implements ImportConfigurationInterface
 {
     /**
      * Class of entity used during import process.
+     * This is required method.
      *
      * @return string
      */

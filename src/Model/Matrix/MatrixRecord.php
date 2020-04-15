@@ -1,16 +1,28 @@
 <?php
 
-namespace JG\BatchImportBundle\Model;
+namespace JG\BatchImportBundle\Model\Matrix;
 
 use UnexpectedValueException;
 
 class MatrixRecord
 {
-    private array $data;
+    private ?object $entity = null;
+    private array   $data;
 
     public function __construct(array $data = [])
     {
+        unset($data['entity']);
         $this->data = $data;
+    }
+
+    public function getEntity(): ?object
+    {
+        return $this->entity;
+    }
+
+    public function setEntity(?object $entity): void
+    {
+        $this->entity = $entity;
     }
 
     public function getData(): array

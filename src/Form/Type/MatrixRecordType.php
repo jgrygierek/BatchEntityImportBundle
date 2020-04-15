@@ -2,9 +2,9 @@
 
 namespace JG\BatchImportBundle\Form\Type;
 
-use JG\BatchImportBundle\Model\Form\FormConfigurationInterface;
+use JG\BatchImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchImportBundle\Model\Form\FormFieldDefinition;
-use JG\BatchImportBundle\Model\MatrixRecord;
+use JG\BatchImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\AlreadySubmittedException;
@@ -22,7 +22,7 @@ class MatrixRecordType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        /** @var FormConfigurationInterface $configuration */
+        /** @var ImportConfigurationInterface $configuration */
         $configuration    = $options['configuration'];
         $fieldDefinitions = $configuration->getFieldsDefinitions();
 
@@ -32,7 +32,6 @@ class MatrixRecordType extends AbstractType
                 EntityType::class,
                 [
                     'class'              => $configuration->getEntityClassName(),
-                    'mapped'             => false,
                     'label'              => false,
                     'placeholder'        => '---',
                     'translation_domain' => false,
@@ -67,7 +66,7 @@ class MatrixRecordType extends AbstractType
         $resolver
             ->setDefaults(['data_class' => MatrixRecord::class])
             ->setRequired('configuration')
-            ->addAllowedTypes('configuration', FormConfigurationInterface::class);
+            ->addAllowedTypes('configuration', ImportConfigurationInterface::class);
     }
 
     /**
@@ -81,10 +80,6 @@ class MatrixRecordType extends AbstractType
      */
     private function addField(array $fieldDefinitions, string $columnName, FormEvent $event): void
     {
-        if ($columnName === 'entity') {
-            return;
-        }
-
         if (!isset($fieldDefinitions[$columnName])) {
             $event->getForm()->add($columnName, TextType::class);
         } else {

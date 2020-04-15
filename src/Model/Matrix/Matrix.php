@@ -1,24 +1,32 @@
 <?php
 
-namespace JG\BatchImportBundle\Model;
+namespace JG\BatchImportBundle\Model\Matrix;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class Matrix
 {
-    private array $header = [];
+    /**
+     * @Assert\All({
+     *     @Assert\Type("string")
+     * })
+     */
+    private array $header;
     /**
      * @var array|MatrixRecord[]
+     *
+     * @Assert\All({
+     *     @Assert\Type(MatrixRecord::class)
+     * })
      */
     private array $records = [];
 
-    public function __construct(array $header = [], array $data = [])
+    public function __construct(array $header = [], array $recordsData = [])
     {
         $this->header = $header;
-
-        foreach ($data as $elem) {
-            $this->records[] = new MatrixRecord($elem);
+        foreach ($recordsData as $recordData) {
+            $this->records[] = new MatrixRecord($recordData);
         }
     }
 

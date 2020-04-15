@@ -1,5 +1,5 @@
 {
-    "name": "jg/batch-import-bundle",
+    "name": "jgrygierek/batch-import-bundle",
     "type": "symfony-bundle",
     "description": "Importing data with preview and edit features.",
     "keywords": [
@@ -19,6 +19,8 @@
     ],
     "require": {
         "php": "^7.4.0",
+        "doctrine/orm": "^2.0",
+        "knplabs/doctrine-behaviors": "~2.0",
         "symfony/doctrine-bridge": "^4.0",
         "symfony/form": "^4.0",
         "symfony/http-foundation": "^4.0",

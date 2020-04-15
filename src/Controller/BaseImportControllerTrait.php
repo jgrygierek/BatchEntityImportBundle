@@ -4,11 +4,10 @@ namespace JG\BatchImportBundle\Controller;
 
 use InvalidArgumentException;
 use JG\BatchImportBundle\Form\Type\FileImportType;
-use JG\BatchImportBundle\Form\Type\MatrixType;
+use JG\BatchImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchImportBundle\Model\FileImport;
-use JG\BatchImportBundle\Model\Form\FormConfigurationInterface;
-use JG\BatchImportBundle\Model\Matrix;
-use JG\BatchImportBundle\Model\MatrixFactory;
+use JG\BatchImportBundle\Model\Matrix\Matrix;
+use JG\BatchImportBundle\Model\Matrix\MatrixFactory;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use Symfony\Component\Form\Exception\LogicException;
@@ -19,7 +18,7 @@ use UnexpectedValueException;
 
 trait BaseImportControllerTrait
 {
-    private ?FormConfigurationInterface $importConfiguration = null;
+    private ?ImportConfigurationInterface $importConfiguration = null;
 
     /**
      * @param Request $request
@@ -41,22 +40,32 @@ trait BaseImportControllerTrait
         if ($form->isSubmitted() && $form->isValid()) {
             $matrix = MatrixFactory::createFromUploadedFile($fileImport->getFile());
 
-            return $this->prepareView(
-                $this->getMatrixEditTemplateName(),
-                [
-                    'header' => $matrix->getHeader(),
-                    'data'   => $matrix->getRecords(),
-                    'form'   => $this->createMatrixForm($matrix)->createView(),
-                ]
-            );
+            return $this->prepareMatrixEditView($matrix);
         }
 
-        $this->setErrors($form);
+        $this->addFormErrorToFlash($form);
 
+        return $this->prepareSelectFileView($form);
+    }
+
+    private function prepareSelectFileView(FormInterface $form): Response
+    {
         return $this->prepareView(
             $this->getSelectFileTemplateName(),
             [
                 'form' => $form->createView(),
+            ]
+        );
+    }
+
+    private function prepareMatrixEditView(Matrix $matrix): Response
+    {
+        return $this->prepareView(
+            $this->getMatrixEditTemplateName(),
+            [
+                'header' => $matrix->getHeader(),
+                'data'   => $matrix->getRecords(),
+                'form'   => $this->createMatrixForm($matrix)->createView(),
             ]
         );
     }
@@ -70,6 +79,9 @@ trait BaseImportControllerTrait
     private function doImportSave(Request $request): Response
     {
         if (!isset($request->get('matrix')['records'])) {
+            //todo: add translation
+            $this->addFlash('error', 'No data found');
+
             return $this->redirectToImport();
         }
 
@@ -78,35 +90,22 @@ trait BaseImportControllerTrait
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            die('TODO');
+            $config = $this->getImportConfiguration();
+            foreach ($matrix->getRecords() as $record) {
+                $config->prepareRecord($record);
+            }
+
+            $config->save();
+            //todo: add translation
+            $this->addFlash('success', 'Data has been imported successfully.');
         }
 
-        $this->setErrors($form);
+        $this->addFormErrorToFlash($form);
 
         return $this->redirectToImport();
     }
 
-    /**
-     * @param Matrix $matrix
-     *
-     * @return FormInterface
-     */
-    private function createMatrixForm(Matrix $matrix): FormInterface
-    {
-        return $this->createForm(
-            MatrixType::class,
-            $matrix,
-            [
-                'configuration' => $this->getImportConfiguration(),
-                'action'        => $this->getMatrixSaveActionUrl(),
-            ]
-        );
-    }
-
-    /**
-     * @return FormConfigurationInterface
-     */
-    private function getImportConfiguration(): FormConfigurationInterface
+    private function getImportConfiguration(): ImportConfigurationInterface
     {
         if (!$this->importConfiguration) {
             $class = $this->getImportConfigurationClassName();
@@ -114,16 +113,13 @@ trait BaseImportControllerTrait
                 throw new UnexpectedValueException('Configuration class not found.');
             }
 
-            $this->importConfiguration = new $class;
+            $this->importConfiguration = new $class($this->get('doctrine')->getManager());
         }
 
         return $this->importConfiguration;
     }
 
-    /**
-     * @param FormInterface $form
-     */
-    private function setErrors(FormInterface $form): void
+    private function addFormErrorToFlash(FormInterface $form): void
     {
         $errors = iterator_to_array($form->getErrors());
         if ($errors) {

@@ -2,6 +2,9 @@
 
 namespace JG\BatchImportBundle\Controller;
 
+use JG\BatchImportBundle\Form\Type\MatrixType;
+use JG\BatchImportBundle\Model\Matrix\Matrix;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 trait ImportControllerTrait
@@ -21,5 +24,22 @@ trait ImportControllerTrait
     private function getMatrixEditTemplateName(): string
     {
         return '@BatchImport/edit_matrix.html.twig';
+    }
+
+    /**
+     * @param Matrix $matrix
+     *
+     * @return FormInterface
+     */
+    private function createMatrixForm(Matrix $matrix): FormInterface
+    {
+        return $this->createForm(
+            MatrixType::class,
+            $matrix,
+            [
+                'configuration' => $this->getImportConfiguration(),
+                'action'        => $this->getMatrixSaveActionUrl(),
+            ]
+        );
     }
 }

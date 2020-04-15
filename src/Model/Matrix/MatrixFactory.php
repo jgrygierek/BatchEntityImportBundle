@@ -1,6 +1,6 @@
 <?php
 
-namespace JG\BatchImportBundle\Model;
+namespace JG\BatchImportBundle\Model\Matrix;
 
 use InvalidArgumentException;
 use PhpOffice\PhpSpreadsheet\Exception;
