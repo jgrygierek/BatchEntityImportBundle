@@ -14,11 +14,13 @@ use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UnexpectedValueException;
 
 trait BaseImportControllerTrait
 {
     private ?ImportConfigurationInterface $importConfiguration = null;
+    private ?TranslatorInterface          $translator          = null;
 
     /**
      * @param Request $request
@@ -79,8 +81,8 @@ trait BaseImportControllerTrait
     private function doImportSave(Request $request): Response
     {
         if (!isset($request->get('matrix')['records'])) {
-            //todo: add translation
-            $this->addFlash('error', 'No data found');
+            $msg = $this->getTranslator()->trans('error.data.not_found', [], 'BatchImportBundle');
+            $this->addFlash('error', $msg);
 
             return $this->redirectToImport();
         }
@@ -96,8 +98,9 @@ trait BaseImportControllerTrait
             }
 
             $config->save();
-            //todo: add translation
-            $this->addFlash('success', 'Data has been imported successfully.');
+
+            $msg = $this->getTranslator()->trans('success.import', [], 'BatchImportBundle');
+            $this->addFlash('success', $msg);
         }
 
         $this->addFormErrorToFlash($form);
@@ -126,5 +129,14 @@ trait BaseImportControllerTrait
             $error = reset($errors);
             $this->addFlash('error', $error->getMessage());
         }
+    }
+
+    private function getTranslator(): TranslatorInterface
+    {
+        if (!$this->translator) {
+            $this->translator = $this->get('translator');
+        }
+
+        return $this->translator;
     }
 }

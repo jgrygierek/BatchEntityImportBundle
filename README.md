@@ -3,82 +3,47 @@ BatchImportBundle
 
 Bundle adds feature of batch inserting of data provided from different files. 
 * Data can be viewed and edited before saving to database.
+* Supported extensions: CSV, XLS, XLSX, ODS
 * Supports translations from KnpLabs Translatable extension.
+* The code is divided into smaller methods that can be easily replaced if you want to change something.
 
-### Supported extensions:
-* CSV
-* XLS
-* XLSX
-* ODS
+## Documentation
+* [Installation](#installation)
+* [Basic configuration class](#basic-configuration-class)
+* [Creating controller](#creating-controller)
+* [Fields definitions](#fields-definitions)
+* [Overriding templates](#overriding-templates)
 
-### Prepare form configuration:
+## Installation
 
-You have to create configuration class. You can add here definitions for dynamic fields loaded from file. 
-Field name is the same as column name. If no definition for field will be provided, `TextType` class will be used as default.
+## Basic configuration class
+
+You have to create configuration class. In the simplest case it will contain only class of used entity.
 
 ```php
-namespace App\Configuration;
+namespace App\Model\ImportConfiguration;
 
 use App\Entity\User;
 use JG\BatchImportBundle\Model\Configuration\AbstractImportConfiguration;
 use JG\BatchImportBundle\Model\Configuration\ImportConfigurationInterface;
-use JG\BatchImportBundle\Model\Form\FormFieldDefinition;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class UserImportFormConfiguration extends AbstractImportConfiguration implements ImportConfigurationInterface
+class UserImportConfiguration extends AbstractImportConfiguration implements ImportConfigurationInterface
 {
-    /**
-     * Class of entity used during import process.
-     * This is required method.
-     *
-     * @return string
-     */
     public function getEntityClassName(): string
     {
         return User::class;
     }
-
-    /**
-     * Used to define field definitions used during process of data editing.
-     * If definition for field will not be defined, default definition will be used.
-     *
-     * @return array|FormFieldDefinition[]
-     */
-    public function getFieldsDefinitions(): array
-    {
-        return [
-            'age' => new FormFieldDefinition(
-                'age', IntegerType::class, [
-                    'attr' => [
-                        'min' => 0,
-                        'max' => 999,
-                    ],
-                ]
-            ),
-            'name' => new FormFieldDefinition('name', TextType::class),
-            'description' => new FormFieldDefinition(
-                'description', TextareaType::class,
-                [
-                    'attr' => [
-                        'rows' => 2,
-                    ],
-                ]
-            ),
-        ];
-    }
 }
 ```
 
-### Create your controller:
+## Creating controller
 
-Most part of job is done inside trait, but you still need add some configuration.
+Create controller with some required code.
 
 ```php
 namespace App\Controller\Game;
 
-use App\Form\Configuration\UserImportFormConfiguration;
+use App\Model\ImportConfiguration\UserImportConfiguration;
 use JG\BatchImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -118,12 +83,48 @@ class ImportController extends AbstractController
     
     private function getImportConfigurationClassName(): string
     {
-       return UserImportFormConfiguration::class;
+       return UserImportConfiguration::class;
     }
 }
 ```
 
-### Overriding templates:
+## Fields definitions
+
+If you want to change types of rendered fields, instead of using default ones,
+you have to override method in your import configuration.
+
+```php
+
+use JG\BatchImportBundle\Model\Form\FormFieldDefinition;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+public function getFieldsDefinitions(): array
+{
+    return [
+        'age' => new FormFieldDefinition(
+            'age', IntegerType::class, [
+                'attr' => [
+                    'min' => 0,
+                    'max' => 999,
+                ],
+            ]
+        ),
+        'name' => new FormFieldDefinition('name', TextType::class),
+        'description' => new FormFieldDefinition(
+            'description', TextareaType::class,
+            [
+                'attr' => [
+                    'rows' => 2,
+                ],
+            ]
+        ),
+    ];
+}
+```
+
+## Overriding templates
 
 You can override default templates globally by adding them to directory:
 
@@ -144,3 +145,30 @@ private function getMatrixEditTemplateName(): string
     return 'your/path/to/edit_matrix.html.twig';
 }
 ```
+
+If you want add some specific data to the rendered view, just override these methods in controller:
+
+```php
+private function prepareSelectFileView(FormInterface $form): Response
+{
+    return $this->prepareView(
+        $this->getSelectFileTemplateName(),
+        [
+            'form' => $form->createView(),
+        ]
+    );
+}
+
+private function prepareMatrixEditView(Matrix $matrix): Response
+{
+    return $this->prepareView(
+        $this->getMatrixEditTemplateName(),
+        [
+            'header' => $matrix->getHeader(),
+            'data'   => $matrix->getRecords(),
+            'form'   => $this->createMatrixForm($matrix)->createView(),
+        ]
+    );
+}
+```
+

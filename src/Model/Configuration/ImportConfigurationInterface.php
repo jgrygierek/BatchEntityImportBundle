@@ -15,7 +15,7 @@ interface ImportConfigurationInterface
     public function getEntityClassName(): string;
 
     /**
-     * Used to define field definitions used during process of data editing.
+     * Defines fields definitions used during process of data editing.
      * If definition for field will not be defined, default definition will be used.
      *
      * @return array|FormFieldDefinition[]
@@ -23,14 +23,14 @@ interface ImportConfigurationInterface
     public function getFieldsDefinitions(): array;
 
     /**
-     * Used to prepare data from one record and make update/insert query.
+     * Prepares data from one record and updates existing or inserts new record.
      *
      * @param MatrixRecord $record
      */
     public function prepareRecord(MatrixRecord $record): void;
 
     /**
-     * Saves data from matrix to database.
+     * Saves all prepared data to database.
      */
     public function save(): void;
 }

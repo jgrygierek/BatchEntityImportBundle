@@ -2,9 +2,17 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
     <file source-language="en" datatype="plaintext" original="file.ext">
         <body>
+            <trans-unit id="error.data.not_found">
+                <source>error.data.not_found</source>
+                <target>Data not found</target>
+            </trans-unit>
             <trans-unit id="form.button.import">
                 <source>form.button.import</source>
                 <target>Import</target>
+            </trans-unit>
+            <trans-unit id="success.import">
+                <source>success.import</source>
+                <target>Data has been imported</target>
             </trans-unit>
         </body>
     </file>
