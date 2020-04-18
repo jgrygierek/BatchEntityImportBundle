@@ -44,6 +44,7 @@ Create controller with some required code.
 namespace App\Controller\Game;
 
 use App\Model\ImportConfiguration\UserImportConfiguration;
+use JG\BatchImportBundle\Controller\ImportControllerInterface;
 use JG\BatchImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -51,7 +52,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ImportController extends AbstractController
+class ImportController extends AbstractController implements ImportControllerInterface
 {
     use ImportControllerTrait;
 
