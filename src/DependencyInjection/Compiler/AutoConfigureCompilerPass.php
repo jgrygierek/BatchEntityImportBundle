@@ -13,9 +13,8 @@ class AutoConfigureCompilerPass implements CompilerPassInterface
         $taggedServices = $container->findTaggedServiceIds('batch_entity_import.controller');
 
         foreach ($taggedServices as $id => $tags) {
-            $definition = $container->getDefinition($id);
-
-            $definition
+            $container
+                ->getDefinition($id)
                 ->addMethodCall('setTranslator', [new Reference('translator')])
                 ->addMethodCall('setEntityManager', [new Reference('doctrine.orm.entity_manager')]);
         }
