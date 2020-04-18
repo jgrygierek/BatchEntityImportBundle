@@ -10,7 +10,7 @@ class AutoConfigureCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        $taggedServices = $container->findTaggedServiceIds('batch_import.controller');
+        $taggedServices = $container->findTaggedServiceIds('batch_entity_import.controller');
 
         foreach ($taggedServices as $id => $tags) {
             $definition = $container->getDefinition($id);

@@ -7,7 +7,7 @@ use JG\BatchEntityImportBundle\Controller\ImportControllerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class BatchImportExtension extends Extension
+class BatchEntityImportExtension extends Extension
 {
     /**
      * @param array            $configs
@@ -19,6 +19,6 @@ class BatchImportExtension extends Extension
     {
         $container
             ->registerForAutoconfiguration(ImportControllerInterface::class)
-            ->addTag('batch_import.controller');
+            ->addTag('batch_entity_import.controller');
     }
 }
