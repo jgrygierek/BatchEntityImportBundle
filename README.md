@@ -16,8 +16,16 @@ Bundle adds feature of batch inserting of data provided from different files.
 
 ## Installation
 
+Install package via composer:
+
 ```
 composer require jgrygierek/batch-entity-import-bundle
+```
+
+Add entry to `bundles.php` file:
+
+```
+JG\BatchEntityImportBundle\BatchEntityImportBundle::class => ['all' => true],
 ```
 
 ## Basic configuration class
