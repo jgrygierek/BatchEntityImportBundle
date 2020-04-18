@@ -30,6 +30,10 @@
         "symfony/validator": "^4.0",
         "yectep/phpspreadsheet-bundle": "^0.1.0"
     },
+    "require-dev": {
+        "escapestudios/symfony2-coding-standard": "3.x-dev",
+        "squizlabs/php_codesniffer": "~3.5"
+    },
     "config": {
         "sort-packages": true
     },

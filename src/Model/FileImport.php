@@ -32,13 +32,20 @@ class FileImport
      */
     public function validateExtension(ExecutionContextInterface $context): void
     {
-        if (!$this->file || in_array($this->file->getClientOriginalExtension(), self::AVAILABLE_FILE_EXTENSIONS, true)) {
+        if (!$this->file || !$this->hasValidExtension()) {
             return;
         }
 
+        $extensions = implode(', ', self::AVAILABLE_FILE_EXTENSIONS);
+
         $context
-            ->buildViolation('validation.file.extension', ['%extensions' => implode(', ', self::AVAILABLE_FILE_EXTENSIONS)])
+            ->buildViolation('validation.file.extension', ['%extensions' => $extensions])
             ->atPath('file')
             ->addViolation();
+    }
+
+    private function hasValidExtension(): bool
+    {
+        return in_array($this->file->getClientOriginalExtension(), self::AVAILABLE_FILE_EXTENSIONS, true);
     }
 }
