@@ -1,0 +1,28 @@
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+{% endfor %}
+
+{{ form_start(form) }}
+<table>
+    <tr>
+        <th>Entity</th>
+        {% for col in header %}
+            <th>{{ col }}</th>
+        {% endfor %}
+    </tr>
+
+    {% for record in form.records %}
+        <tr>
+            {% for elem in record.children %}
+                <td>
+                    {{ form_errors(elem) }}
+                    {{ form_widget(elem) }}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+<button type="submit">{{ 'form.button.import'|trans({}, 'BatchEntityImportBundle') }}</button>
+{{ form_end(form) }}

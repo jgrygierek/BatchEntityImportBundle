@@ -1,0 +1,10 @@
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div>{{ message }}</div>
+    {% endfor %}
+{% endfor %}
+
+{{ form_start(form) }}
+{{ form_rest(form) }}
+<button type="submit">{{ 'form.button.import'|trans({}, 'BatchEntityImportBundle') }}</button>
+{{ form_end(form) }}

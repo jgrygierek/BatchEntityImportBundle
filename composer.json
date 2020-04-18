@@ -1,0 +1,46 @@
+{
+    "name": "jgrygierek/batch-entity-import-bundle",
+    "type": "symfony-bundle",
+    "description": "Importing entities with preview and edit features.",
+    "keywords": [
+        "entity",
+        "import",
+        "preview",
+        "excel",
+        "csv",
+        "ods",
+        "symfony"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jarosław Grygierek",
+            "email": "jaroslawgrygierek@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4.0",
+        "doctrine/orm": "^2.0",
+        "knplabs/doctrine-behaviors": "~2.0",
+        "symfony/doctrine-bridge": "^4.0",
+        "symfony/form": "^4.0",
+        "symfony/http-foundation": "^4.0",
+        "symfony/http-kernel": "^4.0",
+        "symfony/options-resolver": "^4.0",
+        "symfony/validator": "^4.0",
+        "yectep/phpspreadsheet-bundle": "^0.1.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "JG\\BatchEntityImportBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JG\\BatchEntityImportBundle\\Tests\\": "tests/"
+        }
+    }
+}
