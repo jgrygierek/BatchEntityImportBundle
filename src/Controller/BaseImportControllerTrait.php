@@ -92,6 +92,8 @@ trait BaseImportControllerTrait
      */
     private function doImportSave(Request $request): Response
     {
+        $this->checkDI();
+
         if (!isset($request->get('matrix')['records'])) {
             $msg = $this->translator->trans('error.data.not_found', [], 'BatchEntityImportBundle');
             $this->addFlash('error', $msg);
@@ -122,6 +124,8 @@ trait BaseImportControllerTrait
 
     private function getImportConfiguration(): ImportConfigurationInterface
     {
+        $this->checkDI();
+
         if (!$this->importConfiguration) {
             $class = $this->getImportConfigurationClassName();
             if (!class_exists($class)) {
@@ -140,6 +144,13 @@ trait BaseImportControllerTrait
         if ($errors) {
             $error = reset($errors);
             $this->addFlash('error', $error->getMessage());
+        }
+    }
+
+    private function checkDI(): void
+    {
+        if (!$this instanceof ImportControllerInterface) {
+            throw new UnexpectedValueException('Controller should implement ' . ImportControllerInterface::class);
         }
     }
 }
