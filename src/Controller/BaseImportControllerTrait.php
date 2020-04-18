@@ -2,6 +2,7 @@
 
 namespace JG\BatchImportBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use JG\BatchImportBundle\Form\Type\FileImportType;
 use JG\BatchImportBundle\Model\Configuration\ImportConfigurationInterface;
@@ -21,6 +22,17 @@ trait BaseImportControllerTrait
 {
     private ?ImportConfigurationInterface $importConfiguration = null;
     private ?TranslatorInterface          $translator          = null;
+    private ?EntityManagerInterface       $em                  = null;
+
+    public function setTranslator(TranslatorInterface $translator): void
+    {
+        $this->translator = $translator;
+    }
+
+    public function setEntityManager(EntityManagerInterface $em): void
+    {
+        $this->em = $em;
+    }
 
     /**
      * @param Request $request
@@ -81,7 +93,7 @@ trait BaseImportControllerTrait
     private function doImportSave(Request $request): Response
     {
         if (!isset($request->get('matrix')['records'])) {
-            $msg = $this->getTranslator()->trans('error.data.not_found', [], 'BatchImportBundle');
+            $msg = $this->translator->trans('error.data.not_found', [], 'BatchImportBundle');
             $this->addFlash('error', $msg);
 
             return $this->redirectToImport();
@@ -99,7 +111,7 @@ trait BaseImportControllerTrait
 
             $config->save();
 
-            $msg = $this->getTranslator()->trans('success.import', [], 'BatchImportBundle');
+            $msg = $this->translator->trans('success.import', [], 'BatchImportBundle');
             $this->addFlash('success', $msg);
         }
 
@@ -116,7 +128,7 @@ trait BaseImportControllerTrait
                 throw new UnexpectedValueException('Configuration class not found.');
             }
 
-            $this->importConfiguration = new $class($this->get('doctrine')->getManager());
+            $this->importConfiguration = new $class($this->em);
         }
 
         return $this->importConfiguration;
@@ -129,14 +141,5 @@ trait BaseImportControllerTrait
             $error = reset($errors);
             $this->addFlash('error', $error->getMessage());
         }
-    }
-
-    private function getTranslator(): TranslatorInterface
-    {
-        if (!$this->translator) {
-            $this->translator = $this->get('translator');
-        }
-
-        return $this->translator;
     }
 }
