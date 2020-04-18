@@ -16,6 +16,10 @@ Bundle adds feature of batch inserting of data provided from different files.
 
 ## Installation
 
+```
+composer require jgrygierek/batch-entity-import-bundle
+```
+
 ## Basic configuration class
 
 You have to create configuration class. In the simplest case it will contain only class of used entity.
