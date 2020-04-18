@@ -1,8 +1,9 @@
 {
-    "name": "jgrygierek/batch-import-bundle",
+    "name": "jgrygierek/batch-entity-import-bundle",
     "type": "symfony-bundle",
-    "description": "Importing data with preview and edit features.",
+    "description": "Importing entities with preview and edit features.",
     "keywords": [
+        "entity",
         "import",
         "preview",
         "excel",
@@ -34,12 +35,12 @@
     },
     "autoload": {
         "psr-4": {
-            "JG\\BatchImportBundle\\": "src/"
+            "JG\\BatchEntityImportBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "JG\\BatchImportBundle\\Tests\\": "tests/"
+            "JG\\BatchEntityImportBundle\\Tests\\": "tests/"
         }
     }
 }

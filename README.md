@@ -1,4 +1,4 @@
-BatchImportBundle
+BatchEntityImportBundle
 =
 
 Bundle adds feature of batch inserting of data provided from different files. 
@@ -24,8 +24,8 @@ You have to create configuration class. In the simplest case it will contain onl
 namespace App\Model\ImportConfiguration;
 
 use App\Entity\User;
-use JG\BatchImportBundle\Model\Configuration\AbstractImportConfiguration;
-use JG\BatchImportBundle\Model\Configuration\ImportConfigurationInterface;
+use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
+use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 
 class UserImportConfiguration extends AbstractImportConfiguration implements ImportConfigurationInterface
 {
@@ -44,8 +44,8 @@ Create controller with some required code.
 namespace App\Controller\Game;
 
 use App\Model\ImportConfiguration\UserImportConfiguration;
-use JG\BatchImportBundle\Controller\ImportControllerInterface;
-use JG\BatchImportBundle\Controller\ImportControllerTrait;
+use JG\BatchEntityImportBundle\Controller\ImportControllerInterface;
+use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -96,7 +96,7 @@ you have to override method in your import configuration.
 
 ```php
 
-use JG\BatchImportBundle\Model\Form\FormFieldDefinition;
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -130,7 +130,7 @@ public function getFieldsDefinitions(): array
 You can override default templates globally by adding them to directory:
 
 ```
-templates/budles/BatchImportBundle
+templates/budles/BatchEntityImportBundle
 ```
 
 If you have controller-specific templates, you can override them in controller:
