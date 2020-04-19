@@ -5,16 +5,8 @@
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.3/phpunit.xsd"
          backupGlobals="false"
          colors="true"
+         bootstrap="vendor/autoload.php"
 >
-    <php>
-        <ini name="error_reporting" value="-1"/>
-        <env name="APP_ENV" value="test" force="true"/>
-        <env name="SHELL_VERBOSITY" value="-1"/>
-        <env name="BOOTSTRAP_CLEAR_CACHE_ENV" value="test"/>
-        <server name="SYMFONY_PHPUNIT_REMOVE" value=""/>
-        <server name="SYMFONY_PHPUNIT_VERSION" value="8.3"/>
-    </php>
-
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>./tests/</directory>
