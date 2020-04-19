@@ -32,7 +32,7 @@ class FileImport
      */
     public function validateExtension(ExecutionContextInterface $context): void
     {
-        if (!$this->file || !$this->hasValidExtension()) {
+        if (!$this->file || $this->hasValidExtension()) {
             return;
         }
 
