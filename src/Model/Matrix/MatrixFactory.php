@@ -22,7 +22,7 @@ class MatrixFactory
     public static function createFromUploadedFile(UploadedFile $file): Matrix
     {
         $factory   = new Factory();
-        $extension = ucfirst($file->getClientOriginalExtension());
+        $extension = ucfirst(strtolower($file->getClientOriginalExtension()));
         /** @var BaseReader $reader */
         $reader      = $factory->createReader($extension);
         $spreadsheet = $reader->load($file->getPathname());

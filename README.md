@@ -1,16 +1,20 @@
 BatchEntityImportBundle
 =
 
-| Branch | Status |
-| --- | --- |
-| master  | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=master)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) |
-| develop | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=develop)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) |
+| Branch | Status | Coverage |
+| --- | --- | --- |
+| master  | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=master)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) | [![codecov](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle/branch/master/graph/badge.svg)](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle) |
+| develop | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=develop)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) | [![codecov](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle/branch/develop/graph/badge.svg)](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle) |
+
+
 
 Bundle adds feature of batch inserting of data provided from different files. 
-* Data can be viewed and edited before saving to database.
-* Supported extensions: CSV, XLS, XLSX, ODS
-* Supports translations from KnpLabs Translatable extension.
+* Data can be **viewed and edited** before saving to database.
+* Supported extensions: **CSV, XLS, XLSX, ODS**
+* Supports translations from **KnpLabs Translatable** extension.
 * The code is divided into smaller methods that can be easily replaced if you want to change something.
+* Columns names are required and should be added as header (first row).
+* If column does not have name provided, will be removed from loaded data.
 
 ## Documentation
 * [Installation](#installation)
