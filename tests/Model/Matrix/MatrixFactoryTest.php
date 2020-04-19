@@ -4,10 +4,10 @@ namespace JG\BatchEntityImportBundle\Tests\Model\Matrix;
 
 use Generator;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
-use PhpOffice\PhpSpreadsheet\Reader\Exception;
-use PHPUnit\Framework\TestCase;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
+use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Yectep\PhpSpreadsheetBundle\Factory;
 
@@ -48,8 +48,8 @@ class MatrixFactoryTest extends TestCase
     {
         yield[[['header1', 'header2', 'header3'], ['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
         yield[[['header1', 'header2', 'header3']], true, 0];
-        yield[[[null]], true, 0];
-        yield[[], true, 0];
+        yield[[[null], ['abcd']], false, 0];
+        yield[[], false, 0];
     }
 
     /**
@@ -70,6 +70,7 @@ class MatrixFactoryTest extends TestCase
     {
         yield[[['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
         yield[[['aaaa', 'bbbb', '123']], true, 1];
+        yield[[[null], ['abcd']], false, 0];
         yield[[], false, 0];
     }
 
