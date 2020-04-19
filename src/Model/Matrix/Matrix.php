@@ -3,7 +3,6 @@
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class Matrix
 {
@@ -39,44 +38,11 @@ class Matrix
         return $this->header;
     }
 
-    public function setHeader(array $header): void
-    {
-        $this->header = $header;
-    }
-
     /**
      * @return array|MatrixRecord[]
      */
     public function getRecords(): array
     {
         return $this->records;
-    }
-
-    /**
-     * @param array|MatrixRecord[] $records
-     */
-    public function setRecords(array $records): void
-    {
-        $this->records = $records;
-    }
-
-    /**
-     * @Assert\Callback
-     *
-     * @param ExecutionContextInterface $context
-     */
-    public function haveRecordsExactFieldsNumber(ExecutionContextInterface $context): void
-    {
-        $prev = null;
-        foreach ($this->records as $record) {
-            $count = count($record->getData());
-            if ($prev && $prev !== $count) {
-                $context->addViolation('validation.matrix.fields_number');
-
-                return;
-            }
-
-            $prev = $count;
-        }
     }
 }
