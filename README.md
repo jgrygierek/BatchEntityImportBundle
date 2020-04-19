@@ -1,8 +1,8 @@
 BatchEntityImportBundle
 =
 
-| Branch | Status |
-| --- | --- |
+| Branch | Status | Coverage |
+| --- | --- | --- |
 | master  | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=master)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) |
 | develop | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=develop)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) |
 
