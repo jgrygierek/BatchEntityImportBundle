@@ -47,7 +47,7 @@ class MatrixRecord
 
     public function __get($name)
     {
-        if (isset($this->data[$name])) {
+        if (array_key_exists($name, $this->data)) {
             return $this->data[$name];
         }
 

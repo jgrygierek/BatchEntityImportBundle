@@ -9,7 +9,8 @@ class Matrix
 {
     /**
      * @Assert\All({
-     *     @Assert\Type("string")
+     *     @Assert\NotBlank(),
+     *     @Assert\Type("string"),
      * })
      */
     private array $header;
@@ -24,9 +25,9 @@ class Matrix
 
     public function __construct(array $header = [], array $recordsData = [])
     {
-        $this->header = $header;
+        $this->header = array_filter($header);
         foreach ($recordsData as $recordData) {
-            $this->records[] = new MatrixRecord($recordData);
+            $this->records[] = new MatrixRecord(array_filter($recordData, fn($key) => !empty($key), ARRAY_FILTER_USE_KEY));
         }
     }
 
