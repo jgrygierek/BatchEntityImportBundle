@@ -26,10 +26,10 @@ class Matrix
     public function __construct(array $header = [], array $recordsData = [])
     {
         $this->header = array_filter($header);
-        foreach ($recordsData as $recordData) {
-            $recordData = array_filter($recordData, fn($key) => !empty($key), ARRAY_FILTER_USE_KEY);
-            if ($recordData) {
-                $this->records[] = new MatrixRecord($recordsData);
+        foreach ($recordsData as $data) {
+            $data = array_filter($data, fn($key) => !empty($key), ARRAY_FILTER_USE_KEY);
+            if ($data) {
+                $this->records[] = new MatrixRecord($data);
             }
         }
     }
