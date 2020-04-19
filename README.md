@@ -3,8 +3,10 @@ BatchEntityImportBundle
 
 | Branch | Status | Coverage |
 | --- | --- | --- |
-| master  | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=master)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) |
-| develop | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=develop)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) |
+| master  | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=master)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) | [![codecov](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle/branch/master/graph/badge.svg)](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle) |
+| develop | [![Build Status](https://travis-ci.com/jgrygierek/BatchEntityImportBundle.svg?branch=develop)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) | [![codecov](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle/branch/develop/graph/badge.svg)](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle) |
+
+
 
 Bundle adds feature of batch inserting of data provided from different files. 
 * Data can be viewed and edited before saving to database.
