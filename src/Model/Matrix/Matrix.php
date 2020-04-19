@@ -27,7 +27,10 @@ class Matrix
     {
         $this->header = array_filter($header);
         foreach ($recordsData as $recordData) {
-            $this->records[] = new MatrixRecord(array_filter($recordData, fn($key) => !empty($key), ARRAY_FILTER_USE_KEY));
+            $recordData = array_filter($recordData, fn($key) => !empty($key), ARRAY_FILTER_USE_KEY);
+            if ($recordData) {
+                $this->records[] = new MatrixRecord($recordsData);
+            }
         }
     }
 

@@ -14,7 +14,7 @@ class FileExtensionValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
-        $extensions = $constraint->extensions;
+        $extensions = array_map('strtolower', $constraint->extensions);
 
         if ($value && !$this->hasValidExtension($value, $extensions)) {
             $this->context->buildViolation($constraint->message, ['%extensions' => implode(', ', $extensions)])->addViolation();
@@ -23,6 +23,6 @@ class FileExtensionValidator extends ConstraintValidator
 
     private function hasValidExtension(UploadedFile $file, array $extensions): bool
     {
-        return in_array($file->getClientOriginalExtension(), $extensions, true);
+        return in_array(strtolower($file->getClientOriginalExtension()), $extensions, true);
     }
 }

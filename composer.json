@@ -32,7 +32,8 @@
     },
     "require-dev": {
         "escapestudios/symfony2-coding-standard": "3.x-dev",
-        "squizlabs/php_codesniffer": "~3.5"
+        "squizlabs/php_codesniffer": "~3.5",
+        "symfony/test-pack": "^1.0"
     },
     "config": {
         "sort-packages": true
