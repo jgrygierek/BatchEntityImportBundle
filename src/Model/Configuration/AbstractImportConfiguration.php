@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\StringHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
+use Throwable;
 
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
@@ -28,7 +29,11 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         foreach ($data as $name => $value) {
             $fieldName = StringHelper::underscoreToPascalCase($name);
-            $entity->{'set' . $fieldName}($value);
+
+            try {
+                $entity->{'set' . $fieldName}($value);
+            } catch (Throwable $e) {
+            }
         }
 
         if ($entity instanceof TranslatableInterface) {

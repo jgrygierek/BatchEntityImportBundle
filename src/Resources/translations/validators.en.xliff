@@ -6,9 +6,9 @@
                 <source>validation.file.extension</source>
                 <target>Wrong file extension. Allowed extensions: %extensions.</target>
             </trans-unit>
-            <trans-unit id="validation.matrix.fields_number">
-                <source>validation.matrix.fields_number</source>
-                <target>All records should have exact number of fields.</target>
+            <trans-unit id="validation.matrix.header.name">
+                <source>validation.matrix.header.name</source>
+                <target>Header name is invalid.</target>
             </trans-unit>
         </body>
     </file>
