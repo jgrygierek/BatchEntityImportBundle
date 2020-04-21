@@ -6,9 +6,9 @@
                 <source>validation.file.extension</source>
                 <target>Nieprawidłowe rozszerzenie pliku. Dozwolone rozszerzenia: %extensions.</target>
             </trans-unit>
-            <trans-unit id="validation.matrix.fields_number">
-                <source>validation.matrix.fields_number</source>
-                <target>Wszystkie rekordy powinny mieć tę samą liczbę pól.</target>
+            <trans-unit id="validation.matrix.header.name">
+                <source>validation.matrix.header.name</source>
+                <target>Nieprawidłowa nazwa nagłówka.</target>
             </trans-unit>
         </body>
     </file>

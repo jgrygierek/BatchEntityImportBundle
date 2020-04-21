@@ -29,6 +29,8 @@ class MatrixFactoryTest extends TestCase
 
             $this->assertEquals($data[1], !empty($matrix->getHeader()));
             $this->assertCount($data[2], $matrix->getRecords());
+
+            unlink($file);
         }
     }
 

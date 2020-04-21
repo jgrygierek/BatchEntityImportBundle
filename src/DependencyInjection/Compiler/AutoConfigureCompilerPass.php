@@ -16,7 +16,8 @@ class AutoConfigureCompilerPass implements CompilerPassInterface
             $container
                 ->getDefinition($id)
                 ->addMethodCall('setTranslator', [new Reference('translator')])
-                ->addMethodCall('setEntityManager', [new Reference('doctrine.orm.entity_manager')]);
+                ->addMethodCall('setEntityManager', [new Reference('doctrine.orm.entity_manager')])
+                ->addMethodCall('setValidator', [new Reference('validator')]);
         }
     }
 }

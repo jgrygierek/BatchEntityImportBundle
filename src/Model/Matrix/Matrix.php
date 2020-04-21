@@ -2,6 +2,7 @@
 
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
+use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Matrix
@@ -10,6 +11,7 @@ class Matrix
      * @Assert\All({
      *     @Assert\NotBlank(),
      *     @Assert\Type("string"),
+     *     @Assert\Regex(pattern="/^[\w]+$/", message="validation.column.name")
      * })
      */
     private array $header;
@@ -44,5 +46,17 @@ class Matrix
     public function getRecords(): array
     {
         return $this->records;
+    }
+
+    public function getHeaderInfo(string $className): array
+    {
+        $info    = [];
+        $checker = new PropertyExistenceChecker(new $className);
+
+        foreach ($this->header as $name) {
+            $info[$name] = $checker->propertyExists($name);
+        }
+
+        return $info;
     }
 }
