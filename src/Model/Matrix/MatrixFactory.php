@@ -27,14 +27,9 @@ class MatrixFactory
         $reader      = $factory->createReader($extension);
         $spreadsheet = $reader->load($file->getPathname());
 
-        $data = $spreadsheet->getActiveSheet()->toArray();
-
-        if ($data) {
-            $header = array_shift($data);
-            self::addKeysToRows($header, $data);
-        } else {
-            $header = [];
-        }
+        $data   = $spreadsheet->getActiveSheet()->toArray();
+        $header = array_shift($data);
+        self::addKeysToRows($header, $data);
 
         return new Matrix($header, $data);
     }

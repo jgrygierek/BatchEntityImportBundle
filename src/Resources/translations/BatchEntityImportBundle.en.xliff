@@ -10,6 +10,10 @@
                 <source>form.button.import</source>
                 <target>Import</target>
             </trans-unit>
+            <trans-unit id="matrix.header.name.unknown">
+                <source>matrix.header.name.unknown</source>
+                <target>Unknown field</target>
+            </trans-unit>
             <trans-unit id="success.import">
                 <source>success.import</source>
                 <target>Data has been imported</target>

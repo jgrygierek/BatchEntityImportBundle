@@ -15,7 +15,9 @@ use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Traversable;
 use UnexpectedValueException;
 
 trait BaseImportControllerTrait
@@ -23,6 +25,7 @@ trait BaseImportControllerTrait
     private ?ImportConfigurationInterface $importConfiguration = null;
     private ?TranslatorInterface          $translator          = null;
     private ?EntityManagerInterface       $em                  = null;
+    private ?ValidatorInterface           $validator           = null;
 
     public function setTranslator(TranslatorInterface $translator): void
     {
@@ -32,6 +35,11 @@ trait BaseImportControllerTrait
     public function setEntityManager(EntityManagerInterface $em): void
     {
         $this->em = $em;
+    }
+
+    public function setValidator(ValidatorInterface $validator): void
+    {
+        $this->validator = $validator;
     }
 
     /**
@@ -54,10 +62,15 @@ trait BaseImportControllerTrait
         if ($form->isSubmitted() && $form->isValid()) {
             $matrix = MatrixFactory::createFromUploadedFile($fileImport->getFile());
 
-            return $this->prepareMatrixEditView($matrix);
+            $errors = $this->validator->validate($matrix);
+            if ($errors->count() === 0) {
+                return $this->prepareMatrixEditView($matrix);
+            }
+        } else {
+            $errors = $form->getErrors();
         }
 
-        $this->addFormErrorToFlash($form);
+        $this->setErrorAsFlash($errors);
 
         return $this->prepareSelectFileView($form);
     }
@@ -77,9 +90,9 @@ trait BaseImportControllerTrait
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
             [
-                'header' => $matrix->getHeader(),
-                'data'   => $matrix->getRecords(),
-                'form'   => $this->createMatrixForm($matrix)->createView(),
+                'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration()->getEntityClassName()),
+                'data'        => $matrix->getRecords(),
+                'form'        => $this->createMatrixForm($matrix)->createView(),
             ]
         );
     }
@@ -117,7 +130,7 @@ trait BaseImportControllerTrait
             $this->addFlash('success', $msg);
         }
 
-        $this->addFormErrorToFlash($form);
+        $this->setErrorAsFlash($form->getErrors());
 
         return $this->redirectToImport();
     }
@@ -138,9 +151,9 @@ trait BaseImportControllerTrait
         return $this->importConfiguration;
     }
 
-    private function addFormErrorToFlash(FormInterface $form): void
+    private function setErrorAsFlash(Traversable $violations): void
     {
-        $errors = iterator_to_array($form->getErrors());
+        $errors = iterator_to_array($violations);
         if ($errors) {
             $error = reset($errors);
             $this->addFlash('error', $error->getMessage());

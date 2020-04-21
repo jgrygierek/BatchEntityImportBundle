@@ -2,8 +2,8 @@
 
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
+use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class Matrix
 {
@@ -11,6 +11,7 @@ class Matrix
      * @Assert\All({
      *     @Assert\NotBlank(),
      *     @Assert\Type("string"),
+     *     @Assert\Regex(pattern="/^[\w]+$/", message="validation.column.name")
      * })
      */
     private array $header;
@@ -39,11 +40,6 @@ class Matrix
         return $this->header;
     }
 
-    public function setHeader(array $header): void
-    {
-        $this->header = $header;
-    }
-
     /**
      * @return array|MatrixRecord[]
      */
@@ -52,31 +48,15 @@ class Matrix
         return $this->records;
     }
 
-    /**
-     * @param array|MatrixRecord[] $records
-     */
-    public function setRecords(array $records): void
+    public function getHeaderInfo(string $className): array
     {
-        $this->records = $records;
-    }
+        $info    = [];
+        $checker = new PropertyExistenceChecker(new $className);
 
-    /**
-     * @Assert\Callback
-     *
-     * @param ExecutionContextInterface $context
-     */
-    public function haveRecordsExactFieldsNumber(ExecutionContextInterface $context): void
-    {
-        $prev = null;
-        foreach ($this->records as $record) {
-            $count = count($record->getData());
-            if ($prev && $prev !== $count) {
-                $context->addViolation('validation.matrix.fields_number');
-
-                return;
-            }
-
-            $prev = $count;
+        foreach ($this->header as $name) {
+            $info[$name] = $checker->propertyExists($name);
         }
+
+        return $info;
     }
 }

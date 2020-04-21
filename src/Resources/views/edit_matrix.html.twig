@@ -8,8 +8,14 @@
 <table>
     <tr>
         <th>Entity</th>
-        {% for col in header %}
-            <th>{{ col }}</th>
+        {% for name, exists in header_info %}
+            <th>
+                {% if not exists %}
+                    <div>{{ 'matrix.header.name.unknown'|trans({}, 'BatchEntityImportBundle') }}</div>
+                {% endif %}
+
+                {{ name }}
+            </th>
         {% endfor %}
     </tr>
 
