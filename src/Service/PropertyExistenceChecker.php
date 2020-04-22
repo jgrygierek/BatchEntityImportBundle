@@ -25,9 +25,12 @@ class PropertyExistenceChecker
 
     public function propertyExists(string $name): bool
     {
-        $name = StringHelper::underscoreToCamelCase($name);
+        $locale = StringHelper::getLocale($name);
+        $name   = StringHelper::underscoreToCamelCase($name);
 
-        return $this->reflectionClass->hasProperty($name) || $this->translationPropertyExists($name);
+        return $locale
+            ? $this->translationPropertyExists($name)
+            : $this->reflectionClass->hasProperty($name);
     }
 
     private function translationPropertyExists(string $name): bool

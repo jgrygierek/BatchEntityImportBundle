@@ -20,6 +20,7 @@ Bundle adds feature of batch inserting of data provided from different files.
 * [Installation](#installation)
 * [Basic configuration class](#basic-configuration-class)
 * [Creating controller](#creating-controller)
+* [Translations]($translations)
 * [Fields definitions](#fields-definitions)
 * [Overriding templates](#overriding-templates)
 
@@ -109,6 +110,19 @@ class ImportController extends AbstractController implements ImportControllerInt
     }
 }
 ```
+
+## Translations
+
+This bundle supports KnpLabs Translatable behavior.
+
+To use this feature, every column with translatable values should be suffixed with locale, for example:
+* `name:en`
+* `description:pl`
+* `title:ru`
+
+If suffix will be added to non-translatable entity, field will be skipped.
+
+If suffix will be added to translatable entity, but field will not be found in translation class, field will be skipped.
 
 ## Fields definitions
 
