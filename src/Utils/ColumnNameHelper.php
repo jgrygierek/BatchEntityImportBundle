@@ -2,7 +2,7 @@
 
 namespace JG\BatchEntityImportBundle\Utils;
 
-class StringHelper
+class ColumnNameHelper
 {
     public static function underscoreToPascalCase(string $value): string
     {

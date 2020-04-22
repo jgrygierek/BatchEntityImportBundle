@@ -2,7 +2,7 @@
 
 namespace JG\BatchEntityImportBundle\Service;
 
-use JG\BatchEntityImportBundle\Utils\StringHelper;
+use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -25,8 +25,8 @@ class PropertyExistenceChecker
 
     public function propertyExists(string $name): bool
     {
-        $locale = StringHelper::getLocale($name);
-        $name   = StringHelper::underscoreToCamelCase($name);
+        $locale = ColumnNameHelper::getLocale($name);
+        $name   = ColumnNameHelper::underscoreToCamelCase($name);
 
         return $locale
             ? $this->translationPropertyExists($name)
