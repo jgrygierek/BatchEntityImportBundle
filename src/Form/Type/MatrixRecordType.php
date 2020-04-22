@@ -5,6 +5,7 @@ namespace JG\BatchEntityImportBundle\Form\Type;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Exception\AlreadySubmittedException;
@@ -85,11 +86,10 @@ class MatrixRecordType extends AbstractType
             throw new UnexpectedValueException('Column name can\'t be empty.');
         }
 
-        if (!isset($fieldDefinitions[$columnName])) {
-            $event->getForm()->add($columnName, TextType::class);
-        } else {
-            $definition = $fieldDefinitions[$columnName];
-            $event->getForm()->add($columnName, $definition->getClass(), $definition->getOptions());
-        }
+        $definition = $fieldDefinitions[ColumnNameHelper::removeTranslationSuffix($columnName)] ?? null;
+
+        $definition
+            ? $event->getForm()->add($columnName, $definition->getClass(), $definition->getOptions())
+            : $event->getForm()->add($columnName, TextType::class);
     }
 }

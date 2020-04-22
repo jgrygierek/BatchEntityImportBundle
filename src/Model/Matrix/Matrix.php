@@ -11,7 +11,7 @@ class Matrix
      * @Assert\All({
      *     @Assert\NotBlank(),
      *     @Assert\Type("string"),
-     *     @Assert\Regex(pattern="/^[\w]+$/", message="validation.column.name")
+     *     @Assert\Regex(pattern="/^([\w]+)(:[\w]+)?$/", message="validation.matrix.header.name")
      * })
      */
     private array $header;

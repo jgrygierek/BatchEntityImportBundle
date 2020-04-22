@@ -4,7 +4,7 @@ namespace JG\BatchEntityImportBundle\Model\Configuration;
 
 use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
-use JG\BatchEntityImportBundle\Utils\StringHelper;
+use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Throwable;
 
@@ -28,10 +28,15 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $data   = $record->getData();
 
         foreach ($data as $name => $value) {
-            $fieldName = StringHelper::underscoreToPascalCase($name);
+            $locale    = ColumnNameHelper::getLocale($name);
+            $fieldName = ColumnNameHelper::underscoreToPascalCase($name);
 
             try {
-                $entity->{'set' . $fieldName}($value);
+                if ($entity instanceof TranslatableInterface && $locale) {
+                    $entity->translate($locale)->{'set' . $fieldName}($value);
+                } elseif (!$locale) {
+                    $entity->{'set' . $fieldName}($value);
+                }
             } catch (Throwable $e) {
             }
         }
