@@ -28,10 +28,15 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $data   = $record->getData();
 
         foreach ($data as $name => $value) {
+            $locale    = StringHelper::getLocale($name);
             $fieldName = StringHelper::underscoreToPascalCase($name);
 
             try {
-                $entity->{'set' . $fieldName}($value);
+                if ($entity instanceof TranslatableInterface && $locale) {
+                    $entity->translate($locale)->{'set' . $fieldName}($value);
+                } elseif (!$locale) {
+                    $entity->{'set' . $fieldName}($value);
+                }
             } catch (Throwable $e) {
             }
         }

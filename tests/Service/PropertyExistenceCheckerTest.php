@@ -26,7 +26,7 @@ class PropertyExistenceCheckerTest extends TestCase
     }
 
     /**
-     * @dataProvider dataProviderEntity
+     * @dataProvider dataProviderEntityWithoutTranslations
      *
      * @param string $property
      */
@@ -35,7 +35,7 @@ class PropertyExistenceCheckerTest extends TestCase
         $this->assertTrue($this->checkerEntity->propertyExists($property));
     }
 
-    public function dataProviderEntity(): Generator
+    public function dataProviderEntityWithoutTranslations(): Generator
     {
         yield ['test_property_private'];
         yield ['testPropertyPrivate'];
@@ -63,16 +63,16 @@ class PropertyExistenceCheckerTest extends TestCase
         yield ['testPropertyProtected'];
         yield ['test_property_public'];
         yield ['testPropertyPublic'];
-        yield ['test_translation_private'];
-        yield ['testTranslationPrivate'];
-        yield ['test_translation_protected'];
-        yield ['testTranslationProtected'];
-        yield ['test_translation_public'];
-        yield ['testTranslationPublic'];
+        yield ['test_translation_protected:ru'];
+        yield ['testTranslationProtected:hu'];
+        yield ['test_translation_public:hu'];
+        yield ['testTranslationPublic:ru'];
+        yield ['test_translation_private:pl'];
+        yield ['testTranslationPrivate:en'];
     }
 
     /**
-     * @dataProvider dataProviderEntityWrongProperty
+     * @dataProvider dataProviderEntityWithoutTranslationsWrongProperty
      *
      * @param string $property
      */
@@ -81,8 +81,16 @@ class PropertyExistenceCheckerTest extends TestCase
         $this->assertFalse($this->checkerEntity->propertyExists($property));
     }
 
+    public function dataProviderEntityWithoutTranslationsWrongProperty(): Generator
+    {
+        yield ['test_property_public:pl'];
+        yield ['testPropertyPublic:en'];
+        yield ['wrong_property'];
+        yield ['wrongProperty'];
+    }
+
     /**
-     * @dataProvider dataProviderEntityWrongProperty
+     * @dataProvider dataProviderEntityWithTranslationsWrongProperty
      *
      * @param string $property
      */
@@ -91,9 +99,11 @@ class PropertyExistenceCheckerTest extends TestCase
         $this->assertFalse($this->checkerEntityWithTranslations->propertyExists($property));
     }
 
-    public function dataProviderEntityWrongProperty(): Generator
+    public function dataProviderEntityWithTranslationsWrongProperty(): Generator
     {
         yield ['wrong_property'];
         yield ['wrongProperty'];
+        yield ['test_translation_public'];
+        yield ['testTranslationPublic'];
     }
 }
