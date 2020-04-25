@@ -20,7 +20,7 @@ Bundle adds feature of batch inserting of data provided from different files.
 * [Installation](#installation)
 * [Basic configuration class](#basic-configuration-class)
 * [Creating controller](#creating-controller)
-* [Translations]($translations)
+* [Translations](#translations)
 * [Fields definitions](#fields-definitions)
 * [Overriding templates](#overriding-templates)
 
@@ -47,9 +47,8 @@ namespace App\Model\ImportConfiguration;
 
 use App\Entity\User;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
-use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 
-class UserImportConfiguration extends AbstractImportConfiguration implements ImportConfigurationInterface
+class UserImportConfiguration extends AbstractImportConfiguration
 {
     public function getEntityClassName(): string
     {
