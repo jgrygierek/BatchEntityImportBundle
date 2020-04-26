@@ -3,19 +3,34 @@
 namespace JG\BatchEntityImportBundle\Tests;
 
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
-use Nyholm\BundleTest\BaseBundleTestCase;
+use JG\BatchEntityImportBundle\DependencyInjection\Compiler\AutoConfigureCompilerPass;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class BatchEntityImportBundleTest extends BaseBundleTestCase
+class BatchEntityImportBundleTest extends TestCase
 {
-    protected function getBundleClass(): string
+    private BatchEntityImportBundle $bundle;
+
+    protected function setUp(): void
     {
-        return BatchEntityImportBundle::class;
+        $this->bundle = new BatchEntityImportBundle();
     }
 
     public function testBundle(): void
     {
-        $class = $this->getBundleClass();
-        $this->assertInstanceOf(Bundle::class, new $class);
+        $this->assertInstanceOf(Bundle::class, $this->bundle);
+    }
+
+    public function testBundleBuild(): void
+    {
+        $containerBuilder = $this->createMock(ContainerBuilder::class);
+
+        $containerBuilder
+            ->expects($this->once())
+            ->method('addCompilerPass')
+            ->with(new AutoConfigureCompilerPass());
+
+        $this->bundle->build($containerBuilder);
     }
 }
