@@ -53,6 +53,7 @@ trait BaseImportControllerTrait
      */
     private function doImport(Request $request): Response
     {
+        $this->checkDI();
         $fileImport = new FileImport();
 
         /** @var FormInterface $form */
