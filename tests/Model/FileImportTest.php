@@ -78,6 +78,7 @@ class FileImportTest extends TestCase
         yield ['jpg'];
         yield ['pdf'];
         yield ['txt'];
+        yield [''];
     }
 
     public function testEmptyContentError(): void
@@ -94,11 +95,13 @@ class FileImportTest extends TestCase
 
     private function createUploadedFile(string $fileExtension, bool $withContent = true): UploadedFile
     {
+        $name = 'test_file' . ($fileExtension ? '.' . $fileExtension : '');
+
         if ($withContent) {
             file_put_contents($this->path, 'test_content');
         }
 
-        return new UploadedFile($this->path, 'test_file.' . $fileExtension, null, null, true);
+        return new UploadedFile($this->path, $name, null, null, true);
     }
 
     private function getErrors(FileImport $fileImport): array
