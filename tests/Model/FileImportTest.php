@@ -95,7 +95,7 @@ class FileImportTest extends TestCase
     private function createUploadedFile(string $fileExtension, bool $withContent = true): UploadedFile
     {
         if ($withContent) {
-            file_put_contents($this->path, $withContent ? 'test_content' : '');
+            file_put_contents($this->path, 'test_content');
         }
 
         return new UploadedFile($this->path, 'test_file.' . $fileExtension, null, null, true);
