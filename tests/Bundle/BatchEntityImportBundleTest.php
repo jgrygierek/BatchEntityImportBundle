@@ -1,6 +1,6 @@
 <?php
 
-namespace JG\BatchEntityImportBundle\Tests;
+namespace JG\BatchEntityImportBundle\Tests\Bundle;
 
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
 use JG\BatchEntityImportBundle\DependencyInjection\Compiler\AutoConfigureCompilerPass;

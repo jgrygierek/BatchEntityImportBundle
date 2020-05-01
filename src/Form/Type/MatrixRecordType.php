@@ -18,7 +18,6 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use UnexpectedValueException;
 
 class MatrixRecordType extends AbstractType
 {
@@ -28,18 +27,7 @@ class MatrixRecordType extends AbstractType
         $configuration    = $options['configuration'];
         $fieldDefinitions = $configuration->getFieldsDefinitions();
 
-        $builder
-            ->add(
-                'entity',
-                EntityType::class,
-                [
-                    'class'              => $configuration->getEntityClassName(),
-                    'label'              => false,
-                    'placeholder'        => '---',
-                    'translation_domain' => false,
-                    'required'           => false,
-                ]
-            );
+        $this->addEntityField($builder, $configuration->getEntityClassName());
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
@@ -71,6 +59,22 @@ class MatrixRecordType extends AbstractType
             ->addAllowedTypes('configuration', ImportConfigurationInterface::class);
     }
 
+    private function addEntityField(FormBuilderInterface $builder, string $entityClassName): void
+    {
+        $builder
+            ->add(
+                'entity',
+                EntityType::class,
+                [
+                    'class'              => $entityClassName,
+                    'label'              => false,
+                    'placeholder'        => '---',
+                    'translation_domain' => false,
+                    'required'           => false,
+                ]
+            );
+    }
+
     /**
      * @param array|FormFieldDefinition[] $fieldDefinitions
      * @param string                      $columnName
@@ -82,10 +86,6 @@ class MatrixRecordType extends AbstractType
      */
     private function addField(array $fieldDefinitions, string $columnName, FormEvent $event): void
     {
-        if (!$columnName) {
-            throw new UnexpectedValueException('Column name can\'t be empty.');
-        }
-
         $definition = $fieldDefinitions[ColumnNameHelper::removeTranslationSuffix($columnName)] ?? null;
 
         $definition

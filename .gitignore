@@ -1,4 +1,5 @@
 /.idea
+/var
 /vendor
 .phpcs-cache
 .phpunit.result.cache
