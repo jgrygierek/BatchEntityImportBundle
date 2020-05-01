@@ -139,16 +139,17 @@ public function getFieldsDefinitions(): array
 {
     return [
         'age' => new FormFieldDefinition(
-            'age', IntegerType::class, [
+            IntegerType::class,
+            [
                 'attr' => [
                     'min' => 0,
                     'max' => 999,
                 ],
             ]
         ),
-        'name' => new FormFieldDefinition('name', TextType::class),
+        'name' => new FormFieldDefinition(TextType::class),
         'description' => new FormFieldDefinition(
-            'description', TextareaType::class,
+            TextareaType::class,
             [
                 'attr' => [
                     'rows' => 2,

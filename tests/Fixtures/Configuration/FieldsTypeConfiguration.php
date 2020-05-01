@@ -19,9 +19,9 @@ class FieldsTypeConfiguration extends AbstractImportConfiguration
     public function getFieldsDefinitions(): array
     {
         return [
-            'age'         => new FormFieldDefinition('age', IntegerType::class),
-            'name'        => new FormFieldDefinition('name', TextType::class),
-            'description' => new FormFieldDefinition('description', TextareaType::class),
+            'age'         => new FormFieldDefinition(IntegerType::class),
+            'name'        => new FormFieldDefinition(TextType::class),
+            'description' => new FormFieldDefinition(TextareaType::class),
         ];
     }
 }
