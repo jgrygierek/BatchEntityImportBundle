@@ -18,7 +18,6 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use UnexpectedValueException;
 
 class MatrixRecordType extends AbstractType
 {
@@ -87,10 +86,6 @@ class MatrixRecordType extends AbstractType
      */
     private function addField(array $fieldDefinitions, string $columnName, FormEvent $event): void
     {
-        if (!$columnName) {
-            throw new UnexpectedValueException('Column name can\'t be empty.');
-        }
-
         $definition = $fieldDefinitions[ColumnNameHelper::removeTranslationSuffix($columnName)] ?? null;
 
         $definition
