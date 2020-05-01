@@ -3,7 +3,7 @@
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Configuration;
 
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Entity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\Entity;
 
 class BaseConfiguration extends AbstractImportConfiguration
 {

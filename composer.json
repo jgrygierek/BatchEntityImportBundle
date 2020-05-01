@@ -31,6 +31,7 @@
         "yectep/phpspreadsheet-bundle": "^0.1.0"
     },
     "require-dev": {
+        "doctrine/doctrine-bundle": "^2.0",
         "escapestudios/symfony2-coding-standard": "3.x-dev",
         "matthiasnoback/symfony-dependency-injection-test": "^4.1",
         "nyholm/symfony-bundle-test": "^1.6",

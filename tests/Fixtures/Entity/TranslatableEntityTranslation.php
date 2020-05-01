@@ -1,11 +1,11 @@
 <?php
 
-namespace JG\BatchEntityImportBundle\Tests\Fixtures;
+namespace JG\BatchEntityImportBundle\Tests\Fixtures\Entity;
 
 use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslationTrait;
 
-class TranslatableEntityTranslation implements TranslationInterface
+class TranslatableEntityTranslation extends AbstractEntity implements TranslationInterface
 {
     use TranslationTrait;
 

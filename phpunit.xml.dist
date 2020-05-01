@@ -2,11 +2,16 @@
 
 <!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.3/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.1/phpunit.xsd"
          backupGlobals="false"
          colors="true"
          bootstrap="vendor/autoload.php"
 >
+    <php>
+        <env name="KERNEL_CLASS" value="JG\BatchEntityImportBundle\Tests\TestKernel"/>
+        <server name="SYMFONY_PHPUNIT_VERSION" value="9.1"/>
+    </php>
+
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>./tests/</directory>
