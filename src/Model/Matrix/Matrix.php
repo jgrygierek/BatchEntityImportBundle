@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Matrix
 {
     /**
+     * @Assert\NotBlank()
      * @Assert\All({
      *     @Assert\NotBlank(),
      *     @Assert\Type("string"),

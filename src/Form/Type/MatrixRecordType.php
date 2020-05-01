@@ -28,18 +28,7 @@ class MatrixRecordType extends AbstractType
         $configuration    = $options['configuration'];
         $fieldDefinitions = $configuration->getFieldsDefinitions();
 
-        $builder
-            ->add(
-                'entity',
-                EntityType::class,
-                [
-                    'class'              => $configuration->getEntityClassName(),
-                    'label'              => false,
-                    'placeholder'        => '---',
-                    'translation_domain' => false,
-                    'required'           => false,
-                ]
-            );
+        $this->addEntityField($builder, $configuration->getEntityClassName());
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
@@ -69,6 +58,22 @@ class MatrixRecordType extends AbstractType
             ->setDefaults(['data_class' => MatrixRecord::class])
             ->setRequired('configuration')
             ->addAllowedTypes('configuration', ImportConfigurationInterface::class);
+    }
+
+    private function addEntityField(FormBuilderInterface $builder, string $entityClassName): void
+    {
+        $builder
+            ->add(
+                'entity',
+                EntityType::class,
+                [
+                    'class'              => $entityClassName,
+                    'label'              => false,
+                    'placeholder'        => '---',
+                    'translation_domain' => false,
+                    'required'           => false,
+                ]
+            );
     }
 
     /**

@@ -7,6 +7,10 @@
          colors="true"
          bootstrap="vendor/autoload.php"
 >
+    <php>
+        <env name="KERNEL_CLASS" value="JG\BatchEntityImportBundle\Tests\TestKernel"/>
+    </php>
+
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>./tests/</directory>

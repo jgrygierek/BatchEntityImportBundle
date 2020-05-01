@@ -1,0 +1,22 @@
+parameters:
+    env(DB_ENGINE): pdo_sqlite
+    env(DB_HOST): localhost
+    env(DB_NAME): batch_entity_import_test
+    env(DB_USER): root
+    env(DB_PASSWD): root
+
+doctrine:
+    dbal:
+        dbname: "%env(DB_NAME)%"
+        host: "%env(DB_HOST)%"
+        user: "%env(DB_USER)%"
+        password: "%env(DB_PASSWD)%"
+        driver: "%env(DB_ENGINE)%"
+
+    orm:
+        auto_mapping: true
+        mappings:
+            -   name: TestMappings
+                type: annotation
+                prefix: JG\BatchEntityImportBundle\Tests\Fixtures\Entity
+                dir: '%kernel.project_dir%/tests/Fixtures/Entity/'

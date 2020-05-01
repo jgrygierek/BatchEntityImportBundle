@@ -62,7 +62,7 @@ class UserImportConfiguration extends AbstractImportConfiguration
 Create controller with some required code.
 
 ```php
-namespace App\Controller\Game;
+namespace App\Controller;
 
 use App\Model\ImportConfiguration\UserImportConfiguration;
 use JG\BatchEntityImportBundle\Controller\ImportControllerInterface;

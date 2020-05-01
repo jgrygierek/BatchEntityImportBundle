@@ -4,8 +4,8 @@ namespace JG\BatchEntityImportBundle\Tests\Service;
 
 use Generator;
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Entity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\TranslatableEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\Entity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 
