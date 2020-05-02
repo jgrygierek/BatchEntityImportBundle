@@ -19,6 +19,7 @@ class Matrix
     /**
      * @var array|MatrixRecord[]
      *
+     * @Assert\NotBlank()
      * @Assert\All({
      *     @Assert\Type(MatrixRecord::class)
      * })
@@ -27,9 +28,10 @@ class Matrix
 
     public function __construct(array $header = [], array $recordsData = [])
     {
-        $this->header = array_filter($header);
+        $this->header = $this->clearHeader($header);
+
         foreach ($recordsData as $data) {
-            $data = array_filter($data, fn($key) => !empty($key), ARRAY_FILTER_USE_KEY);
+            $data = $this->clearRecordData($data);
             if ($data) {
                 $this->records[] = new MatrixRecord($data);
             }
@@ -59,5 +61,17 @@ class Matrix
         }
 
         return $info;
+    }
+
+    private function clearHeader(array $header): array
+    {
+        return array_values(
+            array_filter($header, fn($e) => !empty(trim($e)))
+        );
+    }
+
+    private function clearRecordData(array $data): array
+    {
+        return array_filter($data, fn($key) => !empty(trim($key)), ARRAY_FILTER_USE_KEY);
     }
 }

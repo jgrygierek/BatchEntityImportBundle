@@ -4,21 +4,19 @@ namespace JG\BatchEntityImportBundle\Tests\Model;
 
 use Generator;
 use JG\BatchEntityImportBundle\Model\FileImport;
-use PHPUnit\Framework\TestCase;
+use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Validator\Validation;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class FileImportTest extends TestCase
+class FileImportTest extends AbstractValidationTestCase
 {
-    private ValidatorInterface  $validator;
-    private FileImport          $fileImport;
-    private ?string             $path;
+    private FileImport $fileImport;
+    private ?string    $path;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->fileImport = new FileImport();
-        $this->validator  = Validation::createValidatorBuilder()->enableAnnotationMapping()->getValidator();
         $this->path       = tempnam(sys_get_temp_dir(), 'upl');
     }
 
@@ -102,12 +100,5 @@ class FileImportTest extends TestCase
         }
 
         return new UploadedFile($this->path, $name, null, null, true);
-    }
-
-    private function getErrors(FileImport $fileImport): array
-    {
-        $errors = $this->validator->validate($fileImport);
-
-        return iterator_to_array($errors);
     }
 }
