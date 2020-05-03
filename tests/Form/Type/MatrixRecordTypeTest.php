@@ -7,7 +7,7 @@ use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\FieldsTypeConfiguration;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\Entity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -38,7 +38,7 @@ class MatrixRecordTypeTest extends WebTestCase
 
         $this->assertTrue($form->isSynchronized());
 
-        $this->assertSame(Entity::class, $form->get('entity')->getConfig()->getOption('class'));
+        $this->assertSame(TestEntity::class, $form->get('entity')->getConfig()->getOption('class'));
         $this->assertInstanceOf(TextType::class, $form->get('age')->getConfig()->getType()->getInnerType());
         $this->assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
         $this->assertInstanceOf(TextType::class, $form->get('description')->getConfig()->getType()->getInnerType());
@@ -55,7 +55,7 @@ class MatrixRecordTypeTest extends WebTestCase
 
         $this->assertTrue($form->isSynchronized());
 
-        $this->assertSame(Entity::class, $form->get('entity')->getConfig()->getOption('class'));
+        $this->assertSame(TestEntity::class, $form->get('entity')->getConfig()->getOption('class'));
         $this->assertInstanceOf(IntegerType::class, $form->get('age')->getConfig()->getType()->getInnerType());
         $this->assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
         $this->assertInstanceOf(TextareaType::class, $form->get('description')->getConfig()->getType()->getInnerType());
