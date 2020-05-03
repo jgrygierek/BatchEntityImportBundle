@@ -165,7 +165,7 @@ public function getFieldsDefinitions(): array
 You can override default templates globally by adding them to directory:
 
 ```
-templates/budles/BatchEntityImportBundle
+templates/bundles/BatchEntityImportBundle
 ```
 
 If you have controller-specific templates, you can override them in controller:

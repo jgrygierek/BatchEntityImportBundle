@@ -4,7 +4,7 @@ namespace JG\BatchEntityImportBundle\Tests\Service;
 
 use Generator;
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\Entity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
@@ -21,7 +21,7 @@ class PropertyExistenceCheckerTest extends TestCase
     {
         parent::setUp();
 
-        $this->checkerEntity                 = new PropertyExistenceChecker(new Entity());
+        $this->checkerEntity                 = new PropertyExistenceChecker(new TestEntity());
         $this->checkerEntityWithTranslations = new PropertyExistenceChecker(new TranslatableEntity());
     }
 
@@ -37,12 +37,8 @@ class PropertyExistenceCheckerTest extends TestCase
 
     public function dataProviderEntityWithoutTranslations(): Generator
     {
-        yield ['test_property_private'];
-        yield ['testPropertyPrivate'];
-        yield ['test_property_protected'];
-        yield ['testPropertyProtected'];
-        yield ['test_property_public'];
-        yield ['testPropertyPublic'];
+        yield ['test_property'];
+        yield ['testProperty'];
     }
 
     /**
@@ -57,18 +53,10 @@ class PropertyExistenceCheckerTest extends TestCase
 
     public function dataProviderEntityWithTranslations(): Generator
     {
-        yield ['test_property_private'];
-        yield ['testPropertyPrivate'];
-        yield ['test_property_protected'];
-        yield ['testPropertyProtected'];
-        yield ['test_property_public'];
-        yield ['testPropertyPublic'];
-        yield ['test_translation_protected:ru'];
-        yield ['testTranslationProtected:hu'];
-        yield ['test_translation_public:hu'];
-        yield ['testTranslationPublic:ru'];
-        yield ['test_translation_private:pl'];
-        yield ['testTranslationPrivate:en'];
+        yield ['test_property'];
+        yield ['testProperty'];
+        yield ['test_translation_property:pl'];
+        yield ['testTranslationProperty:en'];
     }
 
     /**
@@ -83,8 +71,8 @@ class PropertyExistenceCheckerTest extends TestCase
 
     public function dataProviderEntityWithoutTranslationsWrongProperty(): Generator
     {
-        yield ['test_property_public:pl'];
-        yield ['testPropertyPublic:en'];
+        yield ['test_property:pl'];
+        yield ['testProperty:en'];
         yield ['wrong_property'];
         yield ['wrongProperty'];
     }
@@ -103,7 +91,7 @@ class PropertyExistenceCheckerTest extends TestCase
     {
         yield ['wrong_property'];
         yield ['wrongProperty'];
-        yield ['test_translation_public'];
-        yield ['testTranslationPublic'];
+        yield ['test_translation_property'];
+        yield ['testTranslationProperty'];
     }
 }

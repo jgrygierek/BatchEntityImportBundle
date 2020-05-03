@@ -2,8 +2,6 @@
 
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
-use UnexpectedValueException;
-
 class MatrixRecord
 {
     private ?object $entity = null;
@@ -30,14 +28,9 @@ class MatrixRecord
         return $this->data;
     }
 
-    public function setData(array $data): void
-    {
-        $this->data = $data;
-    }
-
     public function __isset($name): bool
     {
-        return isset($this->data[$name]);
+        return array_key_exists($name, $this->data);
     }
 
     public function __set($name, $value)
@@ -47,10 +40,6 @@ class MatrixRecord
 
     public function __get($name)
     {
-        if (array_key_exists($name, $this->data)) {
-            return $this->data[$name];
-        }
-
-        throw new UnexpectedValueException("Column $name does not exist.");
+        return $this->data[$name];
     }
 }
