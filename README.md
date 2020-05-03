@@ -45,7 +45,7 @@ You have to create configuration class. In the simplest case it will contain onl
 ```php
 namespace App\Model\ImportConfiguration;
 
-use App\Entity\User;
+use App\TestEntity\User;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 
 class UserImportConfiguration extends AbstractImportConfiguration
@@ -165,7 +165,7 @@ public function getFieldsDefinitions(): array
 You can override default templates globally by adding them to directory:
 
 ```
-templates/budles/BatchEntityImportBundle
+templates/bundles/BatchEntityImportBundle
 ```
 
 If you have controller-specific templates, you can override them in controller:

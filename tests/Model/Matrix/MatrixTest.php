@@ -6,7 +6,7 @@ use Generator;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\Entity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 
 class MatrixTest extends AbstractValidationTestCase
@@ -70,24 +70,24 @@ class MatrixTest extends AbstractValidationTestCase
     public function testHeaderInfoForNonTranslatableEntity(): void
     {
         $expected = [
-            'unknown_column_name'      => false,
-            'test_property_private'    => true,
-            'test_property_private:en' => false,
+            'unknown_column_name' => false,
+            'test_property'       => true,
+            'test_property:en'    => false,
         ];
 
         $matrix = new Matrix(array_keys($expected));
 
-        $this->assertSame($expected, $matrix->getHeaderInfo(Entity::class));
+        $this->assertSame($expected, $matrix->getHeaderInfo(TestEntity::class));
     }
 
     public function testHeaderInfoForTranslatableEntity(): void
     {
         $expected = [
-            'unknown_column_name'         => false,
-            'test_property_private'       => true,
-            'test_property_private:en'    => false,
-            'test_translation_private'    => false,
-            'test_translation_private:en' => true,
+            'unknown_column_name'          => false,
+            'test_property'                => true,
+            'test_property:en'             => false,
+            'test_translation_property'    => false,
+            'test_translation_property:en' => true,
         ];
 
         $matrix = new Matrix(array_keys($expected));

@@ -5,6 +5,13 @@ parameters:
     env(DB_USER): root
     env(DB_PASSWD): root
 
+services:
+    _defaults:
+        public: true
+        autowire: true
+
+    JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
+
 doctrine:
     dbal:
         dbname: "%env(DB_NAME)%"
@@ -16,7 +23,7 @@ doctrine:
     orm:
         auto_mapping: true
         mappings:
-            -   name: TestMappings
+            -   name: BatchEntityImportBundle
                 type: annotation
                 prefix: JG\BatchEntityImportBundle\Tests\Fixtures\Entity
                 dir: '%kernel.project_dir%/tests/Fixtures/Entity/'
