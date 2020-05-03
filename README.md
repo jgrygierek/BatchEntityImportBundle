@@ -45,7 +45,7 @@ You have to create configuration class. In the simplest case it will contain onl
 ```php
 namespace App\Model\ImportConfiguration;
 
-use App\TestEntity\User;
+use App\Entity\User;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 
 class UserImportConfiguration extends AbstractImportConfiguration

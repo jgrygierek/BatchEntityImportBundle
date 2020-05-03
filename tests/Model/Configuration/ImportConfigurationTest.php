@@ -25,8 +25,7 @@ class ImportConfigurationTest extends AbstractDatabaseTestCase
 
         $config = new BaseConfiguration($this->entityManager);
         $config->prepareRecord($record);
-
-        $this->entityManager->flush();
+        $config->save();
 
         /** @var TestEntity|null $item */
         $item = $repository->find(1);
@@ -51,8 +50,7 @@ class ImportConfigurationTest extends AbstractDatabaseTestCase
 
         $config = new TranslatableEntityBaseConfiguration($this->entityManager);
         $config->prepareRecord($record);
-
-        $this->entityManager->flush();
+        $config->save();
 
         /** @var TranslatableEntity|null $item */
         $item = $repository->find(1);
