@@ -120,12 +120,7 @@ trait BaseImportControllerTrait
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $config = $this->getImportConfiguration();
-            foreach ($matrix->getRecords() as $record) {
-                $config->prepareRecord($record);
-            }
-
-            $config->save();
+            $this->getImportConfiguration()->import($matrix);
 
             $msg = $this->translator->trans('success.import', [], 'BatchEntityImportBundle');
             $this->addFlash('success', $msg);
