@@ -3,6 +3,7 @@
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
 use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
@@ -22,7 +23,16 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return [];
     }
 
-    public function prepareRecord(MatrixRecord $record): void
+    public function import(Matrix $matrix): void
+    {
+        foreach ($matrix->getRecords() as $record) {
+            $this->prepareRecord($record);
+        }
+
+        $this->save();
+    }
+
+    protected function prepareRecord(MatrixRecord $record): void
     {
         $entity = $this->getEntity($record);
         $data   = $record->getData();
@@ -48,7 +58,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $this->em->persist($entity);
     }
 
-    public function save(): void
+    protected function save(): void
     {
         $this->em->flush();
     }
