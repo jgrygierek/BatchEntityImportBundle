@@ -23,7 +23,7 @@ twig: ~
 doctrine:
     dbal:
         driver: pdo_mysql #pdo_sqlite
-        url: mysql://root:U6qtZS4T@mysql/batch_entity_import_test
+        url: mysql://root@mysql/batch_entity_import_test
         server_version: 5.7
         charset: utf8mb4
 #        dbname: batch_entity_import_test
