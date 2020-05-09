@@ -2,15 +2,28 @@
 
 namespace JG\BatchEntityImportBundle\Tests\Model\Configuration;
 
+use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
-use JG\BatchEntityImportBundle\Tests\AbstractDatabaseTestCase;
+use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class ImportConfigurationTest extends AbstractDatabaseTestCase
+class ImportConfigurationTest extends WebTestCase
 {
+    protected ?EntityManagerInterface $entityManager;
+
+    public function setUp(): void
+    {
+        self::bootKernel();
+
+        $this->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
+        $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
+        $databaseLoader->reload();
+    }
+
     public function testItemImportedSuccessfully(): void
     {
         $repository = $this->entityManager->getRepository(TestEntity::class);
