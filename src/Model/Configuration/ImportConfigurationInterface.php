@@ -3,7 +3,7 @@
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
-use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 
 interface ImportConfigurationInterface
 {
@@ -23,14 +23,9 @@ interface ImportConfigurationInterface
     public function getFieldsDefinitions(): array;
 
     /**
-     * Prepares data from one record and updates existing or inserts new record.
+     * Import data from matrix to database.
      *
-     * @param MatrixRecord $record
+     * @param Matrix $matrix
      */
-    public function prepareRecord(MatrixRecord $record): void;
-
-    /**
-     * Saves all prepared data to database.
-     */
-    public function save(): void;
+    public function import(Matrix $matrix): void;
 }
