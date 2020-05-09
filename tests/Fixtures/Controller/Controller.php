@@ -2,22 +2,40 @@
 
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Controller\ImportControllerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class Controller implements ImportControllerInterface
+class Controller extends AbstractController implements ImportControllerInterface
 {
-    public function setTranslator(TranslatorInterface $translator): void
+    use ImportControllerTrait;
+
+    public function import(Request $request): Response
     {
+        return $this->doImport($request);
     }
 
-    public function setEntityManager(EntityManagerInterface $em): void
+    public function importSave(Request $request): Response
     {
+        return $this->doImportSave($request);
     }
 
-    public function setValidator(ValidatorInterface $validator): void
+    private function redirectToImport(): RedirectResponse
     {
+        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.import');
+    }
+
+    private function getMatrixSaveActionUrl(): string
+    {
+        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.import_save');
+    }
+
+    private function getImportConfigurationClassName(): string
+    {
+        return TranslatableEntityBaseConfiguration::class;
     }
 }

@@ -1,29 +1,34 @@
-parameters:
-    env(DB_ENGINE): pdo_sqlite
-    env(DB_HOST): localhost
-    env(DB_NAME): batch_entity_import_test
-    env(DB_USER): root
-    env(DB_PASSWD): root
-
 services:
     _defaults:
         public: true
         autowire: true
+        autoconfigure: true
+
+    JG\BatchEntityImportBundle\Tests\Fixtures\Controller\:
+        resource: '../Fixtures/Controller'
+        tags: ['controller.service_arguments']
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
 
+    JG\BatchEntityImportBundle\Tests\Fixtures\Controller\Controller: ~
+
+framework:
+    test: true
+    session:
+        handler_id: ~
+        storage_id: session.storage.mock_file
+
+twig: ~
+
 doctrine:
     dbal:
-        dbname: "%env(DB_NAME)%"
-        host: "%env(DB_HOST)%"
-        user: "%env(DB_USER)%"
-        password: "%env(DB_PASSWD)%"
-        driver: "%env(DB_ENGINE)%"
+        driver: pdo_sqlite
+        url: sqlite://root@localhost/var/batch_entity_import_test.db
 
     orm:
         auto_mapping: true
         mappings:
-            -   name: BatchEntityImportBundle
+            BatchEntityImportBundle:
                 type: annotation
                 prefix: JG\BatchEntityImportBundle\Tests\Fixtures\Entity
                 dir: '%kernel.project_dir%/tests/Fixtures/Entity/'

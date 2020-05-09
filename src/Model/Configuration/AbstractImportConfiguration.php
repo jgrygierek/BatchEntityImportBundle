@@ -51,11 +51,11 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             }
         }
 
+        $this->em->persist($entity);
+
         if ($entity instanceof TranslatableInterface) {
             $entity->mergeNewTranslations();
         }
-
-        $this->em->persist($entity);
     }
 
     protected function save(): void

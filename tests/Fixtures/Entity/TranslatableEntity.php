@@ -15,6 +15,9 @@ class TranslatableEntity extends AbstractEntity implements TranslatableInterface
 {
     use TranslatableTrait;
 
+    /**
+     * @ORM\Column(type="string")
+     */
     private string $testProperty = '';
 
     public function setTestProperty(string $testProperty): void

@@ -1,0 +1,7 @@
+jg.batch_entity_import_bundle.test_controller.import:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\Controller::import
+    path: /jg_batch_entity_import_bundle/import
+
+jg.batch_entity_import_bundle.test_controller.import_save:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\Controller::importSave
+    path: /jg_batch_entity_import_bundle/import_save

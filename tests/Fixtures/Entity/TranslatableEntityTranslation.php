@@ -13,7 +13,10 @@ class TranslatableEntityTranslation extends AbstractEntity implements Translatio
 {
     use TranslationTrait;
 
-    private string $testTranslationProperty;
+    /**
+     * @ORM\Column(type="string")
+     */
+    private string $testTranslationProperty = '';
 
     public function getTestTranslationProperty(): string
     {
