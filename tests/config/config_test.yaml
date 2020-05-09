@@ -22,15 +22,8 @@ twig: ~
 
 doctrine:
     dbal:
-        driver: pdo_mysql #pdo_sqlite
-        url: mysql://root@mysql/batch_entity_import_test
-        server_version: 5.7
-        charset: utf8mb4
-#        dbname: batch_entity_import_test
-#        host: localhost
-#        user: root
-#        password: "U6qtZS4T"
-#        memory: false
+        driver: pdo_sqlite
+        url: sqlite://root@localhost/batch_entity_import_test
 
     orm:
         auto_mapping: true
