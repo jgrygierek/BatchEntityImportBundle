@@ -23,7 +23,7 @@ twig: ~
 doctrine:
     dbal:
         driver: pdo_sqlite
-        url: sqlite://root@localhost/batch_entity_import_test
+        url: sqlite://root@localhost/var/batch_entity_import_test.db
 
     orm:
         auto_mapping: true
