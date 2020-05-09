@@ -27,6 +27,7 @@
         "symfony/http-foundation": "^4.0",
         "symfony/http-kernel": "^4.0",
         "symfony/options-resolver": "^4.0",
+        "symfony/translation": "^4.0",
         "symfony/validator": "^4.0",
         "yectep/phpspreadsheet-bundle": "^0.1.0"
     },
@@ -36,7 +37,8 @@
         "matthiasnoback/symfony-dependency-injection-test": "^4.1",
         "nyholm/symfony-bundle-test": "^1.6",
         "squizlabs/php_codesniffer": "~3.5",
-        "symfony/test-pack": "^1.0"
+        "symfony/test-pack": "^1.0",
+        "symfony/twig-bundle": "^4.0"
     },
     "config": {
         "sort-packages": true
