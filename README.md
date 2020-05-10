@@ -5,6 +5,7 @@
 
 Bundle adds feature of batch inserting of data provided from different files. 
 * Data can be **viewed and edited** before saving to database.
+* Supports **inserting** new records and **updating** existing ones.
 * Supported extensions: **CSV, XLS, XLSX, ODS**
 * Supports translations from **KnpLabs Translatable** extension.
 * The code is divided into smaller methods that can be easily replaced if you want to change something.
