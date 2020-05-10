@@ -5,11 +5,12 @@ namespace JG\BatchEntityImportBundle\Tests\Model\Matrix;
 use Generator;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Yectep\PhpSpreadsheetBundle\Factory;
 
 class MatrixFactoryTest extends TestCase
 {
@@ -81,7 +82,6 @@ class MatrixFactoryTest extends TestCase
      * @param array  $data
      *
      * @return UploadedFile
-     * @throws Exception
      * @throws SpreadsheetException
      * @throws WriterException
      */
@@ -89,12 +89,11 @@ class MatrixFactoryTest extends TestCase
     {
         $fileExtension = strtolower($fileExtension);
         $filename      = 'file.' . $fileExtension;
-        $factory       = new Factory();
 
-        $spreadsheet = $factory->createSpreadsheet();
+        $spreadsheet = new Spreadsheet();
         $spreadsheet->getActiveSheet()->fromArray($data);
 
-        $writer = $factory->createWriter($spreadsheet, ucfirst($fileExtension));
+        $writer = IOFactory::createWriter($spreadsheet, ucfirst($fileExtension));
         $writer->save($filename);
 
         return new UploadedFile($filename, $filename);

@@ -21,6 +21,7 @@
     "require": {
         "php": "^7.4.0",
         "doctrine/orm": "^2.0",
+        "phpoffice/phpspreadsheet": "^1.10",
         "symfony/doctrine-bridge": "^4.4|^5.0",
         "symfony/form": "^4.4|^5.0",
         "symfony/framework-bundle": "^4.4|^5.0",
@@ -28,9 +29,7 @@
         "symfony/translation": "^4.4|^5.0",
         "symfony/twig-bundle": "^4.4|^5.0",
         "symfony/validator": "^4.4|^5.0",
-        "phpoffice/phpspreadsheet": "^1.10",
-        "twig/twig": "^2.12|^3.0",
-        "yectep/phpspreadsheet-bundle": "^0.1.1"
+        "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
         "doctrine/doctrine-bundle": "^2.0",
