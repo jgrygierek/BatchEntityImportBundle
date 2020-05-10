@@ -50,7 +50,7 @@ class MatrixFactory
         $extension   = ucfirst(strtolower($file->getClientOriginalExtension()));
         $readerClass = 'PhpOffice\PhpSpreadsheet\Reader\\' . $extension;
         if (!class_exists($readerClass)) {
-            throw new InvalidArgumentException("The extension $extension is not supported by PhpOffice.");
+            throw new InvalidArgumentException("Reader for extension $extension is not supported by PhpOffice.");
         }
 
         return new $readerClass();
