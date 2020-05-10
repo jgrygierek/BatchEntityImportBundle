@@ -7,7 +7,6 @@ use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
 use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Yectep\PhpSpreadsheetBundle\Factory;
 
 class MatrixFactory
 {
@@ -21,10 +20,7 @@ class MatrixFactory
      */
     public static function createFromUploadedFile(UploadedFile $file): Matrix
     {
-        $factory   = new Factory();
-        $extension = ucfirst(strtolower($file->getClientOriginalExtension()));
-        /** @var BaseReader $reader */
-        $reader      = $factory->createReader($extension);
+        $reader      = self::getReader($file);
         $spreadsheet = $reader->load($file->getPathname());
 
         $data   = $spreadsheet->getActiveSheet()->toArray();
@@ -47,5 +43,16 @@ class MatrixFactory
                 $row = array_combine($header, $row);
             }
         );
+    }
+
+    private static function getReader(UploadedFile $file): BaseReader
+    {
+        $extension   = ucfirst(strtolower($file->getClientOriginalExtension()));
+        $readerClass = 'PhpOffice\PhpSpreadsheet\Reader\\' . $extension;
+        if (!class_exists($readerClass)) {
+            throw new InvalidArgumentException("Reader for extension $extension is not supported by PhpOffice.");
+        }
+
+        return new $readerClass();
     }
 }
