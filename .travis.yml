@@ -8,10 +8,15 @@ cache:
 php:
     - '7.4snapshot'
 
+env:
+    matrix:
+        - PREFER_LOWEST="--prefer-lowest"
+        - PREFER_LOWEST=""
+
 before_install:
     - composer self-update
     - composer global require hirak/prestissimo
-    - composer install
+    - composer update $PREFER_LOWEST
     - pip install --user codecov
 
 jobs:

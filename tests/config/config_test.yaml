@@ -1,3 +1,6 @@
+parameters:
+    kernel.secret: "this_is_secret"
+
 services:
     _defaults:
         public: true
