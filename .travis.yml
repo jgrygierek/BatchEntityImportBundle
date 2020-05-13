@@ -15,7 +15,8 @@ matrix:
     include:
         -   stage: phpcs
             script: ./vendor/bin/phpcs src
-        -   env: PREFER_LOWEST="--prefer-lowest"
+        -   stage: tests
+            env: PREFER_LOWEST="--prefer-lowest"
             script:
                 - ./vendor/bin/simple-phpunit
         -   env: PREFER_LOWEST=""
