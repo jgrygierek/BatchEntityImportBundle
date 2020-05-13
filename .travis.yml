@@ -14,16 +14,17 @@ env:
         - PREFER_LOWEST=""
 
 before_install:
-    - composer self-update
     - composer global require hirak/prestissimo
     - composer update $PREFER_LOWEST
-    - pip install --user codecov
 
 jobs:
     include:
         - stage: phpcs
           script: ./vendor/bin/phpcs src
         - stage: tests
-          script: phpdbg -qrr -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+          install:
+            - pip install --user codecov
+          script:
+            - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
           after_success:
               - bash <(curl -s https://codecov.io/bash)
