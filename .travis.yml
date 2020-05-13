@@ -15,14 +15,12 @@ env:
         - PREFER_LOWEST="--prefer-lowest"
         - PREFER_LOWEST=""
 
-matrix:
-    fast_finish: true
-
 before_install:
     - composer global require hirak/prestissimo
     - composer update $PREFER_LOWEST
 
 jobs:
+    fast_finish: true
     include:
         -   stage: phpcs
             script: ./vendor/bin/phpcs src
