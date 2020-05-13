@@ -17,13 +17,10 @@ matrix:
             script: ./vendor/bin/phpcs src
         -   stage: tests
             env: PREFER_LOWEST="--prefer-lowest"
-            script:
-                - ./vendor/bin/simple-phpunit
+            script: ./vendor/bin/simple-phpunit
         -   env: PREFER_LOWEST=""
-            script:
-                - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
-            after_success:
-                - bash <(curl -s https://codecov.io/bash)
+            script: ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+            after_success: bash <(curl -s https://codecov.io/bash)
 
 before_install:
     - pip install --user codecov
