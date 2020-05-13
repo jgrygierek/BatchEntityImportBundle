@@ -24,6 +24,6 @@ jobs:
         - stage: phpcs
           script: ./vendor/bin/phpcs src
         - stage: tests
-          script: ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+          script: phpdbg -qrr -d memory_limit=-1 ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
           after_success:
               - bash <(curl -s https://codecov.io/bash)
