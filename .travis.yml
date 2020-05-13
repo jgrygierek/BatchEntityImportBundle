@@ -1,29 +1,26 @@
 language: php
 
+dist: xenial
+
 cache:
     directories:
         - $HOME/.composer/cache/files
         - $HOME/symfony-bridge/.phpunit
 
 php:
-    - '7.4snapshot'
+    - 7.4
 
-env:
-    matrix:
-        - PREFER_LOWEST="--prefer-lowest"
-        - PREFER_LOWEST=""
+matrix:
+    fast_finish: true
+    include:
+        -   script: ./vendor/bin/phpcs src
+        -   env: PREFER_LOWEST="--prefer-lowest"
+            script: ./vendor/bin/simple-phpunit
+        -   env: PREFER_LOWEST=""
+            script: ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+            after_success: bash <(curl -s https://codecov.io/bash)
 
 before_install:
-    - composer self-update
+    - pip install --user codecov
     - composer global require hirak/prestissimo
     - composer update $PREFER_LOWEST
-    - pip install --user codecov
-
-jobs:
-    include:
-        - stage: phpcs
-          script: ./vendor/bin/phpcs src
-        - stage: tests
-          script: ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
-          after_success:
-              - bash <(curl -s https://codecov.io/bash)
