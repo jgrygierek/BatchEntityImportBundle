@@ -8,12 +8,15 @@ cache:
         - $HOME/symfony-bridge/.phpunit
 
 php:
-    - '7.4snapshot'
+    - 7.4
 
 env:
     matrix:
         - PREFER_LOWEST="--prefer-lowest"
         - PREFER_LOWEST=""
+
+matrix:
+    fast_finish: true
 
 before_install:
     - composer global require hirak/prestissimo
