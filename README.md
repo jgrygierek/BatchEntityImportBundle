@@ -3,7 +3,7 @@
 [![Build Status](https://img.shields.io/travis/com/jgrygierek/BatchEntityImportBundle/master?style=flat-square)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) 
 [![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master?style=flat-square)](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle)
 
-Batch inserting of entities for Symfony.
+Importing entities with preview and edit features for Symfony.
 
 * Data can be **viewed and edited** before saving to database.
 * Supports **inserting** new records and **updating** existing ones.
