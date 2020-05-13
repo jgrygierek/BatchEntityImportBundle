@@ -13,24 +13,18 @@ php:
 matrix:
     fast_finish: true
     include:
+        -   stage: phpcs
+            script: ./vendor/bin/phpcs src
         -   env: PREFER_LOWEST="--prefer-lowest"
             script:
-                - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+                - ./vendor/bin/simple-phpunit
         -   env: PREFER_LOWEST=""
-            install:
-                - pip install --user codecov
             script:
                 - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
             after_success:
                 - bash <(curl -s https://codecov.io/bash)
 
 before_install:
+    - pip install --user codecov
     - composer global require hirak/prestissimo
     - composer update $PREFER_LOWEST
-
-jobs:
-    fast_finish: true
-    include:
-        -   stage: phpcs
-            script: ./vendor/bin/phpcs src
-
