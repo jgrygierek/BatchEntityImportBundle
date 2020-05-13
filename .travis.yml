@@ -1,5 +1,7 @@
 language: php
 
+dist: xenial
+
 cache:
     directories:
         - $HOME/.composer/cache/files
@@ -19,12 +21,12 @@ before_install:
 
 jobs:
     include:
-        - stage: phpcs
-          script: ./vendor/bin/phpcs src
-        - stage: tests
-          install:
-            - pip install --user codecov
-          script:
-            - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
-          after_success:
-              - bash <(curl -s https://codecov.io/bash)
+        -   stage: phpcs
+            script: ./vendor/bin/phpcs src
+        -   stage: tests
+            install:
+                - pip install --user codecov
+            script:
+                - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+            after_success:
+                - bash <(curl -s https://codecov.io/bash)
