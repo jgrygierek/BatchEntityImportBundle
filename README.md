@@ -3,10 +3,11 @@
 [![Build Status](https://img.shields.io/travis/com/jgrygierek/BatchEntityImportBundle/master?style=flat-square)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) 
 [![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master?style=flat-square)](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle)
 
-Bundle adds feature of batch inserting of data provided from different files. 
+Importing entities with preview and edit features for Symfony.
+
 * Data can be **viewed and edited** before saving to database.
 * Supports **inserting** new records and **updating** existing ones.
-* Supported extensions: **CSV, XLS, XLSX, ODS**
+* Supported extensions: **CSV, XLS, XLSX, ODS**.
 * Supports translations from **KnpLabs Translatable** extension.
 * The code is divided into smaller methods that can be easily replaced if you want to change something.
 * Columns names are required and should be added as header (first row).

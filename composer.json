@@ -1,14 +1,17 @@
 {
     "name": "jgrygierek/batch-entity-import-bundle",
     "type": "symfony-bundle",
-    "description": "Importing entities with preview and edit features.",
+    "description": "Importing entities with preview and edit features for Symfony.",
     "keywords": [
         "entity",
         "import",
         "preview",
         "excel",
+        "xls",
+        "xlsx",
         "csv",
         "ods",
+        "symfony",
         "symfony"
     ],
     "license": "MIT",
@@ -40,7 +43,6 @@
         "roave/security-advisories": "dev-master",
         "squizlabs/php_codesniffer": "~3.5",
         "symfony/browser-kit": "^4.4|^5.0",
-        "symfony/css-selector": "^4.4|^5.0",
         "symfony/phpunit-bridge": "^4.4|^5.0"
     },
     "config": {
