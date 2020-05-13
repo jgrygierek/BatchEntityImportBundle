@@ -2,10 +2,6 @@ language: php
 
 dist: xenial
 
-addons:
-    apt_packages:
-        - parallel
-
 cache:
     directories:
         - $HOME/.composer/cache/files
@@ -13,6 +9,20 @@ cache:
 
 php:
     - 7.4
+
+matrix:
+    fast_finish: true
+    include:
+        -   env: PREFER_LOWEST="--prefer-lowest"
+            script:
+                - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+        -   env: PREFER_LOWEST=""
+            install:
+                - pip install --user codecov
+            script:
+                - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+            after_success:
+                - bash <(curl -s https://codecov.io/bash)
 
 env:
     matrix:
@@ -28,10 +38,4 @@ jobs:
     include:
         -   stage: phpcs
             script: ./vendor/bin/phpcs src
-        -   stage: tests
-            install:
-                - pip install --user codecov
-            script:
-                - ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
-            after_success:
-                - bash <(curl -s https://codecov.io/bash)
+
