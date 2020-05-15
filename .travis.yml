@@ -13,11 +13,11 @@ php:
 matrix:
     fast_finish: true
     include:
-        -   script: ./vendor/bin/phpcs src
+        -   script: composer phpcs
         -   env: PREFER_LOWEST="--prefer-lowest"
-            script: ./vendor/bin/simple-phpunit
+            script: composer tests
         -   env: PREFER_LOWEST=""
-            script: ./vendor/bin/simple-phpunit --coverage-clover=coverage.xml
+            script: composer tests --coverage-clover=coverage.xml
             after_success: bash <(curl -s https://codecov.io/bash)
 
 before_install:
