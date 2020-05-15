@@ -16,11 +16,10 @@ matrix:
         -   script: composer phpcs
         -   env: PREFER_LOWEST="--prefer-lowest"
             script: composer tests
-        -   env: PREFER_LOWEST=""
+        -   before_install: pip install --user codecov
             script: composer tests-cov
             after_success: bash <(curl -s https://codecov.io/bash)
 
-before_install:
-    - pip install --user codecov
+install:
     - composer global require hirak/prestissimo
     - composer update $PREFER_LOWEST
