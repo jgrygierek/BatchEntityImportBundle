@@ -10,8 +10,12 @@
                 <source>form.button.import</source>
                 <target>Import</target>
             </trans-unit>
-            <trans-unit id="matrix.header.name.unknown">
-                <source>matrix.header.name.unknown</source>
+            <trans-unit id="matrix.header.label.override">
+                <source>matrix.header.label.override</source>
+                <target>Override record</target>
+            </trans-unit>
+            <trans-unit id="matrix.header.label.unknown">
+                <source>matrix.header.label.unknown</source>
                 <target>Unknown field</target>
             </trans-unit>
             <trans-unit id="success.import">

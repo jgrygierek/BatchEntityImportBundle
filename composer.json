@@ -32,6 +32,7 @@
         "symfony/translation": "^4.4|^5.0",
         "symfony/twig-bundle": "^4.4|^5.0",
         "symfony/validator": "^4.4|^5.0",
+        "twig/extensions": "^1.0",
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
@@ -42,8 +43,8 @@
         "nyholm/symfony-bundle-test": "^1.6",
         "roave/security-advisories": "dev-master",
         "squizlabs/php_codesniffer": "~3.5",
-        "symfony/browser-kit": "^4.4|^5.0",
-        "symfony/phpunit-bridge": "^4.4|^5.0"
+        "symfony/browser-kit": "^5.0",
+        "symfony/phpunit-bridge": "^5.0"
     },
     "config": {
         "sort-packages": true
@@ -57,5 +58,10 @@
         "psr-4": {
             "JG\\BatchEntityImportBundle\\Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "phpcs": "vendor/bin/phpcs src",
+        "tests": "vendor/bin/simple-phpunit",
+        "tests-cov": "vendor/bin/simple-phpunit --coverage-clover=coverage.xml"
     }
 }

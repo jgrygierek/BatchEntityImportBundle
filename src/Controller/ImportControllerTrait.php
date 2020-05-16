@@ -18,12 +18,12 @@ trait ImportControllerTrait
 
     private function getSelectFileTemplateName(): string
     {
-        return '@BatchEntityImport/select_file.html.twig';
+        return $this->getParameter('batch_entity_import.templates.select_file');
     }
 
     private function getMatrixEditTemplateName(): string
     {
-        return '@BatchEntityImport/edit_matrix.html.twig';
+        return $this->getParameter('batch_entity_import.templates.edit_matrix');
     }
 
     /**
