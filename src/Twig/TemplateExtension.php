@@ -28,6 +28,6 @@ class TemplateExtension extends AbstractExtension
             return $this->availableTemplates[$name];
         }
 
-        throw new UnexpectedValueException('Template not found.');
+        throw new UnexpectedValueException("Template $name not found.");
     }
 }
