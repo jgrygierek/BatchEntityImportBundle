@@ -1,34 +1,34 @@
-{% for label, messages in app.flashes %}
-    {% for message in messages %}
-        <div>{{ message }}</div>
-    {% endfor %}
-{% endfor %}
+{% extends batch_entity_import_template('layout') %}
 
-{{ form_start(form) }}
-<table>
-    <tr>
-        <th>Entity</th>
-        {% for name, exists in header_info %}
-            <th>
-                {% if not exists %}
-                    <div>{{ 'matrix.header.name.unknown'|trans({}, 'BatchEntityImportBundle') }}</div>
-                {% endif %}
+{% block batch_entity_import_content %}
+    <div class="table-responsive">
+        {{ form_start(form) }}
+        <table class="table">
+            <tr>
+                <th>{{ 'matrix.header.label.override'|trans({}, 'BatchEntityImportBundle') }}</th>
+                {% for name, exists in header_info %}
+                    <th>
+                        {% if not exists %}
+                            <div>{{ 'matrix.header.label.unknown'|trans({}, 'BatchEntityImportBundle') }}</div>
+                        {% endif %}
 
-                {{ name }}
-            </th>
-        {% endfor %}
-    </tr>
+                        {{ name }}
+                    </th>
+                {% endfor %}
+            </tr>
 
-    {% for record in form.records %}
-        <tr>
-            {% for elem in record.children %}
-                <td>
-                    {{ form_errors(elem) }}
-                    {{ form_widget(elem) }}
-                </td>
+            {% for record in form.records %}
+                <tr>
+                    {% for elem in record.children %}
+                        <td>
+                            {{ form_errors(elem) }}
+                            {{ form_widget(elem) }}
+                        </td>
+                    {% endfor %}
+                </tr>
             {% endfor %}
-        </tr>
-    {% endfor %}
-</table>
-<button type="submit" id="btn-submit">{{ 'form.button.import'|trans({}, 'BatchEntityImportBundle') }}</button>
-{{ form_end(form) }}
+        </table>
+        <button type="submit" id="btn-submit" class="btn btn-default">{{ 'form.button.import'|trans({}, 'BatchEntityImportBundle') }}</button>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

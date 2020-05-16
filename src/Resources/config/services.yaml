@@ -1,0 +1,4 @@
+services:
+    JG\BatchEntityImportBundle\Twig\TemplateExtension:
+        arguments: ['%batch_entity_import.templates%']
+        tags: [twig.extension]
