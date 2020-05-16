@@ -20,6 +20,10 @@ Importing entities with preview and edit features for Symfony.
 * [Translations](#translations)
 * [Fields definitions](#fields-definitions)
 * [Overriding templates](#overriding-templates)
+    * [Global templates](#global-templates)
+    * [Controller-specific templates](#controller-specific-templates)
+    * [Main layout](#main-layout)
+    * [Additional data](#additional-data)
 
 ## Installation
 
@@ -159,11 +163,28 @@ public function getFieldsDefinitions(): array
 
 ## Overriding templates
 
-You can override default templates globally by adding them to directory:
+#### Global templates
+
+You have two ways to override templates globally:
+
+- **Configuration** - just change paths to templates in your configuration file. 
+Values in this example are default ones and will be used if nothing will be change.
+
+```yaml
+batch_entity_import:
+    templates:
+        select_file: '@BatchEntityImport/select_file.html.twig'
+        edit_matrix: '@BatchEntityImport/edit_matrix.html.twig'
+        layout: '@BatchEntityImport/layout.html.twig'
+```
+
+- **Bundle directory** - put your templates in this directory:
 
 ```
 templates/bundles/BatchEntityImportBundle
 ```
+
+#### Controller-specific templates
 
 If you have controller-specific templates, you can override them in controller:
 
@@ -179,7 +200,24 @@ private function getMatrixEditTemplateName(): string
 }
 ```
 
-If you want add some specific data to the rendered view, just override these methods in controller:
+#### Main layout
+
+Block name used in templates is `batch_entity_import_content`, so probably there will be need to override it a bit.
+You can create a new file with content similar to the given example. Then just use it instead of original layout file.
+
+```twig
+{% extends path/to/your/layout.html.twig %}
+
+{% block your_real_block_name %}
+    {% block batch_entity_import_content %}{% endblock %}
+{% endblock %}
+```
+
+Then you just have to override it in bundle directory, or change a path to layout in your configuration.
+
+#### Additional data
+
+If you want add some specific data to the rendered view, just override these methods in your controller:
 
 ```php
 private function prepareSelectFileView(FormInterface $form): Response

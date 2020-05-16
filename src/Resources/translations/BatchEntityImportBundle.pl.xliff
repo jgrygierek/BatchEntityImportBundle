@@ -10,8 +10,12 @@
                 <source>form.button.import</source>
                 <target>Importuj</target>
             </trans-unit>
-            <trans-unit id="matrix.header.name.unknown">
-                <source>matrix.header.name.unknown</source>
+            <trans-unit id="matrix.header.label.override">
+                <source>matrix.header.label.override</source>
+                <target>Nadpisz rekord</target>
+            </trans-unit>
+            <trans-unit id="matrix.header.label.unknown">
+                <source>matrix.header.label.unknown</source>
                 <target>Nieznane pole</target>
             </trans-unit>
             <trans-unit id="success.import">

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>BatchEntityImportBundle</title>
+</head>
+<body>
+<div>
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div>{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+</div>
+<div>
+    {% block batch_entity_import_content %}{% endblock %}
+</div>
+</body>
+</html>
