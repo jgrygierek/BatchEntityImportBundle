@@ -1,0 +1,45 @@
+name: Tests
+
+on: [ push, pull_request ]
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+        name: Tests
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php-versions: [ '7.4' ]
+                vendors-version: [ '--prefer-lowest', '' ]
+
+        steps:
+            -   name: Prepare github actions
+                uses: actions/checkout@v2
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php-versions }}
+                    tools: pecl,composer:v2
+                    coverage: pcov
+
+            -   name: Get composer cache directory
+                id: composer-cache
+                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            -   name: Cache composer dependencies
+                uses: actions/cache@v2
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: ${{ runner.os }}-composer-
+
+            -   name: Run composer
+                run: COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-versions }} --optimize-autoloader
+
+            -   name: Run tests
+                run: composer tests-cov
+
+            -   name: Upload coverage report
+                run: bash <(curl -s https://codecov.io/bash)
