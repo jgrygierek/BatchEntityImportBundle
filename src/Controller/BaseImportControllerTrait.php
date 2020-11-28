@@ -23,9 +23,9 @@ use UnexpectedValueException;
 trait BaseImportControllerTrait
 {
     private ?ImportConfigurationInterface $importConfiguration = null;
-    private ?TranslatorInterface          $translator          = null;
-    private ?EntityManagerInterface       $em                  = null;
-    private ?ValidatorInterface           $validator           = null;
+    private ?TranslatorInterface          $translator = null;
+    private ?EntityManagerInterface       $em = null;
+    private ?ValidatorInterface           $validator = null;
 
     public function setTranslator(TranslatorInterface $translator): void
     {
@@ -43,9 +43,6 @@ trait BaseImportControllerTrait
     }
 
     /**
-     * @param Request $request
-     *
-     * @return Response
      * @throws Exception
      * @throws InvalidArgumentException
      * @throws ReaderException
@@ -64,7 +61,7 @@ trait BaseImportControllerTrait
             $matrix = MatrixFactory::createFromUploadedFile($fileImport->getFile());
 
             $errors = $this->validator->validate($matrix);
-            if ($errors->count() === 0) {
+            if (0 === $errors->count()) {
                 return $this->prepareMatrixEditView($matrix);
             }
         } else {
@@ -92,16 +89,13 @@ trait BaseImportControllerTrait
             $this->getMatrixEditTemplateName(),
             [
                 'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration()->getEntityClassName()),
-                'data'        => $matrix->getRecords(),
-                'form'        => $this->createMatrixForm($matrix)->createView(),
+                'data' => $matrix->getRecords(),
+                'form' => $this->createMatrixForm($matrix)->createView(),
             ]
         );
     }
 
     /**
-     * @param Request $request
-     *
-     * @return Response
      * @throws LogicException
      */
     private function doImportSave(Request $request): Response
@@ -116,7 +110,7 @@ trait BaseImportControllerTrait
         }
 
         $matrix = MatrixFactory::createFromPostData($request->get('matrix')['records']);
-        $form   = $this->createMatrixForm($matrix);
+        $form = $this->createMatrixForm($matrix);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

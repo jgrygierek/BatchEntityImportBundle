@@ -24,8 +24,8 @@ class MatrixTypeTest extends TypeTestCase
     public function testValidForm(): void
     {
         $formData = [];
-        $matrix   = new Matrix();
-        $form     = $this->factory->create(MatrixType::class, $matrix, ['configuration' => $this->baseConfig]);
+        $matrix = new Matrix();
+        $form = $this->factory->create(MatrixType::class, $matrix, ['configuration' => $this->baseConfig]);
 
         $form->submit($formData);
         $this->assertTrue($form->isSynchronized());

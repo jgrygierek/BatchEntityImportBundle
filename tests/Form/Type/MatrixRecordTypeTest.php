@@ -23,15 +23,15 @@ class MatrixRecordTypeTest extends WebTestCase
     {
         self::bootKernel();
 
-        $container     = self::$kernel->getContainer();
+        $container = self::$kernel->getContainer();
         $this->factory = $container->get('form.factory');
     }
 
     public function testValidFormWithBaseConfig(): void
     {
-        $data          = $this->getRecordData();
+        $data = $this->getRecordData();
         $configuration = new BaseConfiguration($this->createMock(EntityManagerInterface::class));
-        $matrixRecord  = new MatrixRecord($data);
+        $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
         $form->submit($data);
@@ -46,9 +46,9 @@ class MatrixRecordTypeTest extends WebTestCase
 
     public function testValidFormWithFieldsConfig(): void
     {
-        $data          = $this->getRecordData();
+        $data = $this->getRecordData();
         $configuration = new FieldsTypeConfiguration($this->createMock(EntityManagerInterface::class));
-        $matrixRecord  = new MatrixRecord($data);
+        $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
         $form->submit($data);
@@ -72,8 +72,8 @@ class MatrixRecordTypeTest extends WebTestCase
     private function getRecordData(): array
     {
         return [
-            'age'         => 12,
-            'name'        => 'John Doe',
+            'age' => 12,
+            'name' => 'John Doe',
             'description' => 'Lorem Ipsum',
         ];
     }

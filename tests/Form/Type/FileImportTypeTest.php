@@ -10,9 +10,9 @@ class FileImportTypeTest extends TypeTestCase
 {
     public function testForm(): void
     {
-        $formData   = [];
+        $formData = [];
         $fileImport = new FileImport();
-        $form       = $this->factory->create(FileImportType::class, $fileImport);
+        $form = $this->factory->create(FileImportType::class, $fileImport);
 
         $form->submit($formData);
         $this->assertTrue($form->isSynchronized());

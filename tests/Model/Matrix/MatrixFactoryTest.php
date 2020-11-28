@@ -17,15 +17,13 @@ class MatrixFactoryTest extends TestCase
     /**
      * @dataProvider dataProvider
      *
-     * @param string $fileExtension
-     *
      * @throws SpreadsheetException
      * @throws Exception
      */
     public function testCreateFromUploadedFileSuccess(string $fileExtension): void
     {
         foreach ($this->contentProvider() as $data) {
-            $file   = $this->createFile($fileExtension, $data[0]);
+            $file = $this->createFile($fileExtension, $data[0]);
             $matrix = MatrixFactory::createFromUploadedFile($file);
 
             $this->assertEquals($data[1], !empty($matrix->getHeader()));
@@ -63,16 +61,12 @@ class MatrixFactoryTest extends TestCase
     {
         $this->expectExceptionMessage('Reader for extension Txt is not supported by PhpOffice.');
 
-        $file   = new UploadedFile(__DIR__ . '/../../Fixtures/Resources/test.txt', 'test.txt');
+        $file = new UploadedFile(__DIR__ . '/../../Fixtures/Resources/test.txt', 'test.txt');
         MatrixFactory::createFromUploadedFile($file);
     }
 
     /**
      * @dataProvider postContentProvider
-     *
-     * @param array $data
-     * @param bool  $isHeader
-     * @param int   $recordsNumber
      */
     public function testCreateFromPostDataSuccess(array $data, bool $isHeader, int $recordsNumber): void
     {
@@ -90,17 +84,13 @@ class MatrixFactoryTest extends TestCase
     }
 
     /**
-     * @param string $fileExtension
-     * @param array  $data
-     *
-     * @return UploadedFile
      * @throws SpreadsheetException
      * @throws WriterException
      */
     private function createFile(string $fileExtension, array $data = []): UploadedFile
     {
         $fileExtension = strtolower($fileExtension);
-        $filename      = 'file.' . $fileExtension;
+        $filename = 'file.' . $fileExtension;
 
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getActiveSheet()->fromArray($data);

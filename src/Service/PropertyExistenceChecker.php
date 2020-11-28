@@ -13,20 +13,18 @@ class PropertyExistenceChecker
     private ?ReflectionClass $translationReflectionClass;
 
     /**
-     * @param object $entity
-     *
      * @throws ReflectionException
      */
     public function __construct(object $entity)
     {
-        $this->reflectionClass            = new ReflectionClass($entity);
+        $this->reflectionClass = new ReflectionClass($entity);
         $this->translationReflectionClass = $entity instanceof TranslatableInterface ? new ReflectionClass($entity->translate()) : null;
     }
 
     public function propertyExists(string $name): bool
     {
         $locale = ColumnNameHelper::getLocale($name);
-        $name   = ColumnNameHelper::underscoreToCamelCase($name);
+        $name = ColumnNameHelper::underscoreToCamelCase($name);
 
         return $locale
             ? $this->translationPropertyExists($name)

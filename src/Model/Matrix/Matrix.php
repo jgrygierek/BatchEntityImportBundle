@@ -53,8 +53,8 @@ class Matrix
 
     public function getHeaderInfo(string $className): array
     {
-        $info    = [];
-        $checker = new PropertyExistenceChecker(new $className);
+        $info = [];
+        $checker = new PropertyExistenceChecker(new $className());
 
         foreach ($this->header as $name) {
             $info[$name] = $checker->propertyExists($name);
@@ -66,12 +66,12 @@ class Matrix
     private function clearHeader(array $header): array
     {
         return array_values(
-            array_filter($header, fn($e) => !empty(trim($e)))
+            array_filter($header, fn ($e) => !empty(trim($e)))
         );
     }
 
     private function clearRecordData(array $data): array
     {
-        return array_filter($data, fn($key) => !empty(trim($key)), ARRAY_FILTER_USE_KEY);
+        return array_filter($data, fn ($key) => !empty(trim($key)), ARRAY_FILTER_USE_KEY);
     }
 }

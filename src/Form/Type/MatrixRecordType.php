@@ -24,7 +24,7 @@ class MatrixRecordType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         /** @var ImportConfigurationInterface $configuration */
-        $configuration    = $options['configuration'];
+        $configuration = $options['configuration'];
         $fieldDefinitions = $configuration->getFieldsDefinitions();
 
         $this->addEntityField($builder, $configuration->getEntityClassName());
@@ -44,8 +44,6 @@ class MatrixRecordType extends AbstractType
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @throws AccessException
      * @throws UndefinedOptionsException
      */
@@ -66,19 +64,17 @@ class MatrixRecordType extends AbstractType
                 'entity',
                 EntityType::class,
                 [
-                    'class'              => $entityClassName,
-                    'label'              => false,
-                    'placeholder'        => '---',
+                    'class' => $entityClassName,
+                    'label' => false,
+                    'placeholder' => '---',
                     'translation_domain' => false,
-                    'required'           => false,
+                    'required' => false,
                 ]
             );
     }
 
     /**
      * @param array|FormFieldDefinition[] $fieldDefinitions
-     * @param string                      $columnName
-     * @param FormEvent                   $event
      *
      * @throws AlreadySubmittedException
      * @throws LogicException

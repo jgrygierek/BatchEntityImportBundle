@@ -26,11 +26,6 @@ trait ImportControllerTrait
         return $this->getParameter('batch_entity_import.templates.edit_matrix');
     }
 
-    /**
-     * @param Matrix $matrix
-     *
-     * @return FormInterface
-     */
     private function createMatrixForm(Matrix $matrix): FormInterface
     {
         return $this->createForm(
@@ -38,7 +33,7 @@ trait ImportControllerTrait
             $matrix,
             [
                 'configuration' => $this->getImportConfiguration(),
-                'action'        => $this->getMatrixSaveActionUrl(),
+                'action' => $this->getMatrixSaveActionUrl(),
             ]
         );
     }

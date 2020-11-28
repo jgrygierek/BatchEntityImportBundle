@@ -10,9 +10,6 @@ class ColumnNameHelperTest extends TestCase
 {
     /**
      * @dataProvider pascalCaseDataProvider
-     *
-     * @param string $underscoreString
-     * @param string $expected
      */
     public function testToPascalCaseSuccess(string $underscoreString, string $expected): void
     {
@@ -30,9 +27,6 @@ class ColumnNameHelperTest extends TestCase
 
     /**
      * @dataProvider camelCaseDataProvider
-     *
-     * @param string $underscoreString
-     * @param string $expected
      */
     public function testToCamelCaseSuccess(string $underscoreString, string $expected): void
     {

@@ -21,14 +21,12 @@ class PropertyExistenceCheckerTest extends TestCase
     {
         parent::setUp();
 
-        $this->checkerEntity                 = new PropertyExistenceChecker(new TestEntity());
+        $this->checkerEntity = new PropertyExistenceChecker(new TestEntity());
         $this->checkerEntityWithTranslations = new PropertyExistenceChecker(new TranslatableEntity());
     }
 
     /**
      * @dataProvider dataProviderEntityWithoutTranslations
-     *
-     * @param string $property
      */
     public function testEntityWithoutTranslationsHasProperty(string $property): void
     {
@@ -43,8 +41,6 @@ class PropertyExistenceCheckerTest extends TestCase
 
     /**
      * @dataProvider dataProviderEntityWithTranslations
-     *
-     * @param string $property
      */
     public function testEntityWithTranslationsHasProperty(string $property): void
     {
@@ -61,8 +57,6 @@ class PropertyExistenceCheckerTest extends TestCase
 
     /**
      * @dataProvider dataProviderEntityWithoutTranslationsWrongProperty
-     *
-     * @param string $property
      */
     public function testEntityWithoutTranslationsWithoutProperty(string $property): void
     {
@@ -79,8 +73,6 @@ class PropertyExistenceCheckerTest extends TestCase
 
     /**
      * @dataProvider dataProviderEntityWithTranslationsWrongProperty
-     *
-     * @param string $property
      */
     public function testEntityWithTranslationsWithoutProperty(string $property): void
     {

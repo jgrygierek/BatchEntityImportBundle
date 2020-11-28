@@ -13,9 +13,6 @@ class MatrixTest extends AbstractValidationTestCase
 {
     /**
      * @dataProvider getValidDataProvider
-     *
-     * @param array $header
-     * @param array $recordsData
      */
     public function testValidMatrix(array $header, array $recordsData): void
     {
@@ -32,9 +29,6 @@ class MatrixTest extends AbstractValidationTestCase
 
     /**
      * @dataProvider getInvalidDataProvider
-     *
-     * @param array $header
-     * @param array $recordsData
      */
     public function testInvalidMatrix(array $header, array $recordsData): void
     {
@@ -53,7 +47,7 @@ class MatrixTest extends AbstractValidationTestCase
 
     public function testRemoveColumnsWithEmptyHeader(): void
     {
-        $header      = ['column_name', '', 'column_name2', null, ' '];
+        $header = ['column_name', '', 'column_name2', null, ' '];
         $recordsData = [
             ['column_name' => '', '' => '', 'column_name2' => '', ' ' => ''],
         ];
@@ -71,8 +65,8 @@ class MatrixTest extends AbstractValidationTestCase
     {
         $expected = [
             'unknown_column_name' => false,
-            'test_property'       => true,
-            'test_property:en'    => false,
+            'test_property' => true,
+            'test_property:en' => false,
         ];
 
         $matrix = new Matrix(array_keys($expected));
@@ -83,10 +77,10 @@ class MatrixTest extends AbstractValidationTestCase
     public function testHeaderInfoForTranslatableEntity(): void
     {
         $expected = [
-            'unknown_column_name'          => false,
-            'test_property'                => true,
-            'test_property:en'             => false,
-            'test_translation_property'    => false,
+            'unknown_column_name' => false,
+            'test_property' => true,
+            'test_property:en' => false,
+            'test_translation_property' => false,
             'test_translation_property:en' => true,
         ];
 
