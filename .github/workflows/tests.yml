@@ -1,6 +1,6 @@
 name: Tests
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
     tests:
@@ -10,8 +10,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-versions: [ '7.4', '8.0' ]
-                vendors-version: ['--prefer-lowest', '']
+                php-versions: [ '7.4' ]
+                vendors-version: [ '--prefer-lowest', '' ]
 
         steps:
             -   name: Prepare github actions
@@ -42,4 +42,4 @@ jobs:
                 run: composer tests-cov
 
             -   name: Upload coverage report
-                run:  bash <(curl -s https://codecov.io/bash)
+                run: bash <(curl -s https://codecov.io/bash)
