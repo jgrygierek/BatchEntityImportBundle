@@ -9,8 +9,6 @@ interface ImportConfigurationInterface
 {
     /**
      * Class of entity used during import process.
-     *
-     * @return string
      */
     public function getEntityClassName(): string;
 
@@ -24,8 +22,6 @@ interface ImportConfigurationInterface
 
     /**
      * Import data from matrix to database.
-     *
-     * @param Matrix $matrix
      */
     public function import(Matrix $matrix): void;
 }

@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraint;
  */
 class FileExtension extends Constraint
 {
-    public string  $message    = 'validation.file.extension';
+    public string  $message = 'validation.file.extension';
     public array   $extensions = [];
 
     public function getDefaultOption(): string

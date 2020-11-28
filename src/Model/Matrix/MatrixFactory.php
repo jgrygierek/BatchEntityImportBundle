@@ -11,19 +11,16 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class MatrixFactory
 {
     /**
-     * @param UploadedFile $file
-     *
-     * @return Matrix
      * @throws Exception
      * @throws InvalidArgumentException
      * @throws ReaderException
      */
     public static function createFromUploadedFile(UploadedFile $file): Matrix
     {
-        $reader      = self::getReader($file);
+        $reader = self::getReader($file);
         $spreadsheet = $reader->load($file->getPathname());
 
-        $data   = $spreadsheet->getActiveSheet()->toArray();
+        $data = $spreadsheet->getActiveSheet()->toArray();
         $header = array_shift($data);
         self::addKeysToRows($header, $data);
 
@@ -47,7 +44,7 @@ class MatrixFactory
 
     private static function getReader(UploadedFile $file): BaseReader
     {
-        $extension   = ucfirst(strtolower($file->getClientOriginalExtension()));
+        $extension = ucfirst(strtolower($file->getClientOriginalExtension()));
         $readerClass = 'PhpOffice\PhpSpreadsheet\Reader\\' . $extension;
         if (!class_exists($readerClass)) {
             throw new InvalidArgumentException("Reader for extension $extension is not supported by PhpOffice.");

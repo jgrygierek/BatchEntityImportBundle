@@ -9,7 +9,7 @@ class FormFieldDefinition
 
     public function __construct(string $class, array $options = [])
     {
-        $this->class   = $class;
+        $this->class = $class;
         $this->options = $options;
     }
 

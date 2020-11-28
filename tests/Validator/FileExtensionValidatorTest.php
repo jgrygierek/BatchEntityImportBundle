@@ -17,8 +17,6 @@ class FileExtensionValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param string $fileExtension
      */
     public function testSuccess(string $fileExtension): void
     {
@@ -31,8 +29,6 @@ class FileExtensionValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param string $fileExtension
      */
     public function testFailure(string $fileExtension): void
     {

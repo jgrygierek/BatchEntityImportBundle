@@ -35,10 +35,10 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     protected function prepareRecord(MatrixRecord $record): void
     {
         $entity = $this->getEntity($record);
-        $data   = $record->getData();
+        $data = $record->getData();
 
         foreach ($data as $name => $value) {
-            $locale    = ColumnNameHelper::getLocale($name);
+            $locale = ColumnNameHelper::getLocale($name);
             $fieldName = ColumnNameHelper::underscoreToPascalCase($name);
 
             try {
@@ -71,15 +71,11 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     /**
      * Creates new entity object. Uses default constructor without any arguments.
      * To use constructor with arguments, please override this method.
-     *
-     * @param MatrixRecord $record
-     *
-     * @return object
      */
     protected function getNewEntity(MatrixRecord $record): object
     {
         $class = $this->getEntityClassName();
 
-        return new $class;
+        return new $class();
     }
 }

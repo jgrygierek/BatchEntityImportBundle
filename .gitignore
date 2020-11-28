@@ -1,6 +1,6 @@
 /.idea
 /var
 /vendor
-.phpcs-cache
+.php_cs.cache
 .phpunit.result.cache
 composer.lock

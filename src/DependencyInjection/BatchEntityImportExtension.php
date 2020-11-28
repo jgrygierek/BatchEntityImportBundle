@@ -13,9 +13,6 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 class BatchEntityImportExtension extends Extension
 {
     /**
-     * @param array            $configs
-     * @param ContainerBuilder $container
-     *
      * @throws Exception
      */
     public function load(array $configs, ContainerBuilder $container): void
@@ -36,9 +33,9 @@ class BatchEntityImportExtension extends Extension
 
     private function setParameters(array $configs, ContainerBuilder $container): void
     {
-        $processor     = new Processor();
+        $processor = new Processor();
         $configuration = new Configuration();
-        $config        = $processor->processConfiguration($configuration, $configs);
+        $config = $processor->processConfiguration($configuration, $configs);
 
         $templates = $config['templates'];
         $container->setParameter('batch_entity_import.templates', $templates);

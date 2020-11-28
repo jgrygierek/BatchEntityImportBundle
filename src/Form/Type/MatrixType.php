@@ -20,19 +20,17 @@ class MatrixType extends AbstractType
                 'records',
                 CollectionType::class,
                 [
-                    'entry_type'    => MatrixRecordType::class,
+                    'entry_type' => MatrixRecordType::class,
                     'entry_options' => [
                         'configuration' => $options['configuration'],
-                        'label'         => false,
+                        'label' => false,
                     ],
-                    'label'         => false,
+                    'label' => false,
                 ]
             );
     }
 
     /**
-     * @param OptionsResolver $resolver
-     *
      * @throws AccessException
      * @throws UndefinedOptionsException
      */

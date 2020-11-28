@@ -17,7 +17,7 @@ class FileImportTest extends AbstractValidationTestCase
         parent::setUp();
 
         $this->fileImport = new FileImport();
-        $this->path       = tempnam(sys_get_temp_dir(), 'upl');
+        $this->path = tempnam(sys_get_temp_dir(), 'upl');
     }
 
     protected function tearDown(): void
@@ -33,8 +33,6 @@ class FileImportTest extends AbstractValidationTestCase
 
     /**
      * @dataProvider validExtensionsProvider
-     *
-     * @param string $extension
      */
     public function testValidFile(string $extension): void
     {
@@ -62,8 +60,6 @@ class FileImportTest extends AbstractValidationTestCase
 
     /**
      * @dataProvider invalidExtensionsProvider
-     *
-     * @param string $extension
      */
     public function testInvalidExtensionError(string $extension): void
     {

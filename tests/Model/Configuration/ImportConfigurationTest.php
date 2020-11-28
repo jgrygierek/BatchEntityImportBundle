@@ -37,11 +37,11 @@ class ImportConfigurationTest extends WebTestCase
             [
                 [
                     'unknown_column' => 'value_1',
-                    'test_property'  => 'value_2',
+                    'test_property' => 'value_2',
                 ],
                 [
                     'unknown_column' => 'value_3',
-                    'test_property'  => 'value_4',
+                    'test_property' => 'value_4',
                 ],
             ]
         );
@@ -78,14 +78,14 @@ class ImportConfigurationTest extends WebTestCase
             ],
             [
                 [
-                    'unknown_column'               => 'value_1',
-                    'test_property'                => 'value_2',
+                    'unknown_column' => 'value_1',
+                    'test_property' => 'value_2',
                     'test_translation_property:en' => 'value_3',
                     'test_translation_property:pl' => 'value_4',
                 ],
                 [
-                    'unknown_column'               => 'value_5',
-                    'test_property'                => 'value_6',
+                    'unknown_column' => 'value_5',
+                    'test_property' => 'value_6',
                     'test_translation_property:en' => 'value_7',
                     'test_translation_property:pl' => 'value_8',
                 ],
