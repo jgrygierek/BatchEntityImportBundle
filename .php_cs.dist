@@ -1,0 +1,21 @@
+<?php
+
+$finder = PhpCsFixer\Finder::create()
+    ->exclude('.github')
+    ->exclude('var')
+    ->exclude('vendor')
+    ->in(__DIR__);
+
+return PhpCsFixer\Config::create()
+    ->setFinder($finder)
+    ->setRules([
+        '@PSR1' => true,
+        '@PSR2' => true,
+        '@Symfony' => true,
+        '@Symfony:risky' => true,
+        'concat_space' => ['spacing' => 'one'],
+        'global_namespace_import' => ['import_classes' => true],
+        'native_function_invocation' => false,
+    ])
+    ->setRiskyAllowed(true)
+;
