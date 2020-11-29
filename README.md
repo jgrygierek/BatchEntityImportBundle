@@ -1,7 +1,8 @@
 # BatchEntityImportBundle
 
-[![Build Status](https://img.shields.io/travis/com/jgrygierek/BatchEntityImportBundle/master?style=flat-square)](https://travis-ci.com/jgrygierek/BatchEntityImportBundle) 
-[![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master?style=flat-square)](https://codecov.io/gh/jgrygierek/BatchEntityImportBundle)
+![Code Style](https://github.com/jgrygierek/BatchEntityImportBundle/workflows/Code%20Style/badge.svg)
+![Tests](https://github.com/jgrygierek/BatchEntityImportBundle/workflows/Tests/badge.svg)
+![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master)
 
 Importing entities with preview and edit features for Symfony.
 
