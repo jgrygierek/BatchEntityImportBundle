@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
+use const ARRAY_FILTER_USE_KEY;
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -66,12 +69,12 @@ class Matrix
     private function clearHeader(array $header): array
     {
         return array_values(
-            array_filter($header, fn ($e) => !empty(trim($e)))
+            array_filter($header, static fn ($e) => !empty(trim((string) $e)))
         );
     }
 
     private function clearRecordData(array $data): array
     {
-        return array_filter($data, fn ($key) => !empty(trim($key)), ARRAY_FILTER_USE_KEY);
+        return array_filter($data, static fn ($key) => !empty(trim((string) $key)), ARRAY_FILTER_USE_KEY);
     }
 }

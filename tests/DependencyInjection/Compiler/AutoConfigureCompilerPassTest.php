@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\DependencyInjection\Compiler;
 
 use JG\BatchEntityImportBundle\DependencyInjection\Compiler\AutoConfigureCompilerPass;

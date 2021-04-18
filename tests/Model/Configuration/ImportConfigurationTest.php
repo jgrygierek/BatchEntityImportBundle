@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Model\Configuration;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,7 +17,7 @@ class ImportConfigurationTest extends WebTestCase
 {
     protected ?EntityManagerInterface $entityManager;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         self::bootKernel();
 
@@ -27,7 +29,7 @@ class ImportConfigurationTest extends WebTestCase
     public function testItemImportedSuccessfully(): void
     {
         $repository = $this->entityManager->getRepository(TestEntity::class);
-        $this->assertEmpty($repository->find(1));
+        self::assertEmpty($repository->find(1));
 
         $matrix = new Matrix(
             [
@@ -49,25 +51,25 @@ class ImportConfigurationTest extends WebTestCase
         $config = new BaseConfiguration($this->entityManager);
         $config->import($matrix);
 
-        $this->assertCount(2, $repository->findAll());
+        self::assertCount(2, $repository->findAll());
 
         /** @var TestEntity|null $item */
         $item = $repository->find(1);
 
-        $this->assertNotEmpty($item);
-        $this->assertSame('value_2', $item->getTestProperty());
+        self::assertNotEmpty($item);
+        self::assertSame('value_2', $item->getTestProperty());
 
         /** @var TestEntity|null $item */
         $item = $repository->find(2);
 
-        $this->assertNotEmpty($item);
-        $this->assertSame('value_4', $item->getTestProperty());
+        self::assertNotEmpty($item);
+        self::assertSame('value_4', $item->getTestProperty());
     }
 
     public function testTranslatableItemImportedSuccessfully(): void
     {
         $repository = $this->entityManager->getRepository(TranslatableEntity::class);
-        $this->assertEmpty($repository->find(1));
+        self::assertEmpty($repository->find(1));
 
         $matrix = new Matrix(
             [
@@ -95,22 +97,22 @@ class ImportConfigurationTest extends WebTestCase
         $config = new TranslatableEntityBaseConfiguration($this->entityManager);
         $config->import($matrix);
 
-        $this->assertCount(2, $repository->findAll());
+        self::assertCount(2, $repository->findAll());
 
         /** @var TranslatableEntity|null $item */
         $item = $repository->find(1);
 
-        $this->assertNotEmpty($item);
-        $this->assertSame('value_2', $item->getTestProperty());
-        $this->assertSame('value_3', $item->translate('en')->getTestTranslationProperty());
-        $this->assertSame('value_4', $item->translate('pl')->getTestTranslationProperty());
+        self::assertNotEmpty($item);
+        self::assertSame('value_2', $item->getTestProperty());
+        self::assertSame('value_3', $item->translate('en')->getTestTranslationProperty());
+        self::assertSame('value_4', $item->translate('pl')->getTestTranslationProperty());
 
         /** @var TranslatableEntity|null $item */
         $item = $repository->find(2);
 
-        $this->assertNotEmpty($item);
-        $this->assertSame('value_6', $item->getTestProperty());
-        $this->assertSame('value_7', $item->translate('en')->getTestTranslationProperty());
-        $this->assertSame('value_8', $item->translate('pl')->getTestTranslationProperty());
+        self::assertNotEmpty($item);
+        self::assertSame('value_6', $item->getTestProperty());
+        self::assertSame('value_7', $item->translate('en')->getTestTranslationProperty());
+        self::assertSame('value_8', $item->translate('pl')->getTestTranslationProperty());
     }
 }

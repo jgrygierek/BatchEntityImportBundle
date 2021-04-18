@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Bundle;
 
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
@@ -19,7 +21,7 @@ class BatchEntityImportBundleTest extends TestCase
 
     public function testBundle(): void
     {
-        $this->assertInstanceOf(Bundle::class, $this->bundle);
+        self::assertInstanceOf(Bundle::class, $this->bundle);
     }
 
     public function testBundleBuild(): void
@@ -27,7 +29,7 @@ class BatchEntityImportBundleTest extends TestCase
         $containerBuilder = $this->createMock(ContainerBuilder::class);
 
         $containerBuilder
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('addCompilerPass')
             ->with(new AutoConfigureCompilerPass());
 

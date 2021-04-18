@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Form\Type;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,12 +38,12 @@ class MatrixRecordTypeTest extends WebTestCase
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
         $form->submit($data);
 
-        $this->assertTrue($form->isSynchronized());
+        self::assertTrue($form->isSynchronized());
 
-        $this->assertSame(TestEntity::class, $form->get('entity')->getConfig()->getOption('class'));
-        $this->assertInstanceOf(TextType::class, $form->get('age')->getConfig()->getType()->getInnerType());
-        $this->assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
-        $this->assertInstanceOf(TextType::class, $form->get('description')->getConfig()->getType()->getInnerType());
+        self::assertSame(TestEntity::class, $form->get('entity')->getConfig()->getOption('class'));
+        self::assertInstanceOf(TextType::class, $form->get('age')->getConfig()->getType()->getInnerType());
+        self::assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
+        self::assertInstanceOf(TextType::class, $form->get('description')->getConfig()->getType()->getInnerType());
     }
 
     public function testValidFormWithFieldsConfig(): void
@@ -53,12 +55,12 @@ class MatrixRecordTypeTest extends WebTestCase
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
         $form->submit($data);
 
-        $this->assertTrue($form->isSynchronized());
+        self::assertTrue($form->isSynchronized());
 
-        $this->assertSame(TestEntity::class, $form->get('entity')->getConfig()->getOption('class'));
-        $this->assertInstanceOf(IntegerType::class, $form->get('age')->getConfig()->getType()->getInnerType());
-        $this->assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
-        $this->assertInstanceOf(TextareaType::class, $form->get('description')->getConfig()->getType()->getInnerType());
+        self::assertSame(TestEntity::class, $form->get('entity')->getConfig()->getOption('class'));
+        self::assertInstanceOf(IntegerType::class, $form->get('age')->getConfig()->getType()->getInnerType());
+        self::assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
+        self::assertInstanceOf(TextareaType::class, $form->get('description')->getConfig()->getType()->getInnerType());
     }
 
     public function testInvalidFormWithoutConfiguration(): void

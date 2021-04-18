@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Service;
 
 use Generator;
@@ -30,7 +32,7 @@ class PropertyExistenceCheckerTest extends TestCase
      */
     public function testEntityWithoutTranslationsHasProperty(string $property): void
     {
-        $this->assertTrue($this->checkerEntity->propertyExists($property));
+        self::assertTrue($this->checkerEntity->propertyExists($property));
     }
 
     public function dataProviderEntityWithoutTranslations(): Generator
@@ -44,7 +46,7 @@ class PropertyExistenceCheckerTest extends TestCase
      */
     public function testEntityWithTranslationsHasProperty(string $property): void
     {
-        $this->assertTrue($this->checkerEntityWithTranslations->propertyExists($property));
+        self::assertTrue($this->checkerEntityWithTranslations->propertyExists($property));
     }
 
     public function dataProviderEntityWithTranslations(): Generator
@@ -60,7 +62,7 @@ class PropertyExistenceCheckerTest extends TestCase
      */
     public function testEntityWithoutTranslationsWithoutProperty(string $property): void
     {
-        $this->assertFalse($this->checkerEntity->propertyExists($property));
+        self::assertFalse($this->checkerEntity->propertyExists($property));
     }
 
     public function dataProviderEntityWithoutTranslationsWrongProperty(): Generator
@@ -76,7 +78,7 @@ class PropertyExistenceCheckerTest extends TestCase
      */
     public function testEntityWithTranslationsWithoutProperty(string $property): void
     {
-        $this->assertFalse($this->checkerEntityWithTranslations->propertyExists($property));
+        self::assertFalse($this->checkerEntityWithTranslations->propertyExists($property));
     }
 
     public function dataProviderEntityWithTranslationsWrongProperty(): Generator

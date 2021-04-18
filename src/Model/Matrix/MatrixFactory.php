@@ -1,19 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
 use InvalidArgumentException;
-use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
-use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MatrixFactory
 {
     /**
-     * @throws Exception
      * @throws InvalidArgumentException
-     * @throws ReaderException
      */
     public static function createFromUploadedFile(UploadedFile $file): Matrix
     {
@@ -36,7 +34,7 @@ class MatrixFactory
     {
         array_walk(
             $data,
-            static function (array &$row) use ($header) {
+            static function (array &$row) use ($header): void {
                 $row = array_combine($header, $row);
             }
         );

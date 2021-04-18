@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
@@ -14,7 +16,6 @@ class Configuration implements ConfigurationInterface
 
         $nodeBuilder = $treeBuilder->getRootNode()->children();
         $this->addTemplatesConfig($nodeBuilder);
-        $nodeBuilder->end();
 
         return $treeBuilder;
     }
@@ -26,8 +27,6 @@ class Configuration implements ConfigurationInterface
         $this->addNodeConfig($builder, 'select_file', '@BatchEntityImport/select_file.html.twig');
         $this->addNodeConfig($builder, 'edit_matrix', '@BatchEntityImport/edit_matrix.html.twig');
         $this->addNodeConfig($builder, 'layout', '@BatchEntityImport/layout.html.twig');
-
-        $parentBuilder->end()->end();
     }
 
     private function addNodeConfig(NodeBuilder $builder, string $name, string $value): void

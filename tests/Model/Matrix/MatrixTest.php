@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Model\Matrix;
 
 use Generator;
@@ -17,7 +19,7 @@ class MatrixTest extends AbstractValidationTestCase
     public function testValidMatrix(array $header, array $recordsData): void
     {
         $matrix = new Matrix($header, $recordsData);
-        $this->assertEmpty($this->getErrors($matrix));
+        self::assertEmpty($this->getErrors($matrix));
     }
 
     public function getValidDataProvider(): Generator
@@ -33,7 +35,7 @@ class MatrixTest extends AbstractValidationTestCase
     public function testInvalidMatrix(array $header, array $recordsData): void
     {
         $matrix = new Matrix($header, $recordsData);
-        $this->assertNotEmpty($this->getErrors($matrix));
+        self::assertNotEmpty($this->getErrors($matrix));
     }
 
     public function getInvalidDataProvider(): Generator
@@ -55,10 +57,10 @@ class MatrixTest extends AbstractValidationTestCase
         $matrix = new Matrix($header, $recordsData);
 
         $expectedHeader = ['column_name', 'column_name2'];
-        $this->assertSame($expectedHeader, $matrix->getHeader());
+        self::assertSame($expectedHeader, $matrix->getHeader());
 
         $expectedRecords = [new MatrixRecord(['column_name' => '', 'column_name2' => ''])];
-        $this->assertEquals($expectedRecords, $matrix->getRecords());
+        self::assertEquals($expectedRecords, $matrix->getRecords());
     }
 
     public function testHeaderInfoForNonTranslatableEntity(): void
@@ -71,7 +73,7 @@ class MatrixTest extends AbstractValidationTestCase
 
         $matrix = new Matrix(array_keys($expected));
 
-        $this->assertSame($expected, $matrix->getHeaderInfo(TestEntity::class));
+        self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class));
     }
 
     public function testHeaderInfoForTranslatableEntity(): void
@@ -86,6 +88,6 @@ class MatrixTest extends AbstractValidationTestCase
 
         $matrix = new Matrix(array_keys($expected));
 
-        $this->assertSame($expected, $matrix->getHeaderInfo(TranslatableEntity::class));
+        self::assertSame($expected, $matrix->getHeaderInfo(TranslatableEntity::class));
     }
 }
