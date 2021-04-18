@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+use Symfony\Component\Routing\RouteCollectionBuilder;
 
 class TestKernel extends Kernel
 {
@@ -67,7 +68,10 @@ class TestKernel extends Kernel
         $this->configs = $configs;
     }
 
-    protected function configureRoutes(RoutingConfigurator $routes): void
+    /**
+     * @param RoutingConfigurator|RouteCollectionBuilder $routes
+     */
+    protected function configureRoutes($routes): void
     {
         $routes->import(__DIR__ . '/config/routes.yaml');
     }
