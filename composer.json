@@ -34,12 +34,10 @@
         "symfony/translation": "^4.4|^5.0",
         "symfony/twig-bundle": "^4.4|^5.0",
         "symfony/validator": "^4.4|^5.0",
-        "twig/extensions": "^1.0",
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
         "doctrine/doctrine-bundle": "^2.0",
-        "escapestudios/symfony2-coding-standard": "3.x-dev",
         "friendsofphp/php-cs-fixer": "^2.7",
         "knplabs/doctrine-behaviors": "~2.0",
         "matthiasnoback/symfony-dependency-injection-test": "^4.1.1",
