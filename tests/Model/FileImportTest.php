@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Model;
 
 use Generator;
@@ -37,7 +39,7 @@ class FileImportTest extends AbstractValidationTestCase
     public function testValidFile(string $extension): void
     {
         $this->setUploadedFile($extension);
-        $this->assertEmpty($this->getErrors($this->fileImport));
+        self::assertEmpty($this->getErrors($this->fileImport));
     }
 
     public function validExtensionsProvider(): Generator
@@ -55,7 +57,7 @@ class FileImportTest extends AbstractValidationTestCase
     public function testEmptyFileError(): void
     {
         $this->setUploadedFile('csv', false);
-        $this->assertNotEmpty($this->getErrors($this->fileImport));
+        self::assertNotEmpty($this->getErrors($this->fileImport));
     }
 
     /**
@@ -64,7 +66,7 @@ class FileImportTest extends AbstractValidationTestCase
     public function testInvalidExtensionError(string $extension): void
     {
         $this->setUploadedFile($extension);
-        $this->assertNotEmpty($this->getErrors($this->fileImport));
+        self::assertNotEmpty($this->getErrors($this->fileImport));
     }
 
     public function invalidExtensionsProvider(): Generator
@@ -79,7 +81,7 @@ class FileImportTest extends AbstractValidationTestCase
     {
         $this->fileImport->setFile($this->createUploadedFile('csv', false));
 
-        $this->assertNotEmpty($this->getErrors($this->fileImport));
+        self::assertNotEmpty($this->getErrors($this->fileImport));
     }
 
     private function setUploadedFile(string $fileExtension, bool $withContent = true): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Model\Matrix;
 
 use Generator;
@@ -26,10 +28,10 @@ class MatrixFactoryTest extends TestCase
             $file = $this->createFile($fileExtension, $data[0]);
             $matrix = MatrixFactory::createFromUploadedFile($file);
 
-            $this->assertEquals($data[1], !empty($matrix->getHeader()));
-            $this->assertCount($data[2], $matrix->getRecords());
+            self::assertEquals($data[1], !empty($matrix->getHeader()));
+            self::assertCount($data[2], $matrix->getRecords());
 
-            unlink($file);
+            unlink($file->getPathname());
         }
     }
 
@@ -47,10 +49,10 @@ class MatrixFactoryTest extends TestCase
 
     public function contentProvider(): Generator
     {
-        yield[[['header1', 'header2', 'header3'], ['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
-        yield[[['header1', 'header2', 'header3']], true, 0];
-        yield[[[null], ['abcd']], false, 0];
-        yield[[], false, 0];
+        yield [[['header1', 'header2', 'header3'], ['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
+        yield [[['header1', 'header2', 'header3']], true, 0];
+        yield [[[null], ['abcd']], false, 0];
+        yield [[], false, 0];
     }
 
     /**
@@ -71,16 +73,16 @@ class MatrixFactoryTest extends TestCase
     public function testCreateFromPostDataSuccess(array $data, bool $isHeader, int $recordsNumber): void
     {
         $matrix = MatrixFactory::createFromPostData($data);
-        $this->assertEquals($isHeader, !empty($matrix->getHeader()));
-        $this->assertCount($recordsNumber, $matrix->getRecords());
+        self::assertEquals($isHeader, !empty($matrix->getHeader()));
+        self::assertCount($recordsNumber, $matrix->getRecords());
     }
 
     public function postContentProvider(): Generator
     {
-        yield[[['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
-        yield[[['aaaa', 'bbbb', '123']], true, 1];
-        yield[[[null], ['abcd']], false, 0];
-        yield[[], false, 0];
+        yield [[['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
+        yield [[['aaaa', 'bbbb', '123']], true, 1];
+        yield [[[null], ['abcd']], false, 0];
+        yield [[], false, 0];
     }
 
     /**

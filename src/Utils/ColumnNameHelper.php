@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Utils;
 
 class ColumnNameHelper

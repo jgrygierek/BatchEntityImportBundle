@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Form\Type;
 
 use JG\BatchEntityImportBundle\Model\FileImport;

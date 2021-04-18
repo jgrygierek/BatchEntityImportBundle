@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -9,8 +11,6 @@ use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
-use PhpOffice\PhpSpreadsheet\Exception;
-use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,9 +43,7 @@ trait BaseImportControllerTrait
     }
 
     /**
-     * @throws Exception
      * @throws InvalidArgumentException
-     * @throws ReaderException
      * @throws \LogicException
      */
     private function doImport(Request $request): Response

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Form\Type;
 
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
@@ -31,7 +33,7 @@ class MatrixRecordType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-            function (FormEvent $event) use ($fieldDefinitions) {
+            function (FormEvent $event) use ($fieldDefinitions): void {
                 /** @var MatrixRecord $record */
                 $record = $event->getData();
                 if ($record) {

@@ -1,20 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Service;
 
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use ReflectionClass;
-use ReflectionException;
 
 class PropertyExistenceChecker
 {
     private ReflectionClass  $reflectionClass;
     private ?ReflectionClass $translationReflectionClass;
 
-    /**
-     * @throws ReflectionException
-     */
     public function __construct(object $entity)
     {
         $this->reflectionClass = new ReflectionClass($entity);
