@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
 class MatrixRecord
@@ -33,7 +35,7 @@ class MatrixRecord
         return array_key_exists($name, $this->data);
     }
 
-    public function __set($name, $value)
+    public function __set($name, $value): void
     {
         $this->data[$name] = $value;
     }

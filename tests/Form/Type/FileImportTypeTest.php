@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Form\Type;
 
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
@@ -15,7 +17,7 @@ class FileImportTypeTest extends TypeTestCase
         $form = $this->factory->create(FileImportType::class, $fileImport);
 
         $form->submit($formData);
-        $this->assertTrue($form->isSynchronized());
-        $this->assertSame($fileImport, $form->getData());
+        self::assertTrue($form->isSynchronized());
+        self::assertSame($fileImport, $form->getData());
     }
 }

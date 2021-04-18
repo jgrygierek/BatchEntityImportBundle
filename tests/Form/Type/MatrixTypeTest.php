@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Form\Type;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,7 +30,7 @@ class MatrixTypeTest extends TypeTestCase
         $form = $this->factory->create(MatrixType::class, $matrix, ['configuration' => $this->baseConfig]);
 
         $form->submit($formData);
-        $this->assertTrue($form->isSynchronized());
+        self::assertTrue($form->isSynchronized());
     }
 
     public function testInvalidFormWithoutConfiguration(): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
@@ -11,7 +13,7 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Routing\RouteCollectionBuilder;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 class TestKernel extends Kernel
 {
@@ -32,7 +34,7 @@ class TestKernel extends Kernel
             $loader->load($config);
         }
 
-        $loader->load(function (ContainerBuilder $container) use ($loader) {
+        $loader->load(function (ContainerBuilder $container) use ($loader): void {
             $container->loadFromExtension('framework', [
                 'router' => [
                     'resource' => 'kernel::loadRoutes',
@@ -65,7 +67,7 @@ class TestKernel extends Kernel
         $this->configs = $configs;
     }
 
-    protected function configureRoutes(RouteCollectionBuilder $routes): void
+    protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import(__DIR__ . '/config/routes.yaml');
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Twig;
 
 use JG\BatchEntityImportBundle\Twig\TemplateExtension;
@@ -7,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class TemplateExtensionTest extends WebTestCase
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         self::bootKernel();
     }
@@ -17,9 +19,9 @@ class TemplateExtensionTest extends WebTestCase
         /** @var TemplateExtension $extension */
         $extension = self::$kernel->getContainer()->get(TemplateExtension::class);
 
-        $this->assertNotEmpty($extension->getTemplate('select_file'));
-        $this->assertNotEmpty($extension->getTemplate('edit_matrix'));
-        $this->assertNotEmpty($extension->getTemplate('layout'));
+        self::assertNotEmpty($extension->getTemplate('select_file'));
+        self::assertNotEmpty($extension->getTemplate('edit_matrix'));
+        self::assertNotEmpty($extension->getTemplate('layout'));
     }
 
     public function testWrongTemplateException(): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Utils;
 
 use Generator;
@@ -13,7 +15,7 @@ class ColumnNameHelperTest extends TestCase
      */
     public function testToPascalCaseSuccess(string $underscoreString, string $expected): void
     {
-        $this->assertEquals($expected, ColumnNameHelper::underscoreToPascalCase($underscoreString));
+        self::assertEquals($expected, ColumnNameHelper::underscoreToPascalCase($underscoreString));
     }
 
     public function pascalCaseDataProvider(): Generator
@@ -30,7 +32,7 @@ class ColumnNameHelperTest extends TestCase
      */
     public function testToCamelCaseSuccess(string $underscoreString, string $expected): void
     {
-        $this->assertEquals($expected, ColumnNameHelper::underscoreToCamelCase($underscoreString));
+        self::assertEquals($expected, ColumnNameHelper::underscoreToCamelCase($underscoreString));
     }
 
     public function camelCaseDataProvider(): Generator

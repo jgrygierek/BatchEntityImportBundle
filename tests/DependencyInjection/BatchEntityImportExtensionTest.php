@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\DependencyInjection;
 
 use JG\BatchEntityImportBundle\Controller\ImportControllerInterface;
@@ -13,10 +15,10 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $this->load();
 
         $autoConfiguredInstances = $this->container->getAutoconfiguredInstanceof();
-        $this->assertArrayHasKey(ImportControllerInterface::class, $autoConfiguredInstances);
+        self::assertArrayHasKey(ImportControllerInterface::class, $autoConfiguredInstances);
 
         $instance = $autoConfiguredInstances[ImportControllerInterface::class];
-        $this->assertNotEmpty($instance->getTag('batch_entity_import.controller'));
+        self::assertNotEmpty($instance->getTag('batch_entity_import.controller'));
     }
 
     protected function getContainerExtensions(): array
