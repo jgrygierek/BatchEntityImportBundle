@@ -36,7 +36,7 @@ jobs:
                     restore-keys: ${{ runner.os }}-composer-
 
             -   name: Run composer
-                run: COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader --ignore-platform-req=php
+                run: COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
 
             -   name: Run tests
                 run: composer tests-cov
