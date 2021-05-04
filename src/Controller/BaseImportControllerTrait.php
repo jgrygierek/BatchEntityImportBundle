@@ -13,6 +13,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -23,9 +24,21 @@ use UnexpectedValueException;
 trait BaseImportControllerTrait
 {
     private ?ImportConfigurationInterface $importConfiguration = null;
-    private ?TranslatorInterface          $translator = null;
-    private ?EntityManagerInterface       $em = null;
-    private ?ValidatorInterface           $validator = null;
+    private ?TranslatorInterface $translator = null;
+    private ?EntityManagerInterface $em = null;
+    private ?ValidatorInterface $validator = null;
+
+    abstract protected function getImportConfigurationClassName(): string;
+
+    abstract protected function redirectToImport(): RedirectResponse;
+
+    abstract protected function getSelectFileTemplateName(): string;
+
+    abstract protected function getMatrixEditTemplateName(): string;
+
+    abstract protected function prepareView(string $view, array $parameters = []): Response;
+
+    abstract protected function createMatrixForm(Matrix $matrix): FormInterface;
 
     public function setTranslator(TranslatorInterface $translator): void
     {

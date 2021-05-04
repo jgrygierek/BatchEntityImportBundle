@@ -95,17 +95,17 @@ class ImportController extends AbstractController implements ImportControllerInt
         return $this->doImportSave($request);
     }
 
-    private function redirectToImport(): RedirectResponse
+    protected function redirectToImport(): RedirectResponse
     {
        return $this->redirectToRoute('user_import');
     }
     
-    private function getMatrixSaveActionUrl(): string
+    protected function getMatrixSaveActionUrl(): string
     {
        return $this->generateUrl('user_import_save');
     }
     
-    private function getImportConfigurationClassName(): string
+    protected function getImportConfigurationClassName(): string
     {
        return UserImportConfiguration::class;
     }
