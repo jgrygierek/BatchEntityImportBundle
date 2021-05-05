@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
@@ -16,17 +15,14 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Traversable;
 use UnexpectedValueException;
 
 trait BaseImportControllerTrait
 {
-    private ?ImportConfigurationInterface $importConfiguration = null;
-    private ?TranslatorInterface $translator = null;
-    private ?EntityManagerInterface $em = null;
-    private ?ValidatorInterface $validator = null;
+    use DependencyInjectionTrait;
+
+    protected ?ImportConfigurationInterface $importConfiguration = null;
 
     abstract protected function getImportConfigurationClassName(): string;
 
@@ -39,21 +35,6 @@ trait BaseImportControllerTrait
     abstract protected function prepareView(string $view, array $parameters = []): Response;
 
     abstract protected function createMatrixForm(Matrix $matrix): FormInterface;
-
-    public function setTranslator(TranslatorInterface $translator): void
-    {
-        $this->translator = $translator;
-    }
-
-    public function setEntityManager(EntityManagerInterface $em): void
-    {
-        $this->em = $em;
-    }
-
-    public function setValidator(ValidatorInterface $validator): void
-    {
-        $this->validator = $validator;
-    }
 
     /**
      * @throws InvalidArgumentException
