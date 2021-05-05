@@ -59,7 +59,7 @@ trait BaseImportControllerTrait
      * @throws InvalidArgumentException
      * @throws \LogicException
      */
-    private function doImport(Request $request): Response
+    protected function doImport(Request $request): Response
     {
         $this->checkDI();
         $fileImport = new FileImport();
@@ -84,7 +84,7 @@ trait BaseImportControllerTrait
         return $this->prepareSelectFileView($form);
     }
 
-    private function prepareSelectFileView(FormInterface $form): Response
+    protected function prepareSelectFileView(FormInterface $form): Response
     {
         return $this->prepareView(
             $this->getSelectFileTemplateName(),
@@ -94,7 +94,7 @@ trait BaseImportControllerTrait
         );
     }
 
-    private function prepareMatrixEditView(Matrix $matrix): Response
+    protected function prepareMatrixEditView(Matrix $matrix): Response
     {
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
@@ -109,7 +109,7 @@ trait BaseImportControllerTrait
     /**
      * @throws LogicException
      */
-    private function doImportSave(Request $request): Response
+    protected function doImportSave(Request $request): Response
     {
         $this->checkDI();
 
@@ -136,7 +136,7 @@ trait BaseImportControllerTrait
         return $this->redirectToImport();
     }
 
-    private function getImportConfiguration(): ImportConfigurationInterface
+    protected function getImportConfiguration(): ImportConfigurationInterface
     {
         $this->checkDI();
 
@@ -152,7 +152,7 @@ trait BaseImportControllerTrait
         return $this->importConfiguration;
     }
 
-    private function setErrorAsFlash(Traversable $violations): void
+    protected function setErrorAsFlash(Traversable $violations): void
     {
         $errors = iterator_to_array($violations);
         if ($errors) {
@@ -161,7 +161,7 @@ trait BaseImportControllerTrait
         }
     }
 
-    private function checkDI(): void
+    protected function checkDI(): void
     {
         if (!$this instanceof ImportControllerInterface) {
             throw new UnexpectedValueException('Controller should implement ' . ImportControllerInterface::class);

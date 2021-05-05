@@ -13,6 +13,8 @@ trait ImportControllerTrait
 {
     use BaseImportControllerTrait;
 
+    abstract protected function getMatrixSaveActionUrl(): string;
+
     protected function prepareView(string $view, array $parameters = []): Response
     {
         return $this->render($view, $parameters);
