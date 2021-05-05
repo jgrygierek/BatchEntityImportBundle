@@ -26,17 +26,17 @@ class Controller extends AbstractController implements ImportControllerInterface
         return $this->doImportSave($request);
     }
 
-    private function redirectToImport(): RedirectResponse
+    protected function redirectToImport(): RedirectResponse
     {
         return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.import');
     }
 
-    private function getMatrixSaveActionUrl(): string
+    protected function getMatrixSaveActionUrl(): string
     {
         return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.import_save');
     }
 
-    private function getImportConfigurationClassName(): string
+    protected function getImportConfigurationClassName(): string
     {
         return TranslatableEntityBaseConfiguration::class;
     }

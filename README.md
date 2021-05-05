@@ -95,17 +95,17 @@ class ImportController extends AbstractController implements ImportControllerInt
         return $this->doImportSave($request);
     }
 
-    private function redirectToImport(): RedirectResponse
+    protected function redirectToImport(): RedirectResponse
     {
        return $this->redirectToRoute('user_import');
     }
     
-    private function getMatrixSaveActionUrl(): string
+    protected function getMatrixSaveActionUrl(): string
     {
        return $this->generateUrl('user_import_save');
     }
     
-    private function getImportConfigurationClassName(): string
+    protected function getImportConfigurationClassName(): string
     {
        return UserImportConfiguration::class;
     }
@@ -190,12 +190,12 @@ templates/bundles/BatchEntityImportBundle
 If you have controller-specific templates, you can override them in controller:
 
 ```php
-private function getSelectFileTemplateName(): string
+protected function getSelectFileTemplateName(): string
 {
     return 'your/path/to/select_file.html.twig';
 }
 
-private function getMatrixEditTemplateName(): string
+protected function getMatrixEditTemplateName(): string
 {
     return 'your/path/to/edit_matrix.html.twig';
 }
@@ -221,7 +221,7 @@ Then you just have to override it in bundle directory, or change a path to layou
 If you want add some specific data to the rendered view, just override these methods in your controller:
 
 ```php
-private function prepareSelectFileView(FormInterface $form): Response
+protected function prepareSelectFileView(FormInterface $form): Response
 {
     return $this->prepareView(
         $this->getSelectFileTemplateName(),
@@ -231,7 +231,7 @@ private function prepareSelectFileView(FormInterface $form): Response
     );
 }
 
-private function prepareMatrixEditView(Matrix $matrix): Response
+protected function prepareMatrixEditView(Matrix $matrix): Response
 {
     return $this->prepareView(
         $this->getMatrixEditTemplateName(),

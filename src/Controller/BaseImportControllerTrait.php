@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
@@ -13,40 +12,35 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Traversable;
 use UnexpectedValueException;
 
 trait BaseImportControllerTrait
 {
-    private ?ImportConfigurationInterface $importConfiguration = null;
-    private ?TranslatorInterface          $translator = null;
-    private ?EntityManagerInterface       $em = null;
-    private ?ValidatorInterface           $validator = null;
+    use DependencyInjectionTrait;
 
-    public function setTranslator(TranslatorInterface $translator): void
-    {
-        $this->translator = $translator;
-    }
+    protected ?ImportConfigurationInterface $importConfiguration = null;
 
-    public function setEntityManager(EntityManagerInterface $em): void
-    {
-        $this->em = $em;
-    }
+    abstract protected function getImportConfigurationClassName(): string;
 
-    public function setValidator(ValidatorInterface $validator): void
-    {
-        $this->validator = $validator;
-    }
+    abstract protected function redirectToImport(): RedirectResponse;
+
+    abstract protected function getSelectFileTemplateName(): string;
+
+    abstract protected function getMatrixEditTemplateName(): string;
+
+    abstract protected function prepareView(string $view, array $parameters = []): Response;
+
+    abstract protected function createMatrixForm(Matrix $matrix): FormInterface;
 
     /**
      * @throws InvalidArgumentException
      * @throws \LogicException
      */
-    private function doImport(Request $request): Response
+    protected function doImport(Request $request): Response
     {
         $this->checkDI();
         $fileImport = new FileImport();
@@ -71,7 +65,7 @@ trait BaseImportControllerTrait
         return $this->prepareSelectFileView($form);
     }
 
-    private function prepareSelectFileView(FormInterface $form): Response
+    protected function prepareSelectFileView(FormInterface $form): Response
     {
         return $this->prepareView(
             $this->getSelectFileTemplateName(),
@@ -81,7 +75,7 @@ trait BaseImportControllerTrait
         );
     }
 
-    private function prepareMatrixEditView(Matrix $matrix): Response
+    protected function prepareMatrixEditView(Matrix $matrix): Response
     {
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
@@ -96,7 +90,7 @@ trait BaseImportControllerTrait
     /**
      * @throws LogicException
      */
-    private function doImportSave(Request $request): Response
+    protected function doImportSave(Request $request): Response
     {
         $this->checkDI();
 
@@ -123,7 +117,7 @@ trait BaseImportControllerTrait
         return $this->redirectToImport();
     }
 
-    private function getImportConfiguration(): ImportConfigurationInterface
+    protected function getImportConfiguration(): ImportConfigurationInterface
     {
         $this->checkDI();
 
@@ -139,7 +133,7 @@ trait BaseImportControllerTrait
         return $this->importConfiguration;
     }
 
-    private function setErrorAsFlash(Traversable $violations): void
+    protected function setErrorAsFlash(Traversable $violations): void
     {
         $errors = iterator_to_array($violations);
         if ($errors) {
@@ -148,7 +142,7 @@ trait BaseImportControllerTrait
         }
     }
 
-    private function checkDI(): void
+    protected function checkDI(): void
     {
         if (!$this instanceof ImportControllerInterface) {
             throw new UnexpectedValueException('Controller should implement ' . ImportControllerInterface::class);

@@ -38,7 +38,7 @@
     },
     "require-dev": {
         "doctrine/doctrine-bundle": "^2.0",
-        "friendsofphp/php-cs-fixer": "^2.7",
+        "friendsofphp/php-cs-fixer": "^3.0",
         "knplabs/doctrine-behaviors": "~2.0",
         "matthiasnoback/symfony-dependency-injection-test": "^4.1.1",
         "roave/security-advisories": "dev-latest",
