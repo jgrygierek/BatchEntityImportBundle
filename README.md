@@ -190,12 +190,12 @@ templates/bundles/BatchEntityImportBundle
 If you have controller-specific templates, you can override them in controller:
 
 ```php
-private function getSelectFileTemplateName(): string
+protected function getSelectFileTemplateName(): string
 {
     return 'your/path/to/select_file.html.twig';
 }
 
-private function getMatrixEditTemplateName(): string
+protected function getMatrixEditTemplateName(): string
 {
     return 'your/path/to/edit_matrix.html.twig';
 }
