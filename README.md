@@ -67,32 +67,34 @@ Create controller with some required code.
 namespace App\Controller;
 
 use App\Model\ImportConfiguration\UserImportConfiguration;
-use JG\BatchEntityImportBundle\Controller\ImportControllerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ImportController extends AbstractController implements ImportControllerInterface
+class ImportController extends AbstractController
 {
     use ImportControllerTrait;
 
     /**
      * @Route("/user/import", name="user_import")
      */
-    public function import(Request $request): Response
+    public function import(Request $request, ValidatorInterface $validator, EntityManagerInterface $em): Response
     {
-        return $this->doImport($request);
+        return $this->doImport($request, $validator, $em);
     }
 
     /**
      * @Route("/user/import/save", name="user_import_save")
      */
-    public function importSave(Request $request): Response
+    public function importSave(Request $request, TranslatorInterface $translator, EntityManagerInterface $em): Response
     {
-        return $this->doImportSave($request);
+        return $this->doImportSave($request, $translator, $em);
     }
 
     protected function redirectToImport(): RedirectResponse
@@ -218,7 +220,7 @@ Then you just have to override it in bundle directory, or change a path to layou
 
 #### Additional data
 
-If you want add some specific data to the rendered view, just override these methods in your controller:
+If you want to add some specific data to the rendered view, just override these methods in your controller:
 
 ```php
 protected function prepareSelectFileView(FormInterface $form): Response
@@ -231,14 +233,14 @@ protected function prepareSelectFileView(FormInterface $form): Response
     );
 }
 
-protected function prepareMatrixEditView(Matrix $matrix): Response
+protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager): Response
 {
     return $this->prepareView(
         $this->getMatrixEditTemplateName(),
         [
-            'header' => $matrix->getHeader(),
-            'data'   => $matrix->getRecords(),
-            'form'   => $this->createMatrixForm($matrix)->createView(),
+            'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
+            'data' => $matrix->getRecords(),
+            'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
         ]
     );
 }

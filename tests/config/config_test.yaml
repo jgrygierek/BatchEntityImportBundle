@@ -13,8 +13,6 @@ services:
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
 
-    JG\BatchEntityImportBundle\Tests\Fixtures\Controller\Controller: ~
-
 framework:
     test: true
     session:

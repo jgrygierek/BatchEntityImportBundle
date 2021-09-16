@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\DependencyInjection;
 
 use Exception;
-use JG\BatchEntityImportBundle\Controller\ImportControllerInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -22,15 +21,7 @@ class BatchEntityImportExtension extends Extension
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
 
-        $this->addTags($container);
         $this->setParameters($configs, $container);
-    }
-
-    private function addTags(ContainerBuilder $container): void
-    {
-        $container
-            ->registerForAutoconfiguration(ImportControllerInterface::class)
-            ->addTag('batch_entity_import.controller');
     }
 
     private function setParameters(array $configs, ContainerBuilder $container): void
@@ -43,5 +34,6 @@ class BatchEntityImportExtension extends Extension
         $container->setParameter('batch_entity_import.templates', $templates);
         $container->setParameter('batch_entity_import.templates.select_file', $templates['select_file']);
         $container->setParameter('batch_entity_import.templates.edit_matrix', $templates['edit_matrix']);
+        $container->setParameter('batch_entity_import.templates.layout', $templates['layout']);
     }
 }
