@@ -18,7 +18,6 @@ Importing entities with preview and edit features for Symfony.
 * [Installation](#installation)
 * [Basic configuration class](#basic-configuration-class)
 * [Creating controller](#creating-controller)
-* [Services][#services]
 * [Translations](#translations)
 * [Fields definitions](#fields-definitions)
 * [Overriding templates](#overriding-templates)
