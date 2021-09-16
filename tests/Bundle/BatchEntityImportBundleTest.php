@@ -6,7 +6,6 @@ namespace JG\BatchEntityImportBundle\Tests\Bundle;
 
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class BatchEntityImportBundleTest extends TestCase
