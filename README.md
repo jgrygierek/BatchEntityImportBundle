@@ -18,6 +18,7 @@ Importing entities with preview and edit features for Symfony.
 * [Installation](#installation)
 * [Basic configuration class](#basic-configuration-class)
 * [Creating controller](#creating-controller)
+* [Services][#services]
 * [Translations](#translations)
 * [Fields definitions](#fields-definitions)
 * [Overriding templates](#overriding-templates)
@@ -62,6 +63,8 @@ class UserImportConfiguration extends AbstractImportConfiguration
 ## Creating controller
 
 Create controller with some required code.
+
+This is just an example, depending on your needs you can inject services in different ways.
 
 ```php
 namespace App\Controller;
