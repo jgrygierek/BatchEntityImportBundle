@@ -7,10 +7,12 @@ namespace JG\BatchEntityImportBundle\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
+use JG\BatchEntityImportBundle\Form\Type\MatrixType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -77,12 +79,15 @@ trait BaseImportControllerTrait
 
     protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager): Response
     {
+        $form = $this->createMatrixForm($matrix, $entityManager);
+        $form->submit(['records' => array_map(fn(MatrixRecord $record) => $record->getData(), $matrix->getRecords())]);
+
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
             [
                 'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
                 'data' => $matrix->getRecords(),
-                'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+                'form' => $form->createView(),
                 'importConfiguration' => $this->getImportConfiguration($entityManager),
             ]
         );
@@ -111,9 +116,15 @@ trait BaseImportControllerTrait
             $this->addFlash('success', $msg);
         }
 
-        $this->setErrorAsFlash($form->getErrors());
-
-        return $this->redirectToImport();
+        return $this->prepareView(
+            $this->getMatrixEditTemplateName(),
+            [
+                'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
+                'data' => $matrix->getRecords(),
+                'form' => $form->createView(),
+                'importConfiguration' => $this->getImportConfiguration($entityManager),
+            ]
+        );
     }
 
     protected function getImportConfiguration(EntityManagerInterface $entityManager): ImportConfigurationInterface
