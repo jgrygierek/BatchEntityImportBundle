@@ -15,6 +15,11 @@ interface ImportConfigurationInterface
     public function getEntityClassName(): string;
 
     /**
+     * Allow to override entity in the edit view
+     */
+    public function allowOverrideEntity(): bool;
+
+    /**
      * Defines fields definitions used during process of data editing.
      * If definition for field will not be defined, default definition will be used.
      *

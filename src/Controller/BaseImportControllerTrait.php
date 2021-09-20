@@ -83,6 +83,7 @@ trait BaseImportControllerTrait
                 'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
                 'data' => $matrix->getRecords(),
                 'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+                'importConfiguration' => $this->getImportConfiguration($entityManager),
             ]
         );
     }

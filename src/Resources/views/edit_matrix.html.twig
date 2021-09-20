@@ -5,7 +5,7 @@
         {{ form_start(form) }}
         <table class="table">
             <tr>
-                <th>{{ 'matrix.header.label.override'|trans({}, 'BatchEntityImportBundle') }}</th>
+                {% if importConfiguration.allowOverrideEntity %}<th>{{ 'matrix.header.label.override'|trans({}, 'BatchEntityImportBundle') }}</th>{% endif %}
                 {% for name, exists in header_info %}
                     <th>
                         {% if not exists %}
