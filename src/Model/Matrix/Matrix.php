@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
 use const ARRAY_FILTER_USE_KEY;
-use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class Matrix

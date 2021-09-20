@@ -15,7 +15,7 @@ interface ImportConfigurationInterface
     public function getEntityClassName(): string;
 
     /**
-     * Allow to override entity in the edit view
+     * Allow to override entity in the edit view.
      */
     public function allowOverrideEntity(): bool;
 

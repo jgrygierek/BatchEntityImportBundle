@@ -7,7 +7,6 @@ namespace JG\BatchEntityImportBundle\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
-use JG\BatchEntityImportBundle\Form\Type\MatrixType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
@@ -80,7 +79,7 @@ trait BaseImportControllerTrait
     protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createMatrixForm($matrix, $entityManager);
-        $form->submit(['records' => array_map(fn(MatrixRecord $record) => $record->getData(), $matrix->getRecords())]);
+        $form->submit(['records' => array_map(static fn (MatrixRecord $record) => $record->getData(), $matrix->getRecords())]);
 
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
