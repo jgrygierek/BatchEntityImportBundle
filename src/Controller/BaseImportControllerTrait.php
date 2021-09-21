@@ -113,6 +113,8 @@ trait BaseImportControllerTrait
 
             $msg = $translator->trans('success.import', [], 'BatchEntityImportBundle');
             $this->addFlash('success', $msg);
+
+            return $this->redirectToImport();
         }
 
         return $this->prepareView(
