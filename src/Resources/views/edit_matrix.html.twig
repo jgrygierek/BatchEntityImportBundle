@@ -24,10 +24,8 @@
                 <tr>
                     {% for elem in record.children %}
                         <td>
-                            <div class="form-group">
-                                {{ form_widget(elem) }}
-                                {{ form_errors(elem) }}
-                            </div>
+                            {{ form_widget(elem) }}
+                            {{ form_errors(elem) }}
                         </td>
                     {% endfor %}
                 </tr>
