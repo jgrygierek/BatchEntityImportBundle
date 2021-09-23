@@ -56,7 +56,7 @@ trait BaseImportControllerTrait
 
             $errors = $validator->validate($matrix);
             if (0 === $errors->count()) {
-                return $this->prepareMatrixEditView($matrix, $entityManager);
+                return $this->prepareMatrixEditView($matrix, $entityManager, true);
             }
         } else {
             $errors = $form->getErrors();
@@ -77,10 +77,12 @@ trait BaseImportControllerTrait
         );
     }
 
-    protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager): Response
+    protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager, $manualSubmit = false): Response
     {
         $form = $this->createMatrixForm($matrix, $entityManager);
-        $form->submit(['records' => array_map(static fn (MatrixRecord $record) => $record->getData(), $matrix->getRecords())]);
+        if ($manualSubmit) {
+            $form->submit(['records' => array_map(static fn (MatrixRecord $record) => $record->getData(), $matrix->getRecords())]);
+        }
 
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
@@ -118,15 +120,7 @@ trait BaseImportControllerTrait
             return $this->redirectToImport();
         }
 
-        return $this->prepareView(
-            $this->getMatrixEditTemplateName(),
-            [
-                'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
-                'data' => $matrix->getRecords(),
-                'form' => $form->createView(),
-                'importConfiguration' => $this->getImportConfiguration($entityManager),
-            ]
-        );
+        return $this->prepareMatrixEditView($matrix, $entityManager);
     }
 
     protected function getImportConfiguration(EntityManagerInterface $entityManager): ImportConfigurationInterface

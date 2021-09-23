@@ -1,15 +1,16 @@
 {% extends batch_entity_import_template('layout') %}
 
 {% block batch_entity_import_content %}
-    {% form_theme form 'bootstrap_3_layout.html.twig' %}
 
     <div class="table-responsive">
         {{ form_start(form) }}
         <table class="table">
             <tr>
-                {% if importConfiguration.allowOverrideEntity %}<th>{{ 'matrix.header.label.override'|trans({}, 'BatchEntityImportBundle') }}</th>{% endif %}
+                {% if importConfiguration.allowOverrideEntity %}
+                    <th>{{ 'matrix.header.label.override'|trans({}, 'BatchEntityImportBundle') }}</th>
+                {% endif %}
                 {% for name, exists in header_info %}
-                    <th style="min-width: 150px;">
+                    <th>
                         {% if not exists %}
                             <div>{{ 'matrix.header.label.unknown'|trans({}, 'BatchEntityImportBundle') }}</div>
                         {% endif %}
@@ -23,7 +24,7 @@
                 <tr>
                     {% for elem in record.children %}
                         <td>
-                            <div class="form-group {% if form_errors(elem) %}has-error"{% endif %}">
+                            <div class="form-group">
                                 {{ form_widget(elem) }}
                                 {{ form_errors(elem) }}
                             </div>
