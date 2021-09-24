@@ -11,6 +11,7 @@ use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -123,7 +124,11 @@ trait BaseImportControllerTrait
                 throw new UnexpectedValueException('Configuration class not found.');
             }
 
-            $this->importConfiguration = new $class($entityManager);
+            if (isset($this->container) && $this->container instanceof ContainerInterface && $this->container->has($class)) {
+                $this->importConfiguration = $this->container->get($class);
+            } else {
+                $this->importConfiguration = new $class($entityManager);
+            }
         }
 
         return $this->importConfiguration;
