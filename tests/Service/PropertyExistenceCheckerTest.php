@@ -23,8 +23,8 @@ class PropertyExistenceCheckerTest extends TestCase
     {
         parent::setUp();
 
-        $this->checkerEntity = new PropertyExistenceChecker(new TestEntity());
-        $this->checkerEntityWithTranslations = new PropertyExistenceChecker(new TranslatableEntity());
+        $this->checkerEntity = new PropertyExistenceChecker(TestEntity::class);
+        $this->checkerEntityWithTranslations = new PropertyExistenceChecker(TranslatableEntity::class);
     }
 
     /**

@@ -57,7 +57,7 @@ class Matrix
     public function getHeaderInfo(string $className): array
     {
         $info = [];
-        $checker = new PropertyExistenceChecker(new $className());
+        $checker = new PropertyExistenceChecker($className);
 
         foreach ($this->header as $name) {
             $info[$name] = $checker->propertyExists($name);

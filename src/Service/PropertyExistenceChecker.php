@@ -11,12 +11,14 @@ use ReflectionClass;
 class PropertyExistenceChecker
 {
     private ReflectionClass  $reflectionClass;
-    private ?ReflectionClass $translationReflectionClass;
+    private ?ReflectionClass $translationReflectionClass = null;
 
-    public function __construct(object $entity)
+    public function __construct(string $entityClass)
     {
-        $this->reflectionClass = new ReflectionClass($entity);
-        $this->translationReflectionClass = $entity instanceof TranslatableInterface ? new ReflectionClass($entity->translate()) : null;
+        $this->reflectionClass = new ReflectionClass($entityClass);
+        if (is_subclass_of($entityClass, TranslatableInterface::class)) {
+            $this->translationReflectionClass = new ReflectionClass($this->reflectionClass->newInstanceWithoutConstructor()->translate());
+        }
     }
 
     public function propertyExists(string $name): bool
