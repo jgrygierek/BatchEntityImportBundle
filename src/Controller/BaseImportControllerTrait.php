@@ -58,7 +58,7 @@ trait BaseImportControllerTrait
                 return $this->prepareMatrixEditView($matrix, $entityManager);
             }
         } else {
-            $errors = $form->getErrors(true);
+            $errors = $form->getErrors();
         }
 
         $this->setErrorAsFlash($errors);
@@ -115,7 +115,7 @@ trait BaseImportControllerTrait
             }
         }
 
-        $this->setErrorAsFlash($form->getErrors(true));
+        $this->setErrorAsFlash($form->getErrors());
 
         return $this->redirectToImport();
     }
