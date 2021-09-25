@@ -15,7 +15,6 @@ class PropertyExistenceChecker
     private ?ReflectionClass $translationReflectionClass = null;
 
     /**
-     * @param string $entityClass
      * @throws ReflectionException
      */
     public function __construct(string $entityClass)

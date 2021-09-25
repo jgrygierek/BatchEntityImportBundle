@@ -35,18 +35,18 @@ class ImportConfigurationTest extends WebTestCase
             [
                 'unknown_column',
                 'test_private_property',
-                'test_public_property'
+                'test_public_property',
             ],
             [
                 [
                     'unknown_column' => 'value_1',
                     'test_private_property' => 'value_2',
-                    'test_public_property' => 'public_value_1'
+                    'test_public_property' => 'public_value_1',
                 ],
                 [
                     'unknown_column' => 'value_3',
                     'test_private_property' => 'value_4',
-                    'test_public_property' => 'public_value_2'
+                    'test_public_property' => 'public_value_2',
                 ],
             ]
         );
