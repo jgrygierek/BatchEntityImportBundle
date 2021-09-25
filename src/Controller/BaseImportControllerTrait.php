@@ -19,7 +19,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Throwable;
 use Traversable;
 use UnexpectedValueException;
 
@@ -113,8 +112,6 @@ trait BaseImportControllerTrait
             } catch (BatchEntityImportExceptionInterface $e) {
                 $msg = $translator->trans($e->getMessage(), [], 'BatchEntityImportBundle');
                 $this->addFlash('error', $msg);
-            } catch (Throwable $e) {
-                $this->addFlash('error', $e->getMessage());
             }
         }
 
