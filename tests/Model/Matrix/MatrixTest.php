@@ -67,8 +67,10 @@ class MatrixTest extends AbstractValidationTestCase
     {
         $expected = [
             'unknown_column_name' => false,
-            'test_property' => true,
-            'test_property:en' => false,
+            'test_public_property' => true,
+            'test_private_property' => true,
+            'test_private_property_no_setter' => false,
+            'test_private_property:en' => false,
         ];
 
         $matrix = new Matrix(array_keys($expected));
@@ -80,8 +82,10 @@ class MatrixTest extends AbstractValidationTestCase
     {
         $expected = [
             'unknown_column_name' => false,
-            'test_property' => true,
-            'test_property:en' => false,
+            'test_public_property' => true,
+            'test_private_property' => true,
+            'test_private_property_no_setter' => false,
+            'test_private_property:en' => false,
             'test_translation_property' => false,
             'test_translation_property:en' => true,
         ];
