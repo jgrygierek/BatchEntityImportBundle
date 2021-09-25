@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 use Traversable;
 use UnexpectedValueException;
 
@@ -57,7 +59,7 @@ trait BaseImportControllerTrait
                 return $this->prepareMatrixEditView($matrix, $entityManager);
             }
         } else {
-            $errors = $form->getErrors();
+            $errors = $form->getErrors(true);
         }
 
         $this->setErrorAsFlash($errors);
@@ -104,13 +106,19 @@ trait BaseImportControllerTrait
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getImportConfiguration($entityManager)->import($matrix);
-
-            $msg = $translator->trans('success.import', [], 'BatchEntityImportBundle');
-            $this->addFlash('success', $msg);
+            try {
+                $this->getImportConfiguration($entityManager)->import($matrix);
+                $msg = $translator->trans('success.import', [], 'BatchEntityImportBundle');
+                $this->addFlash('success', $msg);
+            } catch (BatchEntityImportExceptionInterface $e) {
+                $msg = $translator->trans($e->getMessage(), [], 'BatchEntityImportBundle');
+                $this->addFlash('error', $msg);
+            } catch (Throwable $e) {
+                $this->addFlash('error', $e->getMessage());
+            }
         }
 
-        $this->setErrorAsFlash($form->getErrors());
+        $this->setErrorAsFlash($form->getErrors(true));
 
         return $this->redirectToImport();
     }
