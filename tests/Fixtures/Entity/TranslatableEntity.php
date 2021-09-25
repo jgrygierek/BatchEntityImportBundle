@@ -17,19 +17,18 @@ class TranslatableEntity extends AbstractEntity implements TranslatableInterface
 {
     use TranslatableTrait;
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    private string $testProperty = '';
+    public string $testPublicProperty = '';
+    private string $testPrivateProperty = '';
+    private string $testPrivatePropertyNoSetter = '';
 
-    public function setTestProperty(string $testProperty): void
+    public function setTestPrivateProperty(string $testPrivateProperty): void
     {
-        $this->testProperty = $testProperty;
+        $this->testPrivateProperty = $testPrivateProperty;
     }
 
-    public function getTestProperty(): string
+    public function getTestPrivateProperty(): string
     {
-        return $this->testProperty;
+        return $this->testPrivateProperty;
     }
 
     public function __call($method, $arguments)

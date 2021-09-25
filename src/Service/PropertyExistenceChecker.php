@@ -7,12 +7,16 @@ namespace JG\BatchEntityImportBundle\Service;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use ReflectionClass;
+use ReflectionException;
 
 class PropertyExistenceChecker
 {
-    private ReflectionClass  $reflectionClass;
+    private ReflectionClass $reflectionClass;
     private ?ReflectionClass $translationReflectionClass = null;
 
+    /**
+     * @throws ReflectionException
+     */
     public function __construct(string $entityClass)
     {
         $this->reflectionClass = new ReflectionClass($entityClass);
@@ -28,11 +32,19 @@ class PropertyExistenceChecker
 
         return $locale
             ? $this->translationPropertyExists($name)
-            : $this->reflectionClass->hasProperty($name);
+            : $this->isPropertyWritable($this->reflectionClass, $name);
     }
 
     private function translationPropertyExists(string $name): bool
     {
-        return $this->translationReflectionClass && $this->translationReflectionClass->hasProperty($name);
+        return $this->translationReflectionClass && $this->isPropertyWritable($this->translationReflectionClass, $name);
+    }
+
+    private function isPropertyWritable(ReflectionClass $entity, string $name): bool
+    {
+        $setterName = ColumnNameHelper::getSetterName($name);
+
+        return ($entity->hasProperty($name) && $entity->getProperty($name)->isPublic())
+            || ($entity->hasMethod($setterName) && $entity->getMethod($setterName)->isPublic());
     }
 }

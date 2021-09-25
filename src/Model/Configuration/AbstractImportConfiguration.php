@@ -27,27 +27,42 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
     public function import(Matrix $matrix): void
     {
+        $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName());
         foreach ($matrix->getRecords() as $record) {
-            $this->prepareRecord($record);
+            $this->prepareRecord($record, $headerInfo);
         }
 
         $this->save();
     }
 
-    protected function prepareRecord(MatrixRecord $record): void
+    protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
     {
         $entity = $this->getEntity($record);
         $data = $record->getData();
 
         foreach ($data as $name => $value) {
+            if (empty($headerInfo[$name])) {
+                continue;
+            }
+
             $locale = ColumnNameHelper::getLocale($name);
-            $fieldName = ColumnNameHelper::underscoreToPascalCase($name);
+            $propertyName = ColumnNameHelper::underscoreToCamelCase($name);
+            $setterName = ColumnNameHelper::getSetterName($name);
 
             try {
                 if ($entity instanceof TranslatableInterface && $locale) {
-                    $entity->translate($locale)->{'set' . $fieldName}($value);
+                    $translatedEntity = $entity->translate($locale);
+                    if (method_exists($translatedEntity, $setterName)) {
+                        $translatedEntity->$setterName($value);
+                    } else {
+                        $translatedEntity->$propertyName = $value;
+                    }
                 } elseif (!$locale) {
-                    $entity->{'set' . $fieldName}($value);
+                    if (method_exists($entity, $setterName)) {
+                        $entity->$setterName($value);
+                    } else {
+                        $entity->$propertyName = $value;
+                    }
                 }
             } catch (Throwable $e) {
             }
