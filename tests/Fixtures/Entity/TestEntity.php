@@ -12,6 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
 class TestEntity extends AbstractEntity
 {
     public string $testPublicProperty = '';
+    /**
+     * @ORM\Column(type="string", unique=true)
+     */
     private string $testPrivateProperty = '';
     private string $testPrivatePropertyNoSetter = '';
 

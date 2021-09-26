@@ -115,7 +115,7 @@ trait BaseImportControllerTrait
             }
         }
 
-        $this->setErrorAsFlash($form->getErrors());
+        $this->setErrorAsFlash($form->getErrors(true));
 
         return $this->redirectToImport();
     }
