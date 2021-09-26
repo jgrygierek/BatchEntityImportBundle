@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Controller;
 
 use Doctrine\ORM\EntityRepository;
-use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
