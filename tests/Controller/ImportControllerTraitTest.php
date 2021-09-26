@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Controller;
 
+use Doctrine\ORM\EntityRepository;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -26,14 +28,15 @@ class ImportControllerTraitTest extends WebTestCase
     public function testControllerWorksOk(): void
     {
         self::assertEmpty($this->getRepository()->findAll());
+        $uploadedFile = __DIR__ . '/../Fixtures/Resources/test.csv';
 
         // insert new data
-        $this->submitSelectFileForm();
+        $this->submitSelectFileForm($uploadedFile);
         $this->client->submitForm('btn-submit');
         $this->checkData('test2');
 
         // update existing data
-        $this->submitSelectFileForm();
+        $this->submitSelectFileForm($uploadedFile);
         $this->client->submitForm('btn-submit', [
             'matrix' => [
                 'records' => [
@@ -51,12 +54,11 @@ class ImportControllerTraitTest extends WebTestCase
         $this->checkData('new_value');
     }
 
-    private function submitSelectFileForm(): void
+    private function submitSelectFileForm(string $uploadedFile): void
     {
         $this->client->request('GET', '/jg_batch_entity_import_bundle/import');
         self::assertTrue($this->client->getResponse()->isSuccessful());
 
-        $uploadedFile = __DIR__ . '/../Fixtures/Resources/test.csv';
         $this->client->submitForm('btn-submit', ['file_import[file]' => $uploadedFile]);
 
         self::assertTrue($this->client->getResponse()->isSuccessful());
@@ -80,17 +82,23 @@ class ImportControllerTraitTest extends WebTestCase
 
     public function testImportFileWrongExtension(): void
     {
-        $this->client->request('GET', '/jg_batch_entity_import_bundle/import');
-
         $uploadedFile = __DIR__ . '/../Fixtures/Resources/test.txt';
-        $this->client->submitForm('btn-submit', ['file_import[file]' => $uploadedFile]);
+        $this->submitSelectFileForm($uploadedFile);
 
-        self::assertTrue($this->client->getResponse()->isSuccessful());
         self::assertStringContainsString('Wrong file extension.', $this->client->getResponse()->getContent());
         self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
     }
 
-    private function getRepository()
+    public function testFlashMessage(): void
+    {
+        $uploadedFile = __DIR__ . '/../Fixtures/Resources/test_exception_invalid_type.csv';
+        $this->submitSelectFileForm($uploadedFile);
+        $this->client->submitForm('btn-submit');
+        $this->client->followRedirect();
+        self::assertStringContainsString('Invalid type of data. Probably missing validation.', $this->client->getResponse()->getContent());
+    }
+
+    private function getRepository(): EntityRepository
     {
         return self::$kernel->getContainer()->get('doctrine.orm.entity_manager')->getRepository(TranslatableEntity::class);
     }
