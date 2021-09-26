@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Exception\DatabaseException;
+use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
-use Throwable;
+use TypeError;
 
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
@@ -64,7 +69,8 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                         $entity->$propertyName = $value;
                     }
                 }
-            } catch (Throwable $e) {
+            } catch (TypeError $e) {
+                throw new MatrixRecordInvalidDataTypeException();
             }
         }
 
@@ -77,7 +83,13 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
     protected function save(): void
     {
-        $this->em->flush();
+        try {
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw new DatabaseNotUniqueDataException();
+        } catch (Exception $e) {
+            throw new DatabaseException();
+        }
     }
 
     protected function getEntity(MatrixRecord $record): object

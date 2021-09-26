@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Model\Configuration;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Generator;
+use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
@@ -29,7 +32,7 @@ class ImportConfigurationTest extends WebTestCase
     public function testItemImportedSuccessfully(): void
     {
         $repository = $this->entityManager->getRepository(TestEntity::class);
-        self::assertEmpty($repository->find(1));
+        self::assertEmpty($repository->findAll());
 
         $matrix = new Matrix(
             [
@@ -74,7 +77,7 @@ class ImportConfigurationTest extends WebTestCase
     public function testTranslatableItemImportedSuccessfully(): void
     {
         $repository = $this->entityManager->getRepository(TranslatableEntity::class);
-        self::assertEmpty($repository->find(1));
+        self::assertEmpty($repository->findAll());
 
         $matrix = new Matrix(
             [
@@ -124,5 +127,44 @@ class ImportConfigurationTest extends WebTestCase
         self::assertSame('value_7', $item->translate('en')->getTestTranslationProperty());
         self::assertSame('value_8', $item->translate('pl')->getTestTranslationProperty());
         self::assertSame('public_value_2', $item->testPublicProperty);
+    }
+
+    /**
+     * @dataProvider exceptionCheckProvider
+     */
+    public function testExceptionsDuringImport(string $exceptionClass, array $data): void
+    {
+        $this->expectException($exceptionClass);
+
+        $repository = $this->entityManager->getRepository(TestEntity::class);
+        self::assertEmpty($repository->findAll());
+
+        $matrix = new Matrix(['test_private_property'], $data);
+
+        $config = new BaseConfiguration($this->entityManager);
+        $config->import($matrix);
+    }
+
+    public function exceptionCheckProvider(): Generator
+    {
+        yield [
+            'exception_class' => MatrixRecordInvalidDataTypeException::class,
+            'data' => [
+                [
+                    'test_private_property' => 1,
+                ],
+            ],
+        ];
+        yield [
+            'exception_class' => DatabaseNotUniqueDataException::class,
+            'data' => [
+                [
+                    'test_private_property' => 'value1',
+                ],
+                [
+                    'test_private_property' => 'value1',
+                ],
+            ],
+        ];
     }
 }
