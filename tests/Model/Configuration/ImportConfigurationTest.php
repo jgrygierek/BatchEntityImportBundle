@@ -6,7 +6,6 @@ namespace JG\BatchEntityImportBundle\Tests\Model\Configuration;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
-use JG\BatchEntityImportBundle\Exception\DatabaseException;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
