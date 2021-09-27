@@ -94,7 +94,7 @@ class ImportConfigurationTest extends WebTestCase
             ]
         );
 
-        $config = new TranslatableEntityBaseConfiguration($this->entityManager);
+        $config = self::$kernel->getContainer()->get(TranslatableEntityBaseConfiguration::class);
         $config->import($matrix);
 
         self::assertCount(2, $repository->findAll());
