@@ -42,4 +42,17 @@ class Controller extends AbstractController
     {
         return TranslatableEntityBaseConfiguration::class;
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(
+            parent::getSubscribedServices(),
+            [
+                TranslatableEntityBaseConfiguration::class => TranslatableEntityBaseConfiguration::class,
+            ]
+        );
+    }
 }

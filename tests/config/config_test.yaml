@@ -12,6 +12,7 @@ services:
         tags: ['controller.service_arguments']
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
+    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration:
 
 framework:
     test: true

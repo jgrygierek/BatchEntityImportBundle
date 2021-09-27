@@ -129,7 +129,7 @@ trait BaseImportControllerTrait
                 throw new UnexpectedValueException('Configuration class not found.');
             }
 
-            $this->importConfiguration = new $class($entityManager);
+            $this->importConfiguration = $this->get($class) ?? new $class($entityManager);
         }
 
         return $this->importConfiguration;

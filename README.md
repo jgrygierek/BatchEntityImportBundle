@@ -50,9 +50,15 @@ namespace App\Model\ImportConfiguration;
 
 use App\Entity\User;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
+use Doctrine\ORM\EntityManagerInterface;
 
 class UserImportConfiguration extends AbstractImportConfiguration
 {
+    public function __construct(EntityManagerInterface $em, ...)
+    {
+        parent::__construct($em);
+    }
+
     public function getEntityClassName(): string
     {
         return User::class;
@@ -113,6 +119,22 @@ class ImportController extends AbstractController
     protected function getImportConfigurationClassName(): string
     {
        return UserImportConfiguration::class;
+    }
+    
+    /**
+     * Only add this if u need to allow DI in your configuration class
+     * NOTE: make sure the UserImportConfiguration is public
+     * 
+     * @return array<string, string>
+     */
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(
+            parent::getSubscribedServices(),
+            [
+                UserImportConfiguration::class => UserImportConfiguration::class,
+            ]
+        );
     }
 }
 ```
