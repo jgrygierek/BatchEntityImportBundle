@@ -107,4 +107,9 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         return new $class();
     }
+
+    public function allowOverrideEntity(): bool
+    {
+        return true;
+    }
 }

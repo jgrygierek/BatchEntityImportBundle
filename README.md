@@ -20,6 +20,7 @@ Importing entities with preview and edit features for Symfony.
 * [Creating controller](#creating-controller)
 * [Translations](#translations)
 * [Fields definitions](#fields-definitions)
+* [Show & hide entity override column](#show--hide-entity-override-column)
 * [Overriding templates](#overriding-templates)
     * [Global templates](#global-templates)
     * [Controller-specific templates](#controller-specific-templates)
@@ -170,6 +171,18 @@ public function getFieldsDefinitions(): array
 }
 ```
 
+## Show & hide entity override column
+
+If you want to hide/show an entity column that allows you to override entity `default: true`,
+you have to override this method in your import configuration
+
+```php
+public function allowOverrideEntity(): bool
+{
+    return true;
+}
+```
+
 ## Overriding templates
 
 #### Global templates
@@ -247,6 +260,7 @@ protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface 
             'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
             'data' => $matrix->getRecords(),
             'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+            'importConfiguration' => $this->getImportConfiguration($entityManager),
         ]
     );
 }
