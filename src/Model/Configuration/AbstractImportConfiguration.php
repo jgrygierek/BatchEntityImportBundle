@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
+use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Exception\DatabaseException;
+use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
-use Throwable;
+use TypeError;
 
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
@@ -27,29 +32,45 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
     public function import(Matrix $matrix): void
     {
+        $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName());
         foreach ($matrix->getRecords() as $record) {
-            $this->prepareRecord($record);
+            $this->prepareRecord($record, $headerInfo);
         }
 
         $this->save();
     }
 
-    protected function prepareRecord(MatrixRecord $record): void
+    protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
     {
         $entity = $this->getEntity($record);
         $data = $record->getData();
 
         foreach ($data as $name => $value) {
+            if (empty($headerInfo[$name])) {
+                continue;
+            }
+
             $locale = ColumnNameHelper::getLocale($name);
-            $fieldName = ColumnNameHelper::underscoreToPascalCase($name);
+            $propertyName = ColumnNameHelper::underscoreToCamelCase($name);
+            $setterName = ColumnNameHelper::getSetterName($name);
 
             try {
                 if ($entity instanceof TranslatableInterface && $locale) {
-                    $entity->translate($locale)->{'set' . $fieldName}($value);
+                    $translatedEntity = $entity->translate($locale);
+                    if (method_exists($translatedEntity, $setterName)) {
+                        $translatedEntity->$setterName($value);
+                    } else {
+                        $translatedEntity->$propertyName = $value;
+                    }
                 } elseif (!$locale) {
-                    $entity->{'set' . $fieldName}($value);
+                    if (method_exists($entity, $setterName)) {
+                        $entity->$setterName($value);
+                    } else {
+                        $entity->$propertyName = $value;
+                    }
                 }
-            } catch (Throwable $e) {
+            } catch (TypeError $e) {
+                throw new MatrixRecordInvalidDataTypeException();
             }
         }
 
@@ -62,7 +83,13 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
     protected function save(): void
     {
-        $this->em->flush();
+        try {
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw new DatabaseNotUniqueDataException();
+        } catch (Exception $e) {
+            throw new DatabaseException();
+        }
     }
 
     protected function getEntity(MatrixRecord $record): object

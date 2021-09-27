@@ -6,6 +6,18 @@
                 <source>error.data.not_found</source>
                 <target>Data not found</target>
             </trans-unit>
+            <trans-unit id="exception.database.data.not_unique">
+                <source>exception.database.data.not_unique</source>
+                <target>Can't save data to database. Data is not unique.</target>
+            </trans-unit>
+            <trans-unit id="exception.database.save">
+                <source>exception.database.save</source>
+                <target>Can't save data to database. Probably missing validation.</target>
+            </trans-unit>
+            <trans-unit id="exception.matrix.record.data.invalid_type">
+                <source>exception.matrix.record.data.invalid_type</source>
+                <target>Invalid type of data. Probably missing validation.</target>
+            </trans-unit>
             <trans-unit id="form.button.import">
                 <source>form.button.import</source>
                 <target>Import</target>

@@ -135,12 +135,15 @@ If suffix will be added to translatable entity, but field will not be found in t
 If you want to change types of rendered fields, instead of using default ones,
 you have to override method in your import configuration.
 
+To avoid errors during data import, you can add here validation rules.
+
 ```php
 
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Constraints\Length;
 
 public function getFieldsDefinitions(): array
 {
@@ -161,6 +164,7 @@ public function getFieldsDefinitions(): array
                 'attr' => [
                     'rows' => 2,
                 ],
+                'constraints' => [new Length(['max' => 255])],
             ]
         ),
     ];
