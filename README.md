@@ -20,6 +20,7 @@ Importing entities with preview and edit features for Symfony.
 * [Creating controller](#creating-controller)
 * [Translations](#translations)
 * [Fields definitions](#fields-definitions)
+* [Show & hide entity override column](#Show-&-hide-entity-override-column)
 * [Overriding templates](#overriding-templates)
     * [Global templates](#global-templates)
     * [Controller-specific templates](#controller-specific-templates)
