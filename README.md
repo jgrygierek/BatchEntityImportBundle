@@ -166,6 +166,18 @@ public function getFieldsDefinitions(): array
 }
 ```
 
+## Show & hide entity override column
+
+If you want to hide/show an entity column that allows you to override entity `default: true`,
+you have to override this method in your import configuration
+
+```php
+public function allowOverrideEntity(): bool
+{
+    return true;
+}
+```
+
 ## Overriding templates
 
 #### Global templates
@@ -243,6 +255,7 @@ protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface 
             'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
             'data' => $matrix->getRecords(),
             'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+            'importConfiguration' => $this->getImportConfiguration($entityManager),
         ]
     );
 }
