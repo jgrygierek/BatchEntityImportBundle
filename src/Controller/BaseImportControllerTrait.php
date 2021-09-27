@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
@@ -83,6 +84,7 @@ trait BaseImportControllerTrait
                 'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
                 'data' => $matrix->getRecords(),
                 'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+                'importConfiguration' => $this->getImportConfiguration($entityManager),
             ]
         );
     }
@@ -104,13 +106,17 @@ trait BaseImportControllerTrait
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getImportConfiguration($entityManager)->import($matrix);
-
-            $msg = $translator->trans('success.import', [], 'BatchEntityImportBundle');
-            $this->addFlash('success', $msg);
+            try {
+                $this->getImportConfiguration($entityManager)->import($matrix);
+                $msg = $translator->trans('success.import', [], 'BatchEntityImportBundle');
+                $this->addFlash('success', $msg);
+            } catch (BatchEntityImportExceptionInterface $e) {
+                $msg = $translator->trans($e->getMessage(), [], 'BatchEntityImportBundle');
+                $this->addFlash('error', $msg);
+            }
         }
 
-        $this->setErrorAsFlash($form->getErrors());
+        $this->setErrorAsFlash($form->getErrors(true));
 
         return $this->redirectToImport();
     }

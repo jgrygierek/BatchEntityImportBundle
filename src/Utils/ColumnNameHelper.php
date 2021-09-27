@@ -29,4 +29,9 @@ class ColumnNameHelper
     {
         return explode(':', $value)[1] ?? null;
     }
+
+    public static function getSetterName(string $name): string
+    {
+        return 'set' . self::underscoreToPascalCase($name);
+    }
 }

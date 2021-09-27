@@ -6,6 +6,18 @@
                 <source>error.data.not_found</source>
                 <target>Brak danych</target>
             </trans-unit>
+            <trans-unit id="exception.database.data.not_unique">
+                <source>exception.database.data.not_unique</source>
+                <target>Nie można zapisać danych do bazy. Podane dane nie są unikalne.</target>
+            </trans-unit>
+            <trans-unit id="exception.database.save">
+                <source>exception.database.save</source>
+                <target>Nie można zapisać danych do bazy. Prawdopodobnie brakuje walidacji.</target>
+            </trans-unit>
+            <trans-unit id="exception.matrix.record.data.invalid_type">
+                <source>exception.matrix.record.data.invalid_type</source>
+                <target>Nieprawidłowy format danych. Prawdopodobnie brakuje walidacji lub pole posiada zły typ.</target>
+            </trans-unit>
             <trans-unit id="form.button.import">
                 <source>form.button.import</source>
                 <target>Importuj</target>

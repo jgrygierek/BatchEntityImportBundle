@@ -29,7 +29,9 @@ class MatrixRecordType extends AbstractType
         $configuration = $options['configuration'];
         $fieldDefinitions = $configuration->getFieldsDefinitions();
 
-        $this->addEntityField($builder, $configuration->getEntityClassName());
+        if ($configuration->allowOverrideEntity()) {
+            $this->addEntityField($builder, $configuration->getEntityClassName());
+        }
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,

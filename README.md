@@ -20,6 +20,7 @@ Importing entities with preview and edit features for Symfony.
 * [Creating controller](#creating-controller)
 * [Translations](#translations)
 * [Fields definitions](#fields-definitions)
+* [Show & hide entity override column](#show--hide-entity-override-column)
 * [Overriding templates](#overriding-templates)
     * [Global templates](#global-templates)
     * [Controller-specific templates](#controller-specific-templates)
@@ -156,12 +157,15 @@ If suffix will be added to translatable entity, but field will not be found in t
 If you want to change types of rendered fields, instead of using default ones,
 you have to override method in your import configuration.
 
+To avoid errors during data import, you can add here validation rules.
+
 ```php
 
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Constraints\Length;
 
 public function getFieldsDefinitions(): array
 {
@@ -182,9 +186,22 @@ public function getFieldsDefinitions(): array
                 'attr' => [
                     'rows' => 2,
                 ],
+                'constraints' => [new Length(['max' => 255])],
             ]
         ),
     ];
+}
+```
+
+## Show & hide entity override column
+
+If you want to hide/show an entity column that allows you to override entity `default: true`,
+you have to override this method in your import configuration
+
+```php
+public function allowOverrideEntity(): bool
+{
+    return true;
 }
 ```
 
@@ -265,6 +282,7 @@ protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface 
             'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
             'data' => $matrix->getRecords(),
             'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+            'importConfiguration' => $this->getImportConfiguration($entityManager),
         ]
     );
 }

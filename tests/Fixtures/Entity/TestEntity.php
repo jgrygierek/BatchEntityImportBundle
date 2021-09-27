@@ -11,15 +11,26 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class TestEntity extends AbstractEntity
 {
-    private string $testProperty = '';
+    /**
+     * @ORM\Column(type="string")
+     */
+    public string $testPublicProperty = '';
+    /**
+     * @ORM\Column(type="string", unique=true)
+     */
+    private string $testPrivateProperty = '';
+    /**
+     * @ORM\Column(type="string")
+     */
+    private string $testPrivatePropertyNoSetter = '';
 
-    public function setTestProperty(string $testProperty): void
+    public function setTestPrivateProperty(string $testPrivateProperty): void
     {
-        $this->testProperty = $testProperty;
+        $this->testPrivateProperty = $testPrivateProperty;
     }
 
-    public function getTestProperty(): string
+    public function getTestPrivateProperty(): string
     {
-        return $this->testProperty;
+        return $this->testPrivateProperty;
     }
 }
