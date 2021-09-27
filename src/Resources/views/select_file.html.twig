@@ -1,7 +1,7 @@
 {% extends batch_entity_import_template('layout') %}
 
 {% block batch_entity_import_content %}
-    {{ form_start(form) }}
+    {{ form_start(form, {'action': path(app.request.attributes.get('_route')) }) }}
     {{ form_rest(form) }}
     <button type="submit" id="btn-submit" class="btn btn-default">{{ 'form.button.import'|trans({}, 'BatchEntityImportBundle') }}</button>
     {{ form_end(form) }}
