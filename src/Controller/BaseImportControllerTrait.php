@@ -12,6 +12,7 @@ use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -55,7 +56,7 @@ trait BaseImportControllerTrait
 
             $errors = $validator->validate($matrix);
             if (0 === $errors->count()) {
-                return $this->prepareMatrixEditView($matrix, $entityManager);
+                return $this->prepareMatrixEditView($matrix, $entityManager, true);
             }
         } else {
             $errors = $form->getErrors();
@@ -76,14 +77,19 @@ trait BaseImportControllerTrait
         );
     }
 
-    protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager): Response
+    protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager, bool $manualSubmit = false): Response
     {
+        $form = $this->createMatrixForm($matrix, $entityManager);
+        if ($manualSubmit) {
+            $this->manualSubmitMatrixForm($form, $matrix);
+        }
+
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
             [
                 'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
                 'data' => $matrix->getRecords(),
-                'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+                'form' => $form->createView(),
                 'importConfiguration' => $this->getImportConfiguration($entityManager),
             ]
         );
@@ -110,6 +116,8 @@ trait BaseImportControllerTrait
                 $this->getImportConfiguration($entityManager)->import($matrix);
                 $msg = $translator->trans('success.import', [], 'BatchEntityImportBundle');
                 $this->addFlash('success', $msg);
+
+                return $this->redirectToImport();
             } catch (BatchEntityImportExceptionInterface $e) {
                 $msg = $translator->trans($e->getMessage(), [], 'BatchEntityImportBundle');
                 $this->addFlash('error', $msg);
@@ -118,7 +126,7 @@ trait BaseImportControllerTrait
 
         $this->setErrorAsFlash($form->getErrors(true));
 
-        return $this->redirectToImport();
+        return $this->prepareMatrixEditView($matrix, $entityManager);
     }
 
     protected function getImportConfiguration(EntityManagerInterface $entityManager): ImportConfigurationInterface
@@ -142,5 +150,16 @@ trait BaseImportControllerTrait
             $error = reset($errors);
             $this->addFlash('error', $error->getMessage());
         }
+    }
+
+    protected function manualSubmitMatrixForm(FormInterface $form, Matrix $matrix): void
+    {
+        $csrfTokenManager = $form->getConfig()->getOption('csrf_token_manager');
+        $tokenId = $form->getConfig()->getOption('csrf_token_id') ?? $form->getName();
+
+        $form->submit([
+            '_token' => $csrfTokenManager->getToken($tokenId)->getValue(),
+            'records' => array_map(static fn (MatrixRecord $record) => $record->getData(), $matrix->getRecords()),
+        ]);
     }
 }
