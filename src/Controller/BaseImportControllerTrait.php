@@ -157,9 +157,9 @@ trait BaseImportControllerTrait
         $data = ['records' => array_map(static fn (MatrixRecord $record) => $record->getData(), $matrix->getRecords())];
 
         $csrfTokenManager = $form->getConfig()->getOption('csrf_token_manager');
-        if($csrfTokenManager){
+        if ($csrfTokenManager) {
             $tokenId = $form->getConfig()->getOption('csrf_token_id') ?? $form->getName();
-            $data['_token'] =  $csrfTokenManager->getToken($tokenId)->getValue();
+            $data['_token'] = $csrfTokenManager->getToken($tokenId)->getValue();
         }
 
         $form->submit($data);
