@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class Matrix
 {
+    private const RESERVED_ENTITY_COLUMN_NAME = 'entity';
     /**
      * @Assert\NotBlank()
      * @Assert\All({
@@ -69,12 +70,17 @@ class Matrix
     private function clearHeader(array $header): array
     {
         return array_values(
-            array_filter($header, static fn ($e) => !empty(trim((string) $e)))
+            array_filter($header, fn (?string $columnName) => $this->isColumnNameValid($columnName))
         );
     }
 
     private function clearRecordData(array $data): array
     {
-        return array_filter($data, static fn ($key) => !empty(trim((string) $key)), ARRAY_FILTER_USE_KEY);
+        return array_filter($data, fn (?string $columnName) => $this->isColumnNameValid($columnName), ARRAY_FILTER_USE_KEY);
+    }
+
+    private function isColumnNameValid(?string $name): bool
+    {
+        return !empty(trim((string) $name)) && self::RESERVED_ENTITY_COLUMN_NAME !== $name;
     }
 }
