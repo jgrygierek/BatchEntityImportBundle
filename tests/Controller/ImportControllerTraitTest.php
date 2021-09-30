@@ -93,7 +93,6 @@ class ImportControllerTraitTest extends WebTestCase
         $uploadedFile = __DIR__ . '/../Fixtures/Resources/test_exception_invalid_type.csv';
         $this->submitSelectFileForm($uploadedFile);
         $this->client->submitForm('btn-submit');
-        $this->client->followRedirect();
         self::assertStringContainsString('Invalid type of data. Probably missing validation.', $this->client->getResponse()->getContent());
     }
 

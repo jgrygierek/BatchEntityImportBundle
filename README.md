@@ -274,14 +274,18 @@ protected function prepareSelectFileView(FormInterface $form): Response
     );
 }
 
-protected function prepareMatrixEditView(Matrix $matrix, EntityManagerInterface $entityManager): Response
+protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, EntityManagerInterface $entityManager, bool $manualSubmit = false): Response
 {
+    if ($manualSubmit) {
+        $this->manualSubmitMatrixForm($form, $matrix);
+    }
+
     return $this->prepareView(
         $this->getMatrixEditTemplateName(),
         [
             'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
             'data' => $matrix->getRecords(),
-            'form' => $this->createMatrixForm($matrix, $entityManager)->createView(),
+            'form' => $form->createView(),
             'importConfiguration' => $this->getImportConfiguration($entityManager),
         ]
     );
