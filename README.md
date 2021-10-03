@@ -14,6 +14,9 @@ Importing entities with preview and edit features for Symfony.
 * Columns names are required and should be added as header (first row).
 * If column does not have name provided, will be removed from loaded data.
 
+![Select File](docs/select_file.png)
+![Edit Matrix](docs/edit_matrix.png)
+
 ## Documentation
 * [Installation](#installation)
 * [Basic configuration class](#basic-configuration-class)
