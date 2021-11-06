@@ -13,7 +13,7 @@ class TranslatableEntityFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 20; ++$i) {
             $entity = new TranslatableEntity();
             $entity->setTestPrivateProperty('abcd_' . $i);
 

@@ -51,7 +51,7 @@ class ImportControllerTraitTest extends WebTestCase
         $this->checkData('new_value', $updatedEntityId);
     }
 
-    public function atestImportFileWrongExtension(): void
+    public function testImportFileWrongExtension(): void
     {
         $uploadedFile = __DIR__ . '/../Fixtures/Resources/test.txt';
         $this->submitSelectFileForm($uploadedFile);
@@ -60,7 +60,7 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
     }
 
-    public function atestInvalidDataTypeFlashMessage(): void
+    public function testInvalidDataTypeFlashMessage(): void
     {
         $uploadedFile = __DIR__ . '/../Fixtures/Resources/test_exception_invalid_type.csv';
         $this->submitSelectFileForm($uploadedFile);
