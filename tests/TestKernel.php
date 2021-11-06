@@ -6,8 +6,10 @@ namespace JG\BatchEntityImportBundle\Tests;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
+use Knp\DoctrineBehaviors\DoctrineBehaviorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,7 +26,14 @@ class TestKernel extends Kernel
 
     public function registerBundles(): array
     {
-        return [new BatchEntityImportBundle(), new DoctrineBundle(), new FrameworkBundle(), new TwigBundle()];
+        return [
+            new SecurityBundle(),
+            new BatchEntityImportBundle(),
+            new DoctrineBundle(),
+            new FrameworkBundle(),
+            new TwigBundle(),
+            new DoctrineBehaviorsBundle(),
+        ];
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader): void
@@ -44,10 +53,10 @@ class TestKernel extends Kernel
             ]);
 
             if (!$container->hasDefinition('kernel')) {
-                $container->register('kernel', static::class)
-                          ->setSynthetic(true)
-                          ->setPublic(true)
-                ;
+                $container
+                    ->register('kernel', static::class)
+                    ->setSynthetic(true)
+                    ->setPublic(true);
             }
 
             $kernelDefinition = $container->getDefinition('kernel');
