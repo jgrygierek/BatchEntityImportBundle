@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Form\Type;
 
+use Doctrine\ORM\EntityRepository;
+use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
@@ -30,7 +32,7 @@ class MatrixRecordType extends AbstractType
         $fieldDefinitions = $configuration->getFieldsDefinitions();
 
         if ($configuration->allowOverrideEntity()) {
-            $this->addEntityField($builder, $configuration->getEntityClassName());
+            $this->addEntityField($builder, $configuration->getEntityClassName(), $configuration->getEntityTranslationRelationName());
         }
 
         $builder->addEventListener(
@@ -61,7 +63,7 @@ class MatrixRecordType extends AbstractType
             ->addAllowedTypes('configuration', ImportConfigurationInterface::class);
     }
 
-    private function addEntityField(FormBuilderInterface $builder, string $entityClassName): void
+    private function addEntityField(FormBuilderInterface $builder, string $entityClassName, ?string $entityTranslationRelationName): void
     {
         $builder
             ->add(
@@ -73,6 +75,14 @@ class MatrixRecordType extends AbstractType
                     'placeholder' => '---',
                     'translation_domain' => false,
                     'required' => false,
+                    'query_builder' => function (EntityRepository $er) use ($entityTranslationRelationName) {
+                        $qb = $er->createQueryBuilder('qb')->select('qb');
+                        if ($entityTranslationRelationName) {
+                            $qb->addSelect(['t'])->leftJoin("qb.$entityTranslationRelationName", 't');
+                        }
+
+                        return $qb;
+                    },
                 ]
             );
     }

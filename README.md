@@ -19,11 +19,14 @@ Importing entities with preview and edit features for Symfony.
 
 ## Documentation
 * [Installation](#installation)
-* [Basic configuration class](#basic-configuration-class)
+* [Configuration class](#configuration-class)
+  * [Basic configuration class](#basic-configuration-class)
+  * [Fields definitions](#fields-definitions)
+  * [Passing services to configuration class](#passing-services-to-configuration-class)
+  * [Show & hide entity override column](#show--hide-entity-override-column)
+  * [Optimizing queries](#optimizing queries)
 * [Creating controller](#creating-controller)
 * [Translations](#translations)
-* [Fields definitions](#fields-definitions)
-* [Show & hide entity override column](#show--hide-entity-override-column)
 * [Overriding templates](#overriding-templates)
     * [Global templates](#global-templates)
     * [Controller-specific templates](#controller-specific-templates)
@@ -44,9 +47,13 @@ Add entry to `bundles.php` file:
 JG\BatchEntityImportBundle\BatchEntityImportBundle::class => ['all' => true],
 ```
 
-## Basic configuration class
+## Configuration class
 
-You have to create configuration class. In the simplest case it will contain only class of used entity.
+To define how the import function should work, you need to create a configuration class.
+
+### Basic configuration class
+
+In the simplest case it will contain only class of used entity.
 
 ```php
 namespace App\Model\ImportConfiguration;
@@ -57,15 +64,89 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class UserImportConfiguration extends AbstractImportConfiguration
 {
-    public function __construct(EntityManagerInterface $em, ...)
-    {
-        parent::__construct($em);
-    }
-
     public function getEntityClassName(): string
     {
         return User::class;
     }
+}
+```
+
+### Fields definitions
+
+If you want to change types of rendered fields, instead of using default ones,
+you have to override method in your import configuration.
+
+To avoid errors during data import, you can add here validation rules.
+
+```php
+
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Constraints\Length;
+
+public function getFieldsDefinitions(): array
+{
+    return [
+        'age' => new FormFieldDefinition(
+            IntegerType::class,
+            [
+                'attr' => [
+                    'min' => 0,
+                    'max' => 999,
+                ],
+            ]
+        ),
+        'name' => new FormFieldDefinition(TextType::class),
+        'description' => new FormFieldDefinition(
+            TextareaType::class,
+            [
+                'attr' => [
+                    'rows' => 2,
+                ],
+                'constraints' => [new Length(['max' => 255])],
+            ]
+        ),
+    ];
+}
+```
+
+### Passing services to configuration class
+
+If you want to pass some additional services to your configuration, just override constructor.
+
+```php
+public function __construct(EntityManagerInterface $em, TestService $service)
+{
+    parent::__construct($em);
+
+    $this->testService = $service;
+}
+```
+
+### Show & hide entity override column
+
+If you want to hide/show an entity column that allows you to override entity `default: true`,
+you have to override this method in your import configuration
+
+```php
+public function allowOverrideEntity(): bool
+{
+    return true;
+}
+```
+
+### Optimizing queries
+
+If you use **KnpLabs Translatable** extension for your entity, probably you will notice increased number of queries, because of Lazy Loading.
+
+To optimize this, you can use `getEntityTranslationRelationName()` method to pass the relation name to the translation.
+
+```php
+public function getEntityTranslationRelationName(): ?string
+{
+    return 'translations';
 }
 ```
 
@@ -154,59 +235,6 @@ To use this feature, every column with translatable values should be suffixed wi
 If suffix will be added to non-translatable entity, field will be skipped.
 
 If suffix will be added to translatable entity, but field will not be found in translation class, field will be skipped.
-
-## Fields definitions
-
-If you want to change types of rendered fields, instead of using default ones,
-you have to override method in your import configuration.
-
-To avoid errors during data import, you can add here validation rules.
-
-```php
-
-use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Validator\Constraints\Length;
-
-public function getFieldsDefinitions(): array
-{
-    return [
-        'age' => new FormFieldDefinition(
-            IntegerType::class,
-            [
-                'attr' => [
-                    'min' => 0,
-                    'max' => 999,
-                ],
-            ]
-        ),
-        'name' => new FormFieldDefinition(TextType::class),
-        'description' => new FormFieldDefinition(
-            TextareaType::class,
-            [
-                'attr' => [
-                    'rows' => 2,
-                ],
-                'constraints' => [new Length(['max' => 255])],
-            ]
-        ),
-    ];
-}
-```
-
-## Show & hide entity override column
-
-If you want to hide/show an entity column that allows you to override entity `default: true`,
-you have to override this method in your import configuration
-
-```php
-public function allowOverrideEntity(): bool
-{
-    return true;
-}
-```
 
 ## Overriding templates
 
