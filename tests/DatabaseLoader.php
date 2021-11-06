@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests;
 
+use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
+use Doctrine\Common\DataFixtures\Loader;
+use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Data\TranslatableEntityFixtures;
 
 class DatabaseLoader
 {
@@ -31,7 +35,17 @@ class DatabaseLoader
         $this->reloadEntityClasses($entityClasses);
     }
 
-    public function reloadEntityClasses(array $entityClasses): void
+    public function loadFixtures(): void
+    {
+        $loader = new Loader();
+        $loader->addFixture(new TranslatableEntityFixtures());
+
+        $purger = new ORMPurger();
+        $executor = new ORMExecutor($this->entityManager, $purger);
+        $executor->execute($loader->getFixtures());
+    }
+
+    private function reloadEntityClasses(array $entityClasses): void
     {
         $schema = [];
         foreach ($entityClasses as $entityClass) {

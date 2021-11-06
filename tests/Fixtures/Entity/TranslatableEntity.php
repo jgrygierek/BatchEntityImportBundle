@@ -47,6 +47,6 @@ class TranslatableEntity extends AbstractEntity implements TranslatableInterface
 
     public function __toString(): string
     {
-        return $this->testPrivateProperty;
+        return (string) $this->translate();
     }
 }

@@ -28,6 +28,11 @@ interface ImportConfigurationInterface
     public function getFieldsDefinitions(): array;
 
     /**
+     * Use this method to pass a relation name to entity translation.
+     */
+    public function getEntityTranslationRelationName(): ?string;
+
+    /**
      * Import data from matrix to database.
      */
     public function import(Matrix $matrix): void;

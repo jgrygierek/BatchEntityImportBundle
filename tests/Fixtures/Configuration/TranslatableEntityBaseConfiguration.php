@@ -13,4 +13,9 @@ class TranslatableEntityBaseConfiguration extends AbstractImportConfiguration
     {
         return TranslatableEntity::class;
     }
+
+    public function getEntityTranslationRelationName(): ?string
+    {
+        return 'translations';
+    }
 }

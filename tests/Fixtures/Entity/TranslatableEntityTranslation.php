@@ -20,6 +20,11 @@ class TranslatableEntityTranslation extends AbstractEntity implements Translatio
      */
     private string $testTranslationProperty = '';
 
+    public function __toString(): string
+    {
+        return $this->testTranslationProperty;
+    }
+
     public function getTestTranslationProperty(): string
     {
         return $this->testTranslationProperty;
