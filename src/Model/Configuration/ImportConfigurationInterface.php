@@ -29,8 +29,6 @@ interface ImportConfigurationInterface
 
     /**
      * Use this method to pass a relation name to entity translation.
-     *
-     * @return string|null
      */
     public function getEntityTranslationRelationName(): ?string;
 
