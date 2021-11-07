@@ -24,7 +24,7 @@ Importing entities with preview and edit features for Symfony.
   * [Fields definitions](#fields-definitions)
   * [Passing services to configuration class](#passing-services-to-configuration-class)
   * [Show & hide entity override column](#show--hide-entity-override-column)
-  * [Optimizing queries](#optimizing queries)
+  * [Optimizing queries](#optimizing-queries)
 * [Creating controller](#creating-controller)
 * [Translations](#translations)
 * [Overriding templates](#overriding-templates)
@@ -110,6 +110,21 @@ public function getFieldsDefinitions(): array
         ),
     ];
 }
+```
+
+This bundle provides a new validator to check if record data does not exist yet in database:
+
+```php
+use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUniqueValue;
+
+'field_name' => new FormFieldDefinition(
+    IntegerType::class,
+    [
+        'constraints' => [
+            new MatrixRecordUniqueValue(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
+        ],
+    ]
+),
 ```
 
 ### Passing services to configuration class

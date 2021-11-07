@@ -13,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class ImportControllerTraitTest extends WebTestCase
 {
     private const DEFAULT_RECORDS_NUMBER = 20;
-    private const NEW_RECORDS_NUMBER = 12;
+    private const NEW_RECORDS_NUMBER = 30;
     protected KernelBrowser $client;
 
     protected function setUp(): void
