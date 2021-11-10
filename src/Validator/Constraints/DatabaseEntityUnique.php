@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
-class DatabaseEntityUniqueValue extends Constraint
+class DatabaseEntityUnique extends Constraint
 {
     public string $message = 'validation.matrix.record.value.unique';
     public string $entityClassName;

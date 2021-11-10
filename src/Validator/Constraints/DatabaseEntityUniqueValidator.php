@@ -11,7 +11,7 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class DatabaseEntityUniqueValueValidator extends ConstraintValidator
+class DatabaseEntityUniqueValidator extends ConstraintValidator
 {
     private EntityManager $entityManager;
     private static array $duplicates = [];
