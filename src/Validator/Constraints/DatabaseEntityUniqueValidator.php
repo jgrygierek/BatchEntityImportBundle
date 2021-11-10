@@ -11,7 +11,7 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class MatrixRecordUniqueValueValidator extends ConstraintValidator
+class DatabaseEntityUniqueValueValidator extends ConstraintValidator
 {
     private EntityManager $entityManager;
     private static array $duplicates = [];
@@ -22,8 +22,8 @@ class MatrixRecordUniqueValueValidator extends ConstraintValidator
     }
 
     /**
-     * @param int|string                         $value
-     * @param Constraint|MatrixRecordUniqueValue $constraint
+     * @param int|string                      $value
+     * @param Constraint|DatabaseEntityUnique $constraint
      */
     public function validate($value, Constraint $constraint): void
     {

@@ -115,13 +115,13 @@ public function getFieldsDefinitions(): array
 This bundle provides a new validator to check if record data does not exist yet in database:
 
 ```php
-use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUniqueValue;
+use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 
 'field_name' => new FormFieldDefinition(
     IntegerType::class,
     [
         'constraints' => [
-            new MatrixRecordUniqueValue(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
+            new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
         ],
     ]
 ),
