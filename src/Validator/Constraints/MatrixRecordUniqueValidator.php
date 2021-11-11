@@ -6,20 +6,13 @@ namespace JG\BatchEntityImportBundle\Validator\Constraints;
 
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class MatrixRecordUniqueValidator extends ConstraintValidator
 {
-    private TranslatorInterface $translator;
     private static array $duplicates = [];
-
-    public function __construct(TranslatorInterface $translator)
-    {
-        $this->translator = $translator;
-    }
 
     /**
      * @param Matrix                        $value
@@ -27,7 +20,8 @@ class MatrixRecordUniqueValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
-        $errorMessage = $this->translator->trans($constraint->message, ['%fields%' => implode(', ', $constraint->fields)], 'validators');
+        $this->validateArguments($value, $constraint);
+        $this->context->setNode($this->context->getValue(), $this->context->getObject(), $this->context->getMetadata(), '');
         $uniqueIds = array_keys(array_unique($this->getHashedMatrixRecordsDataForDuplicationCheck($value->getRecords(), $constraint->fields)));
 
         foreach ($value->getRecords() as $index => $record) {
@@ -36,11 +30,21 @@ class MatrixRecordUniqueValidator extends ConstraintValidator
             }
 
             $this->context
-                ->getRoot()
-                ->get('records')
-                ->get((string) $index)
-                ->get($constraint->fields[0])
-                ->addError(new FormError($errorMessage));
+                ->buildViolation($constraint->message, ['%fields%' => implode(', ', $constraint->fields)])
+                ->atPath("children[records][$index][{$constraint->fields[0]}]")
+                ->setInvalidValue($record)
+                ->addViolation();
+        }
+    }
+
+    private function validateArguments($value, Constraint $constraint): void
+    {
+        if (!$constraint instanceof MatrixRecordUnique) {
+            throw new UnexpectedTypeException($constraint, MatrixRecordUnique::class);
+        }
+
+        if (!$value instanceof Matrix) {
+            throw new UnexpectedTypeException($constraint, Matrix::class);
         }
     }
 

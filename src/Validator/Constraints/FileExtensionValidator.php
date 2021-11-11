@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Validator\Constraints;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class FileExtensionValidator extends ConstraintValidator
 {
@@ -16,6 +17,10 @@ class FileExtensionValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
+        if (!$constraint instanceof FileExtension) {
+            throw new UnexpectedTypeException($constraint, FileExtension::class);
+        }
+
         $extensions = array_map('strtolower', $constraint->extensions);
 
         if ($value && !$this->hasValidExtension($value, $extensions)) {

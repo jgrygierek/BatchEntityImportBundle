@@ -7,7 +7,3 @@ services:
     JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator:
         arguments: [ '@doctrine.orm.entity_manager' ]
         tags: [ validator.constraint_validator ]
-
-    JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUniqueValidator:
-        arguments: [ '@translator' ]
-        tags: [ validator.constraint_validator ]

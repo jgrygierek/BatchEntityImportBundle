@@ -10,6 +10,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class DatabaseEntityUniqueValidator extends ConstraintValidator
 {
@@ -27,6 +28,10 @@ class DatabaseEntityUniqueValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
+        if (!$constraint instanceof DatabaseEntityUnique) {
+            throw new UnexpectedTypeException($constraint, DatabaseEntityUnique::class);
+        }
+
         /** @var Form $object */
         $object = $this->context->getObject();
         /** @var MatrixRecord $matrixRecord */
