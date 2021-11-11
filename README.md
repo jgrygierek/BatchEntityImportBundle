@@ -131,8 +131,9 @@ use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 ),
 ```
 
-If you want to check duplication without checking database, only matrix records values, you can use another constraint.
+If you want to check duplication without checking database, only matrix records values, you can use another validator.
 It has been created to be used on whole Matrix form, please don't use it on form fields.
+Names of fields should be the same as names of columns in your uploaded file.
 
 ```php
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;

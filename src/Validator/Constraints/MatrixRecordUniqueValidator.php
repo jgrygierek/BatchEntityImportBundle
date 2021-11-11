@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Validator\Constraints;
 
+use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Validator\Constraint;
@@ -12,8 +13,6 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class MatrixRecordUniqueValidator extends ConstraintValidator
 {
-    private static array $duplicates = [];
-
     /**
      * @param Matrix                        $value
      * @param Constraint|MatrixRecordUnique $constraint
@@ -44,7 +43,11 @@ class MatrixRecordUniqueValidator extends ConstraintValidator
         }
 
         if (!$value instanceof Matrix) {
-            throw new UnexpectedTypeException($constraint, Matrix::class);
+            throw new UnexpectedTypeException($value, Matrix::class);
+        }
+
+        if (!empty(array_diff($constraint->fields, $value->getHeader()))) {
+            throw new InvalidArgumentException('Option "fields" contains invalid data.');
         }
     }
 
