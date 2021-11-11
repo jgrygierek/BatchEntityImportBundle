@@ -8,6 +8,8 @@ use Generator;
 use JG\BatchEntityImportBundle\Validator\Constraints\FileExtension;
 use JG\BatchEntityImportBundle\Validator\Constraints\FileExtensionValidator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints\Blank;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
 class FileExtensionValidatorTest extends ConstraintValidatorTestCase
@@ -54,6 +56,13 @@ class FileExtensionValidatorTest extends ConstraintValidatorTestCase
         yield ['XLS'];
         yield ['XLSX'];
         yield ['ODS'];
+    }
+
+    public function testValidatorConstraintException(): void
+    {
+        $constraint = new Blank();
+        $this->expectExceptionObject(new UnexpectedTypeException($constraint, FileExtension::class));
+        $this->validator->validate($this->getUploadedFileMock('csv'), new Blank());
     }
 
     private function getUploadedFileMock(string $fileExtension): UploadedFile
