@@ -9,19 +9,23 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
-class DatabaseEntityUnique extends Constraint
+class MatrixRecordUnique extends Constraint
 {
-    public string $message = 'validation.entity.unique';
-    public string $entityClassName;
+    public string $message = 'validation.matrix.record.unique';
     public array $fields;
 
     public function getDefaultOption(): string
     {
-        return 'entityClassName';
+        return 'fields';
     }
 
     public function getRequiredOptions(): array
     {
-        return ['entityClassName', 'fields'];
+        return ['fields'];
+    }
+
+    public function getTargets()
+    {
+        return self::CLASS_CONSTRAINT;
     }
 }

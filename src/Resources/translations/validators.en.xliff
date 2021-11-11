@@ -2,6 +2,10 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
     <file source-language="en" datatype="plaintext" original="file.ext">
         <body>
+            <trans-unit id="validation.entity.unique">
+                <source>validation.entity.unique</source>
+                <target>Such entity already exists for the same values of fields: %fields%.</target>
+            </trans-unit>
             <trans-unit id="validation.file.extension">
                 <source>validation.file.extension</source>
                 <target>Wrong file extension. Allowed extensions: %extensions.</target>
@@ -9,6 +13,10 @@
             <trans-unit id="validation.matrix.header.name">
                 <source>validation.matrix.header.name</source>
                 <target>Header name is invalid.</target>
+            </trans-unit>
+            <trans-unit id="validation.matrix.record.unique">
+                <source>validation.matrix.record.unique</source>
+                <target>This record should be unique for fields: %fields%.</target>
             </trans-unit>
         </body>
     </file>

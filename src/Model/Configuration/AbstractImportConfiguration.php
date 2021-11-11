@@ -35,6 +35,11 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return null;
     }
 
+    public function getMatrixConstraints(): array
+    {
+        return [];
+    }
+
     public function import(Matrix $matrix): void
     {
         $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName());

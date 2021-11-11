@@ -34,7 +34,7 @@ class DatabaseEntityUniqueValidator extends ConstraintValidator
 
         $matrixDataToCompare = $this->getMatrixRecordDataToCompare($matrixRecord, $constraint->fields);
         if ($this->isDuplicate($matrixDataToCompare)) {
-            $this->context->buildViolation($constraint->message, [])->addViolation();
+            $this->addViolation($constraint);
 
             return;
         }
@@ -43,9 +43,14 @@ class DatabaseEntityUniqueValidator extends ConstraintValidator
         $repository = $this->entityManager->getRepository($constraint->entityClassName);
 
         if (!$repository->matching($criteria)->isEmpty()) {
-            $this->context->buildViolation($constraint->message, [])->addViolation();
+            $this->addViolation($constraint);
             $this->addDuplicate($matrixDataToCompare);
         }
+    }
+
+    private function addViolation(DatabaseEntityUnique $constraint): void
+    {
+        $this->context->buildViolation($constraint->message, ['%fields%' => implode(',', $constraint->fields)])->addViolation();
     }
 
     private function getMatrixRecordDataToCompare(MatrixRecord $matrixRecord, array $fields): array

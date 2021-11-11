@@ -33,6 +33,11 @@ interface ImportConfigurationInterface
     public function getEntityTranslationRelationName(): ?string;
 
     /**
+     * Use this method to pass constraints to the main Matrix form.
+     */
+    public function getMatrixConstraints(): array;
+
+    /**
      * Import data from matrix to database.
      */
     public function import(Matrix $matrix): void;

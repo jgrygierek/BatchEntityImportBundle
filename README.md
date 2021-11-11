@@ -22,6 +22,7 @@ Importing entities with preview and edit features for Symfony.
 * [Configuration class](#configuration-class)
   * [Basic configuration class](#basic-configuration-class)
   * [Fields definitions](#fields-definitions)
+  * [Matrix validation](#matrix-validation)
   * [Passing services to configuration class](#passing-services-to-configuration-class)
   * [Show & hide entity override column](#show--hide-entity-override-column)
   * [Optimizing queries](#optimizing-queries)
@@ -112,7 +113,10 @@ public function getFieldsDefinitions(): array
 }
 ```
 
-This bundle provides a new validator to check if record data does not exist yet in database:
+### Matrix validation
+
+This bundle provides a new validator to check if record data does not exist yet in database. It should be used
+in form field definition.
 
 ```php
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
@@ -125,6 +129,20 @@ use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
         ],
     ]
 ),
+```
+
+If you want to check duplication without checking database, only matrix records values, you can use another constraint.
+It has been created to be used on whole Matrix form, please don't use it on form fields.
+
+```php
+use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
+
+public function getMatrixConstraints(): array
+{
+    return [
+        new MatrixRecordUnique(['fields' => ['field_name']]),
+    ];
+}
 ```
 
 ### Passing services to configuration class
