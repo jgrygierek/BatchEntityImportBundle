@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraint;
 class MatrixRecordUnique extends Constraint
 {
     public string $message = 'validation.matrix.record.unique';
-    public array $fields;
+    public array $fields = [];
 
     public function __construct($options = null, array $groups = null, $payload = null)
     {
