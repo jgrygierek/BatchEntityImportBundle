@@ -49,6 +49,7 @@
         "symfony/phpunit-bridge": "^5.3.8",
         "symfony/security-bundle": "^4.4|^5.0"
     },
+    "minimum-stability": "dev",
     "config": {
         "sort-packages": true
     },
