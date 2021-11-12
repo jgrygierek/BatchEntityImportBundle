@@ -3,6 +3,8 @@
 ![Code Style](https://github.com/jgrygierek/BatchEntityImportBundle/workflows/Code%20Style/badge.svg)
 ![Tests](https://github.com/jgrygierek/BatchEntityImportBundle/workflows/Tests/badge.svg)
 ![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master)
+![PHP Versions](https://img.shields.io/badge/PHP-7.4--8.1-blue)
+![Symfony Versions](https://img.shields.io/badge/Symfony-4.4--5.4-blue)
 
 Importing entities with preview and edit features for Symfony.
 

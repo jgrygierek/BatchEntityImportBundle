@@ -9,7 +9,7 @@ services:
 
     JG\BatchEntityImportBundle\Tests\Fixtures\Controller\:
         resource: '../Fixtures/Controller'
-        tags: ['controller.service_arguments']
+        tags: [ 'controller.service_arguments' ]
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
     JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration:
@@ -17,6 +17,7 @@ services:
     Symfony\Component\Security\Core\Security: ~
 
 framework:
+    annotations: ~
     test: true
     profiler:
         enabled: true
@@ -24,6 +25,8 @@ framework:
     session:
         handler_id: ~
         storage_id: session.storage.mock_file
+    validation:
+        enable_annotations: true
 
 twig: ~
 
