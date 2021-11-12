@@ -25,7 +25,7 @@ class MatrixRecordTypeTest extends WebTestCase
     {
         self::bootKernel();
 
-        $container = self::$kernel->getContainer();
+        $container = property_exists($this, 'container') ? self::$container : self::getContainer();
         $this->factory = $container->get('form.factory');
     }
 

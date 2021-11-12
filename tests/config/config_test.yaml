@@ -12,7 +12,7 @@ services:
         tags: [ 'controller.service_arguments' ]
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
-    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration:
+    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration: ~
 
     Symfony\Component\Security\Core\Security: ~
 
@@ -24,7 +24,6 @@ framework:
         collect: true
     session:
         handler_id: ~
-        storage_id: session.storage.mock_file
     validation:
         enable_annotations: true
 
