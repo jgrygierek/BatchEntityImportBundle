@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Form\Type\MatrixType;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use Symfony\Component\Form\FormInterface;
@@ -31,13 +30,13 @@ trait ImportControllerTrait
         return $this->getParameter('batch_entity_import.templates.edit_matrix');
     }
 
-    protected function createMatrixForm(Matrix $matrix, EntityManagerInterface $em): FormInterface
+    protected function createMatrixForm(Matrix $matrix): FormInterface
     {
         return $this->createForm(
             MatrixType::class,
             $matrix,
             [
-                'configuration' => $this->getImportConfiguration($em),
+                'configuration' => $this->getImportConfiguration(),
                 'action' => $this->getMatrixSaveActionUrl(),
             ]
         );
