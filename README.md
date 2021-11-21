@@ -5,6 +5,7 @@
 ![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master)
 ![PHP Versions](https://img.shields.io/badge/PHP-7.4--8.1-blue)
 ![Symfony Versions](https://img.shields.io/badge/Symfony-4.4--6.0-blue)
+[![SymfonyInsight](https://insight.symfony.com/projects/ad63558e-3612-434f-a93d-0fc5fce2dd20/mini.svg)](https://insight.symfony.com/projects/ad63558e-3612-434f-a93d-0fc5fce2dd20)
 
 Importing entities with preview and edit features for Symfony.
 
@@ -62,7 +63,6 @@ namespace App\Model\ImportConfiguration;
 
 use App\Entity\User;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
-use Doctrine\ORM\EntityManagerInterface;
 
 class UserImportConfiguration extends AbstractImportConfiguration
 {
@@ -162,7 +162,6 @@ This is just an example, depending on your needs you can inject services in diff
 namespace App\Controller;
 
 use App\Model\ImportConfiguration\UserImportConfiguration;
-use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -179,17 +178,17 @@ class ImportController extends AbstractController
     /**
      * @Route("/user/import", name="user_import")
      */
-    public function import(Request $request, ValidatorInterface $validator, EntityManagerInterface $em): Response
+    public function import(Request $request, ValidatorInterface $validator): Response
     {
-        return $this->doImport($request, $validator, $em);
+        return $this->doImport($request, $validator);
     }
 
     /**
      * @Route("/user/import/save", name="user_import_save")
      */
-    public function importSave(Request $request, TranslatorInterface $translator, EntityManagerInterface $em): Response
+    public function importSave(Request $request, TranslatorInterface $translator): Response
     {
-        return $this->doImportSave($request, $translator, $em);
+        return $this->doImportSave($request, $translator);
     }
 
     protected function redirectToImport(): RedirectResponse
@@ -307,19 +306,21 @@ protected function prepareSelectFileView(FormInterface $form): Response
     );
 }
 
-protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, EntityManagerInterface $entityManager, bool $manualSubmit = false): Response
+protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, bool $manualSubmit = false): Response
 {
     if ($manualSubmit) {
         $this->manualSubmitMatrixForm($form, $matrix);
     }
 
+    $configuration = $this->getImportConfiguration();
+
     return $this->prepareView(
         $this->getMatrixEditTemplateName(),
         [
-            'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
+            'header_info' => $matrix->getHeaderInfo($configuration->getEntityClassName()),
             'data' => $matrix->getRecords(),
             'form' => $form->createView(),
-            'importConfiguration' => $this->getImportConfiguration($entityManager),
+            'importConfiguration' => $configuration,
         ]
     );
 }
