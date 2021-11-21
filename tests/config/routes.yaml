@@ -5,3 +5,11 @@ jg.batch_entity_import_bundle.test_controller.import:
 jg.batch_entity_import_bundle.test_controller.import_save:
     controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\Controller::importSave
     path: /jg_batch_entity_import_bundle/import_save
+
+jg.batch_entity_import_bundle.test_controller_no_service.import:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithoutConfigurationService::import
+    path: /jg_batch_entity_import_bundle/import_no_service
+
+jg.batch_entity_import_bundle.test_controller_no_service.import_save:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithoutConfigurationService::importSave
+    path: /jg_batch_entity_import_bundle/import_save_no_service
