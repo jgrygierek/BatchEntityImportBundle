@@ -73,6 +73,13 @@ class UserImportConfiguration extends AbstractImportConfiguration
 }
 ```
 
+Then register it as a service:
+
+```yaml
+services:
+  App\Model\ImportConfiguration\UserImportConfiguration: ~
+```
+
 ### Fields definitions
 
 If you want to change types of rendered fields, instead of using default ones,
@@ -207,7 +214,6 @@ class ImportController extends AbstractController
     }
     
     /**
-     * Only add this if u need to allow DI in your configuration class
      * NOTE: make sure the UserImportConfiguration is public
      * 
      * @return array<string, string>

@@ -9,6 +9,7 @@ use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class ImportControllerTraitTest extends WebTestCase
 {
@@ -66,6 +67,14 @@ class ImportControllerTraitTest extends WebTestCase
         $this->submitSelectFileForm($uploadedFile);
         $this->client->submitForm('btn-submit');
         self::assertStringContainsString('Invalid type of data. Probably missing validation.', $this->client->getResponse()->getContent());
+    }
+
+    public function testImportConfigurationServiceNotFound(): void
+    {
+        $this->client->catchExceptions(false);
+        $this->expectException(ServiceNotFoundException::class);
+        $this->client->request('GET', '/jg_batch_entity_import_bundle/import_no_service');
+        $this->client->submitForm('btn-submit', ['file_import[file]' => __DIR__ . '/../Fixtures/Resources/test.csv']);
     }
 
     private function submitSelectFileForm(string $uploadedFile): void
