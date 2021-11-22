@@ -27,7 +27,7 @@ Importing entities with preview and edit features for Symfony.
   * [Fields definitions](#fields-definitions)
   * [Passing services to configuration class](#passing-services-to-configuration-class)
   * [Show & hide entity override column](#show--hide-entity-override-column)
-  * [Optimizing queries](#optimizing queries)
+  * [Optimizing queries](#optimizing-queries)
 * [Creating controller](#creating-controller)
 * [Translations](#translations)
 * [Overriding templates](#overriding-templates)
@@ -165,10 +165,14 @@ Create controller with some required code.
 
 This is just an example, depending on your needs you can inject services in different ways.
 
+To enable automatic passing configuration service to your controller, please use `ImportConfigurationAutoInjectInterface` and `ImportConfigurationAutoInjectTrait`.
+
 ```php
 namespace App\Controller;
 
 use App\Model\ImportConfiguration\UserImportConfiguration;
+use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectInterface;
+use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectTrait;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -178,9 +182,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ImportController extends AbstractController
+class ImportController extends AbstractController implements ImportConfigurationAutoInjectInterface
 {
     use ImportControllerTrait;
+    use ImportConfigurationAutoInjectTrait;
 
     /**
      * @Route("/user/import", name="user_import")
@@ -211,21 +216,6 @@ class ImportController extends AbstractController
     protected function getImportConfigurationClassName(): string
     {
        return UserImportConfiguration::class;
-    }
-    
-    /**
-     * NOTE: make sure the UserImportConfiguration is public
-     * 
-     * @return array<string, string>
-     */
-    public static function getSubscribedServices(): array
-    {
-        return array_merge(
-            parent::getSubscribedServices(),
-            [
-                UserImportConfiguration::class => UserImportConfiguration::class,
-            ]
-        );
     }
 }
 ```

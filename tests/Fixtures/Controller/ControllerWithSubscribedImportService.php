@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ControllerWithoutConfigurationService extends AbstractController
+class ControllerWithSubscribedImportService extends AbstractController
 {
     use ImportControllerTrait;
 
@@ -29,16 +29,29 @@ class ControllerWithoutConfigurationService extends AbstractController
 
     protected function redirectToImport(): RedirectResponse
     {
-        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.no_service.import');
+        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.subscribed_service.import');
     }
 
     protected function getMatrixSaveActionUrl(): string
     {
-        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.no_service.import_save');
+        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.subscribed_service.import_save');
     }
 
     protected function getImportConfigurationClassName(): string
     {
         return TranslatableEntityBaseConfiguration::class;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(
+            parent::getSubscribedServices(),
+            [
+                TranslatableEntityBaseConfiguration::class => TranslatableEntityBaseConfiguration::class,
+            ]
+        );
     }
 }
