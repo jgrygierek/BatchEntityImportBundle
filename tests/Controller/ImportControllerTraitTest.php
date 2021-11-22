@@ -79,20 +79,12 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertStringContainsString('Invalid type of data. Probably missing validation.', $this->client->getResponse()->getContent());
     }
 
-    /**
-     * @dataProvider importActionUrlDataProvider2
-     */
-    public function testImportConfigurationServiceNotFound(string $url): void
+    public function testImportConfigurationServiceNotFound(): void
     {
         $this->client->catchExceptions(false);
         $this->expectException(ServiceNotFoundException::class);
-        $this->client->request('GET', $url);
+        $this->client->request('GET', '/jg_batch_entity_import_bundle/import_no_service');
         $this->client->submitForm('btn-submit', ['file_import[file]' => __DIR__ . '/../Fixtures/Resources/test.csv']);
-    }
-
-    public function importActionUrlDataProvider2(): Generator
-    {
-        yield ['/jg_batch_entity_import_bundle/import_no_service'];
     }
 
     private function submitSelectFileForm(string $uploadedFile, string $importUrl = '/jg_batch_entity_import_bundle/import'): void

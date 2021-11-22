@@ -16,6 +16,9 @@ services:
 
     Symfony\Component\Security\Core\Security: ~
 
+    Psr\Container\ContainerInterface:
+        alias: service_container
+
 framework:
     annotations: ~
     test: true
