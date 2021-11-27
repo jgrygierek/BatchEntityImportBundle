@@ -3,6 +3,9 @@
 ![Code Style](https://github.com/jgrygierek/BatchEntityImportBundle/workflows/Code%20Style/badge.svg)
 ![Tests](https://github.com/jgrygierek/BatchEntityImportBundle/workflows/Tests/badge.svg)
 ![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master)
+![PHP Versions](https://img.shields.io/badge/PHP-7.4--8.1-blue)
+![Symfony Versions](https://img.shields.io/badge/Symfony-4.4--6.0-blue)
+[![SymfonyInsight](https://insight.symfony.com/projects/ad63558e-3612-434f-a93d-0fc5fce2dd20/mini.svg)](https://insight.symfony.com/projects/ad63558e-3612-434f-a93d-0fc5fce2dd20)
 
 Importing entities with preview and edit features for Symfony.
 
@@ -61,7 +64,6 @@ namespace App\Model\ImportConfiguration;
 
 use App\Entity\User;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
-use Doctrine\ORM\EntityManagerInterface;
 
 class UserImportConfiguration extends AbstractImportConfiguration
 {
@@ -70,6 +72,13 @@ class UserImportConfiguration extends AbstractImportConfiguration
         return User::class;
     }
 }
+```
+
+Then register it as a service:
+
+```yaml
+services:
+  App\Model\ImportConfiguration\UserImportConfiguration: ~
 ```
 
 ### Fields definitions
@@ -190,11 +199,14 @@ Create controller with some required code.
 
 This is just an example, depending on your needs you can inject services in different ways.
 
+To enable automatic passing configuration service to your controller, please use `ImportConfigurationAutoInjectInterface` and `ImportConfigurationAutoInjectTrait`.
+
 ```php
 namespace App\Controller;
 
 use App\Model\ImportConfiguration\UserImportConfiguration;
-use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectInterface;
+use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectTrait;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -204,24 +216,25 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ImportController extends AbstractController
+class ImportController extends AbstractController implements ImportConfigurationAutoInjectInterface
 {
     use ImportControllerTrait;
+    use ImportConfigurationAutoInjectTrait;
 
     /**
      * @Route("/user/import", name="user_import")
      */
-    public function import(Request $request, ValidatorInterface $validator, EntityManagerInterface $em): Response
+    public function import(Request $request, ValidatorInterface $validator): Response
     {
-        return $this->doImport($request, $validator, $em);
+        return $this->doImport($request, $validator);
     }
 
     /**
      * @Route("/user/import/save", name="user_import_save")
      */
-    public function importSave(Request $request, TranslatorInterface $translator, EntityManagerInterface $em): Response
+    public function importSave(Request $request, TranslatorInterface $translator): Response
     {
-        return $this->doImportSave($request, $translator, $em);
+        return $this->doImportSave($request, $translator);
     }
 
     protected function redirectToImport(): RedirectResponse
@@ -237,22 +250,6 @@ class ImportController extends AbstractController
     protected function getImportConfigurationClassName(): string
     {
        return UserImportConfiguration::class;
-    }
-    
-    /**
-     * Only add this if u need to allow DI in your configuration class
-     * NOTE: make sure the UserImportConfiguration is public
-     * 
-     * @return array<string, string>
-     */
-    public static function getSubscribedServices(): array
-    {
-        return array_merge(
-            parent::getSubscribedServices(),
-            [
-                UserImportConfiguration::class => UserImportConfiguration::class,
-            ]
-        );
     }
 }
 ```
@@ -339,19 +336,21 @@ protected function prepareSelectFileView(FormInterface $form): Response
     );
 }
 
-protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, EntityManagerInterface $entityManager, bool $manualSubmit = false): Response
+protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, bool $manualSubmit = false): Response
 {
     if ($manualSubmit) {
         $this->manualSubmitMatrixForm($form, $matrix);
     }
 
+    $configuration = $this->getImportConfiguration();
+
     return $this->prepareView(
         $this->getMatrixEditTemplateName(),
         [
-            'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
+            'header_info' => $matrix->getHeaderInfo($configuration->getEntityClassName()),
             'data' => $matrix->getRecords(),
             'form' => $form->createView(),
-            'importConfiguration' => $this->getImportConfiguration($entityManager),
+            'importConfiguration' => $configuration,
         ]
     );
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,28 +13,28 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class Controller extends AbstractController
+class ControllerWithSubscribedImportService extends AbstractController
 {
     use ImportControllerTrait;
 
-    public function import(Request $request, ValidatorInterface $validator, EntityManagerInterface $em): Response
+    public function import(Request $request, ValidatorInterface $validator): Response
     {
-        return $this->doImport($request, $validator, $em);
+        return $this->doImport($request, $validator);
     }
 
-    public function importSave(Request $request, TranslatorInterface $translator, EntityManagerInterface $em): Response
+    public function importSave(Request $request, TranslatorInterface $translator): Response
     {
-        return $this->doImportSave($request, $translator, $em);
+        return $this->doImportSave($request, $translator);
     }
 
     protected function redirectToImport(): RedirectResponse
     {
-        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.import');
+        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.subscribed_service.import');
     }
 
     protected function getMatrixSaveActionUrl(): string
     {
-        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.import_save');
+        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.subscribed_service.import_save');
     }
 
     protected function getImportConfigurationClassName(): string

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Controller;
 
-use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
@@ -13,6 +12,7 @@ use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -37,13 +37,13 @@ trait BaseImportControllerTrait
 
     abstract protected function prepareView(string $view, array $parameters = []): Response;
 
-    abstract protected function createMatrixForm(Matrix $matrix, EntityManagerInterface $entityManager): FormInterface;
+    abstract protected function createMatrixForm(Matrix $matrix): FormInterface;
 
     /**
      * @throws InvalidArgumentException
      * @throws \LogicException
      */
-    protected function doImport(Request $request, ValidatorInterface $validator, EntityManagerInterface $entityManager): Response
+    protected function doImport(Request $request, ValidatorInterface $validator): Response
     {
         $fileImport = new FileImport();
 
@@ -56,9 +56,9 @@ trait BaseImportControllerTrait
 
             $errors = $validator->validate($matrix);
             if (0 === $errors->count()) {
-                $form = $this->createMatrixForm($matrix, $entityManager);
+                $form = $this->createMatrixForm($matrix);
 
-                return $this->prepareMatrixEditView($form, $matrix, $entityManager, true);
+                return $this->prepareMatrixEditView($form, $matrix, true);
             }
         } else {
             $errors = $form->getErrors();
@@ -79,19 +79,21 @@ trait BaseImportControllerTrait
         );
     }
 
-    protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, EntityManagerInterface $entityManager, bool $manualSubmit = false): Response
+    protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, bool $manualSubmit = false): Response
     {
         if ($manualSubmit) {
             $this->manualSubmitMatrixForm($form, $matrix);
         }
 
+        $configuration = $this->getImportConfiguration();
+
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
             [
-                'header_info' => $matrix->getHeaderInfo($this->getImportConfiguration($entityManager)->getEntityClassName()),
+                'header_info' => $matrix->getHeaderInfo($configuration->getEntityClassName()),
                 'data' => $matrix->getRecords(),
                 'form' => $form->createView(),
-                'importConfiguration' => $this->getImportConfiguration($entityManager),
+                'importConfiguration' => $configuration,
             ]
         );
     }
@@ -99,7 +101,7 @@ trait BaseImportControllerTrait
     /**
      * @throws LogicException
      */
-    protected function doImportSave(Request $request, TranslatorInterface $translator, EntityManagerInterface $entityManager): Response
+    protected function doImportSave(Request $request, TranslatorInterface $translator): Response
     {
         if (!isset($request->get('matrix')['records'])) {
             $msg = $translator->trans('error.data.not_found', [], 'BatchEntityImportBundle');
@@ -109,12 +111,12 @@ trait BaseImportControllerTrait
         }
 
         $matrix = MatrixFactory::createFromPostData($request->get('matrix')['records']);
-        $form = $this->createMatrixForm($matrix, $entityManager);
+        $form = $this->createMatrixForm($matrix);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $this->getImportConfiguration($entityManager)->import($matrix);
+                $this->getImportConfiguration()->import($matrix);
                 $msg = $translator->trans('success.import', [], 'BatchEntityImportBundle');
                 $this->addFlash('success', $msg);
 
@@ -127,10 +129,10 @@ trait BaseImportControllerTrait
 
         $this->setErrorAsFlash($form->getErrors());
 
-        return $this->prepareMatrixEditView($form, $matrix, $entityManager);
+        return $this->prepareMatrixEditView($form, $matrix);
     }
 
-    protected function getImportConfiguration(EntityManagerInterface $entityManager): ImportConfigurationInterface
+    protected function getImportConfiguration(): ImportConfigurationInterface
     {
         if (!$this->importConfiguration) {
             $class = $this->getImportConfigurationClassName();
@@ -138,7 +140,11 @@ trait BaseImportControllerTrait
                 throw new UnexpectedValueException('Configuration class not found.');
             }
 
-            $this->importConfiguration = $this->has($class) ? $this->get($class) : new $class($entityManager);
+            if (!$this->container->has($class)) {
+                throw new ServiceNotFoundException($class);
+            }
+
+            $this->importConfiguration = $this->container->get($class);
         }
 
         return $this->importConfiguration;

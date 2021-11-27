@@ -9,6 +9,7 @@ use JG\BatchEntityImportBundle\BatchEntityImportBundle;
 use Knp\DoctrineBehaviors\DoctrineBehaviorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -50,6 +51,9 @@ class TestKernel extends Kernel
                     'resource' => 'kernel::loadRoutes',
                     'type' => 'service',
                 ],
+                'session' => property_exists(WebTestCase::class, 'container')
+                    ? ['storage_id' => 'session.storage.mock_file']
+                    : ['storage_factory_id' => 'session.storage.factory.mock_file'],
             ]);
 
             if (!$container->hasDefinition('kernel')) {
