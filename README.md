@@ -124,23 +124,7 @@ public function getFieldsDefinitions(): array
 
 ### Matrix validation
 
-This bundle provides a new validator to check if record data does not exist yet in database. It should be used
-in form field definition.
-
-```php
-use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
-
-'field_name' => new FormFieldDefinition(
-    IntegerType::class,
-    [
-        'constraints' => [
-            new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
-        ],
-    ]
-),
-```
-
-If you want to check duplication without checking database, only matrix records values, you can use another validator.
+This bundle provides a new validator to check duplication without checking database, just only matrix records values.
 It has been created to be used on whole Matrix form, please don't use it on form fields.
 Names of fields should be the same as names of columns in your uploaded file.
 

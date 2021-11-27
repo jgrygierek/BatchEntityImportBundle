@@ -199,6 +199,6 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
     {
         $constraint = new Blank();
         $this->expectExceptionObject(new UnexpectedTypeException($constraint, MatrixRecordUnique::class));
-        $this->validator->validate($matrix = MatrixFactory::createFromPostData([]), new Blank());
+        $this->validator->validate(MatrixFactory::createFromPostData([]), new Blank());
     }
 }
