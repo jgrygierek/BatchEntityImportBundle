@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 class ImportControllerTraitTest extends WebTestCase
 {
     private const DEFAULT_RECORDS_NUMBER = 20;
-    private const NEW_RECORDS_NUMBER = 12;
+    private const NEW_RECORDS_NUMBER = 30;
     protected KernelBrowser $client;
 
     protected function setUp(): void

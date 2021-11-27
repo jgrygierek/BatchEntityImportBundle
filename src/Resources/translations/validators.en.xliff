@@ -10,6 +10,10 @@
                 <source>validation.matrix.header.name</source>
                 <target>Header name is invalid.</target>
             </trans-unit>
+            <trans-unit id="validation.matrix.record.unique">
+                <source>validation.matrix.record.unique</source>
+                <target>This record should be unique for fields: %fields%.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

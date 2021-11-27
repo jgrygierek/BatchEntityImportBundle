@@ -1,5 +1,5 @@
 services:
     JG\BatchEntityImportBundle\Twig\TemplateExtension:
         public: true
-        arguments: ['%batch_entity_import.templates%']
-        tags: [twig.extension]
+        arguments: [ '%batch_entity_import.templates%' ]
+        tags: [ twig.extension ]

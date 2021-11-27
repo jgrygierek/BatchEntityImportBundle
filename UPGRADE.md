@@ -1,3 +1,25 @@
+UPGRADE TO 2.4.x
+=======================
+
+Import Configuration class
+--------------
+* Added new validator to check matrix record data uniqueness.
+```php
+use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
+
+public function getMatrixConstraints(): array
+{
+    return [
+        new MatrixRecordUnique(['fields' => ['field_name']]),
+    ];
+}
+```
+
+Controller
+--------------
+* List of options passed to form in `createMatrixForm()` method, should contain new `constraints` element:
+`'constraints' => $importConfiguration->getMatrixConstraints()`
+
 UPGRADE TO 2.3.x
 =======================
 

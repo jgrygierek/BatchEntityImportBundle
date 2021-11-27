@@ -10,6 +10,10 @@
                 <source>validation.matrix.header.name</source>
                 <target>Nieprawidłowa nazwa nagłówka.</target>
             </trans-unit>
+            <trans-unit id="validation.matrix.record.unique">
+                <source>validation.matrix.record.unique</source>
+                <target>Ten rekord powinien być unikalny dla pól: %fields%.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

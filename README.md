@@ -25,6 +25,7 @@ Importing entities with preview and edit features for Symfony.
 * [Configuration class](#configuration-class)
   * [Basic configuration class](#basic-configuration-class)
   * [Fields definitions](#fields-definitions)
+  * [Matrix validation](#matrix-validation)
   * [Passing services to configuration class](#passing-services-to-configuration-class)
   * [Show & hide entity override column](#show--hide-entity-override-column)
   * [Optimizing queries](#optimizing-queries)
@@ -117,6 +118,23 @@ public function getFieldsDefinitions(): array
                 'constraints' => [new Length(['max' => 255])],
             ]
         ),
+    ];
+}
+```
+
+### Matrix validation
+
+This bundle provides a new validator to check duplication without checking database, just only matrix records values.
+It has been created to be used on whole Matrix form, please don't use it on form fields.
+Names of fields should be the same as names of columns in your uploaded file.
+
+```php
+use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
+
+public function getMatrixConstraints(): array
+{
+    return [
+        new MatrixRecordUnique(['fields' => ['field_name']]),
     ];
 }
 ```
