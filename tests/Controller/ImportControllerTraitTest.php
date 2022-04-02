@@ -91,13 +91,11 @@ class ImportControllerTraitTest extends WebTestCase
     {
         $this->client->request('GET', $importUrl);
         self::assertTrue($this->client->getResponse()->isSuccessful());
-        $this->checkQueriesNumber(0);
 
         $this->client->submitForm('btn-submit', ['file_import[file]' => $uploadedFile]);
 
         self::assertTrue($this->client->getResponse()->isSuccessful());
         self::assertEquals($importUrl, $this->client->getRequest()->getRequestUri());
-        $this->checkQueriesNumber(1);
     }
 
     private function checkData(string $expectedValue, int $entityId, string $importUrl = '/jg_batch_entity_import_bundle/import'): void
@@ -118,12 +116,5 @@ class ImportControllerTraitTest extends WebTestCase
     private function getRepository(): EntityRepository
     {
         return self::$kernel->getContainer()->get('doctrine.orm.entity_manager')->getRepository(TranslatableEntity::class);
-    }
-
-    private function checkQueriesNumber(int $limit = 1): void
-    {
-        if ($profile = $this->client->getProfile()) {
-            self::assertLessThanOrEqual($limit, $profile->getCollector('db')->getQueryCount());
-        }
     }
 }

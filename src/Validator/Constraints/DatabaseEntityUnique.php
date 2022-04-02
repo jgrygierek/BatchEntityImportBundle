@@ -10,10 +10,11 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
-class MatrixRecordUnique extends Constraint
+class DatabaseEntityUnique extends Constraint
 {
-    public string $message = 'validation.matrix.record.unique';
-    public array $fields = [];
+    public string $message = 'validation.entity.unique';
+    public string $entityClassName;
+    public array $fields;
 
     public function __construct($options = null, array $groups = null, $payload = null)
     {
@@ -22,15 +23,19 @@ class MatrixRecordUnique extends Constraint
         if (empty($options['fields'])) {
             throw new InvalidArgumentException('Option "fields" should not be empty.');
         }
+
+        if (empty($options['entityClassName'])) {
+            throw new InvalidArgumentException('Option "entityClassName" should not be empty.');
+        }
     }
 
     public function getDefaultOption(): string
     {
-        return 'fields';
+        return 'entityClassName';
     }
 
     public function getRequiredOptions(): array
     {
-        return ['fields'];
+        return ['entityClassName', 'fields'];
     }
 }

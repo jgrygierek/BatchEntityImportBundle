@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
 
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,6 +39,6 @@ class ControllerWithoutConfigurationService extends AbstractController
 
     protected function getImportConfigurationClassName(): string
     {
-        return TranslatableEntityBaseConfiguration::class;
+        return BaseConfiguration::class;
     }
 }
