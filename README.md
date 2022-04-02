@@ -132,7 +132,7 @@ This bundle provides two new validators.
 Names of fields should be the same as names of columns in your uploaded file.
 
 ```php
-use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
+use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 
 public function getMatrixConstraints(): array
