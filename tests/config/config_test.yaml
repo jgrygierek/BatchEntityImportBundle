@@ -22,9 +22,6 @@ services:
 framework:
     annotations: ~
     test: true
-    profiler:
-        enabled: true
-        collect: true
     session:
         handler_id: ~
     validation:

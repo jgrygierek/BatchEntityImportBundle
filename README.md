@@ -124,17 +124,22 @@ public function getFieldsDefinitions(): array
 
 ### Matrix validation
 
-This bundle provides a new validator to check duplication without checking database, just only matrix records values.
-It has been created to be used on whole Matrix form, please don't use it on form fields.
+This bundle provides two new validators.
+
+1) **DatabaseEntityUnique** validator can be used to check if record data does not exist yet in database.
+2) **MatrixRecordUnique** validator can be used to check duplication without checking database, just only matrix records values.
+
 Names of fields should be the same as names of columns in your uploaded file.
 
 ```php
+use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 
 public function getMatrixConstraints(): array
 {
     return [
         new MatrixRecordUnique(['fields' => ['field_name']]),
+        new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
     ];
 }
 ```
@@ -225,12 +230,12 @@ class ImportController extends AbstractController implements ImportConfiguration
     {
        return $this->redirectToRoute('user_import');
     }
-    
+
     protected function getMatrixSaveActionUrl(): string
     {
        return $this->generateUrl('user_import_save');
     }
-    
+
     protected function getImportConfigurationClassName(): string
     {
        return UserImportConfiguration::class;

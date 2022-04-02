@@ -25,7 +25,7 @@
         "php": ">=7.4.0",
         "doctrine/orm": "^2.7",
         "doctrine/lexer": "^1.2.1",
-        "phpoffice/phpspreadsheet": "^1.10",
+        "phpoffice/phpspreadsheet": "^1.22.0",
         "symfony/config": "^4.4.12|^5.1.4|^6.0",
         "symfony/dependency-injection": "^4.4.12|^5.1.9|^6.0",
         "symfony/doctrine-bridge": "^4.4|^5.0|^6.0",
@@ -34,7 +34,7 @@
         "symfony/property-access": "^4.4|^5.0|^6.0",
         "symfony/translation": "^4.4.12|^5.1.4|^6.0",
         "symfony/twig-bundle": "^4.4|^5.0|^6.0",
-        "symfony/validator": "^4.4|^5.0|^6.0",
+        "symfony/validator": "^4.4.11|^5.0.11|^6.0",
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
@@ -49,7 +49,6 @@
         "symfony/phpunit-bridge": "^5.3.8|^6.0",
         "symfony/security-bundle": "^4.4|^5.0|^6.0"
     },
-    "minimum-stability": "dev",
     "config": {
         "sort-packages": true
     },

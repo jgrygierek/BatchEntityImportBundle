@@ -1,3 +1,20 @@
+UPGRADE TO 2.5.x
+=======================
+
+Import Configuration class
+--------------
+* Added new validator to check matrix record data uniqueness in database.
+```php
+use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
+
+public function getMatrixConstraints(): array
+{
+    return [
+        new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
+    ];
+}
+```
+
 UPGRADE TO 2.4.x
 =======================
 

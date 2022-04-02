@@ -3,3 +3,7 @@ services:
         public: true
         arguments: [ '%batch_entity_import.templates%' ]
         tags: [ twig.extension ]
+
+    JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator:
+        arguments: [ '@doctrine.orm.entity_manager' ]
+        tags: [ validator.constraint_validator ]

@@ -6,13 +6,13 @@ namespace JG\BatchEntityImportBundle\Tests\Validator;
 
 use Generator;
 use InvalidArgumentException;
-use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUniqueValidator;
 use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
+use TypeError;
 
 class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
 {
@@ -166,23 +166,18 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
 
     public function testInvalidFieldNameException(): void
     {
-        $this->expectExceptionObject(new InvalidArgumentException('Option "fields" contains invalid data.'));
-        $data = [
+        $this->expectExceptionObject(new InvalidArgumentException('Option "fields" contains invalid data. Allowed fields: field_1, field_2'));
+        $matrix = MatrixFactory::createFromPostData([
             [
                 'field_1' => 0,
                 'field_2' => 100,
             ],
-            [
-                'field_1' => 1,
-                'field_2' => 101,
-            ],
-        ];
-        $matrix = MatrixFactory::createFromPostData($data);
+        ]);
         $constraint = new MatrixRecordUnique(['fields' => ['field_3']]);
         $this->validator->validate($matrix, $constraint);
     }
 
-    public function testConstraintException(): void
+    public function testMissingFieldsOptionException(): void
     {
         $this->expectExceptionObject(new InvalidArgumentException('Option "fields" should not be empty.'));
         new MatrixRecordUnique(['fields' => []]);
@@ -190,15 +185,14 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
 
     public function testValidatedValueException(): void
     {
-        $value = 'qwerty';
-        $this->expectExceptionObject(new UnexpectedTypeException($value, Matrix::class));
-        $this->validator->validate($value, new MatrixRecordUnique(['fields' => ['abcd']]));
+        $this->expectException(TypeError::class);
+        $this->validator->validate('qwerty', new MatrixRecordUnique(['fields' => ['abcd']]));
     }
 
     public function testValidatorConstraintException(): void
     {
         $constraint = new Blank();
         $this->expectExceptionObject(new UnexpectedTypeException($constraint, MatrixRecordUnique::class));
-        $this->validator->validate(MatrixFactory::createFromPostData([]), new Blank());
+        $this->validator->validate(MatrixFactory::createFromPostData([]), $constraint);
     }
 }
