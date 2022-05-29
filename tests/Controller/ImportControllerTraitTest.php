@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Controller;
 
 use Doctrine\ORM\EntityRepository;
-use Generator;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -29,11 +28,9 @@ class ImportControllerTraitTest extends WebTestCase
         $databaseLoader->loadFixtures();
     }
 
-    /**
-     * @dataProvider importActionUrlDataProvider
-     */
-    public function testControllerWorksOk(string $importUrl): void
+    public function testControllerWorksOk(): void
     {
+        $importUrl = '/jg_batch_entity_import_bundle/import';
         $updatedEntityId = self::DEFAULT_RECORDS_NUMBER + 2;
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
         // insert new data
@@ -54,12 +51,6 @@ class ImportControllerTraitTest extends WebTestCase
             ],
         ]);
         $this->checkData('new_value', $updatedEntityId, $importUrl);
-    }
-
-    public function importActionUrlDataProvider(): Generator
-    {
-        yield ['/jg_batch_entity_import_bundle/import'];
-        yield ['/jg_batch_entity_import_bundle/subscribed_service/import'];
     }
 
     public function testImportFileWrongExtension(): void
