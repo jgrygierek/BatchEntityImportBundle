@@ -9,7 +9,6 @@ use JG\BatchEntityImportBundle\BatchEntityImportBundle;
 use Knp\DoctrineBehaviors\DoctrineBehaviorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -17,7 +16,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
-use Symfony\Component\Routing\RouteCollectionBuilder;
 
 class TestKernel extends Kernel
 {
@@ -51,9 +49,6 @@ class TestKernel extends Kernel
                     'resource' => 'kernel::loadRoutes',
                     'type' => 'service',
                 ],
-                'session' => property_exists(WebTestCase::class, 'container')
-                    ? ['storage_id' => 'session.storage.mock_file']
-                    : ['storage_factory_id' => 'session.storage.factory.mock_file'],
             ]);
 
             if (!$container->hasDefinition('kernel')) {
@@ -81,10 +76,7 @@ class TestKernel extends Kernel
         $this->configs = $configs;
     }
 
-    /**
-     * @param RoutingConfigurator|RouteCollectionBuilder $routes
-     */
-    protected function configureRoutes($routes): void
+    protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import(__DIR__ . '/config/routes.yaml');
     }
