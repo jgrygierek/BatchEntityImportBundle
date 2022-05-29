@@ -21,7 +21,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Traversable;
-use UnexpectedValueException;
 
 trait BaseImportControllerTrait
 {
@@ -135,16 +134,7 @@ trait BaseImportControllerTrait
     protected function getImportConfiguration(): ImportConfigurationInterface
     {
         if (!$this->importConfiguration) {
-            $class = $this->getImportConfigurationClassName();
-            if (!class_exists($class)) {
-                throw new UnexpectedValueException('Configuration class not found.');
-            }
-
-            if (!$this->container->has($class)) {
-                throw new ServiceNotFoundException($class);
-            }
-
-            $this->importConfiguration = $this->container->get($class);
+            throw new ServiceNotFoundException($this->getImportConfigurationClassName());
         }
 
         return $this->importConfiguration;
