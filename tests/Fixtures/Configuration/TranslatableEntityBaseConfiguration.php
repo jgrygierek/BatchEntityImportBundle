@@ -12,13 +12,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TranslatableEntityBaseConfiguration extends AbstractImportConfiguration
 {
-    private TranslatorInterface $translator;
-
-    public function __construct(EntityManagerInterface $em, TranslatorInterface $translator)
+    public function __construct(EntityManagerInterface $em, private readonly TranslatorInterface $translator)
     {
         parent::__construct($em);
-
-        $this->translator = $translator;
     }
 
     public function getEntityClassName(): string

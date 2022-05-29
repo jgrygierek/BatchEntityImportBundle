@@ -11,23 +11,20 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Matrix
 {
     private const RESERVED_ENTITY_COLUMN_NAME = 'entity';
-    /**
-     * @Assert\NotBlank()
-     * @Assert\All({
-     *     @Assert\NotBlank(),
-     *     @Assert\Type("string"),
-     *     @Assert\Regex(pattern="/^([\w]+)(:[\w]+)?$/", message="validation.matrix.header.name")
-     * })
-     */
-    private array $header;
+    #[Assert\All([
+        new Assert\NotBlank(),
+        new Assert\Type('string'),
+        new Assert\Regex(pattern: "/^([\w]+)(:[\w]+)?$/", message: 'validation.matrix.header.name'),
+    ])]
+    #[Assert\NotBlank]
+    private readonly array $header;
     /**
      * @var array|MatrixRecord[]
-     *
-     * @Assert\NotBlank()
-     * @Assert\All({
-     *     @Assert\Type(MatrixRecord::class)
-     * })
      */
+    #[Assert\All([
+        new Assert\Type(MatrixRecord::class),
+    ])]
+    #[Assert\NotBlank]
     private array $records = [];
 
     public function __construct(array $header = [], array $recordsData = [])

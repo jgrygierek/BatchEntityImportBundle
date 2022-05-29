@@ -14,13 +14,11 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class DatabaseEntityUniqueValidator extends AbstractValidator
 {
-    private EntityManager $entityManager;
     private array $duplicatedRecords = [];
     private array $correctRecords = [];
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(private readonly EntityManager $entityManager)
     {
-        $this->entityManager = $entityManager;
     }
 
     /**
@@ -121,7 +119,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         }
     }
 
-    private function isRecordDuplicatedInDatabase(EntityManager $em, string $class, array $criteria)
+    private function isRecordDuplicatedInDatabase(EntityManager $em, string $class, array $criteria): bool
     {
         $query = $em->createQuery($this->buildDQL($class, $criteria));
         $this->passParametersToQuery($query, $criteria);

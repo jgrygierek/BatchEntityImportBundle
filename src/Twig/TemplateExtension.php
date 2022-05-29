@@ -10,11 +10,8 @@ use UnexpectedValueException;
 
 class TemplateExtension extends AbstractExtension
 {
-    private array  $availableTemplates;
-
-    public function __construct(array $availableTemplates = [])
+    public function __construct(private readonly array $availableTemplates = [])
     {
-        $this->availableTemplates = $availableTemplates;
     }
 
     public function getFunctions(): array

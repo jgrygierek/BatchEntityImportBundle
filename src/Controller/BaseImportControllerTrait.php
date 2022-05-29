@@ -46,7 +46,6 @@ trait BaseImportControllerTrait
     {
         $fileImport = new FileImport();
 
-        /** @var FormInterface $form */
         $form = $this->createForm(FileImportType::class, $fileImport);
         $form->handleRequest($request);
 
