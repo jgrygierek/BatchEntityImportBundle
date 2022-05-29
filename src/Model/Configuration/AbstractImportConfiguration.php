@@ -18,11 +18,8 @@ use TypeError;
 
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
-    private EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(private readonly EntityManagerInterface $em)
     {
-        $this->em = $em;
     }
 
     public function getFieldsDefinitions(): array
@@ -79,7 +76,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                         $entity->$propertyName = $value;
                     }
                 }
-            } catch (TypeError $e) {
+            } catch (TypeError) {
                 throw new MatrixRecordInvalidDataTypeException();
             }
         }
@@ -95,9 +92,9 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     {
         try {
             $this->em->flush();
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (UniqueConstraintViolationException) {
             throw new DatabaseNotUniqueDataException();
-        } catch (Exception $e) {
+        } catch (Exception) {
             throw new DatabaseException();
         }
     }

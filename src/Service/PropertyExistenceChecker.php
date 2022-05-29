@@ -11,7 +11,7 @@ use ReflectionException;
 
 class PropertyExistenceChecker
 {
-    private ReflectionClass $reflectionClass;
+    private readonly ReflectionClass $reflectionClass;
     private ?ReflectionClass $translationReflectionClass = null;
 
     /**

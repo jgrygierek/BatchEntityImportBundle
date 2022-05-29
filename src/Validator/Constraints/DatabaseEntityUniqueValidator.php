@@ -14,13 +14,11 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class DatabaseEntityUniqueValidator extends AbstractValidator
 {
-    private EntityManager $entityManager;
     private array $duplicatedRecords = [];
     private array $correctRecords = [];
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(private readonly EntityManager $entityManager)
     {
-        $this->entityManager = $entityManager;
     }
 
     /**
