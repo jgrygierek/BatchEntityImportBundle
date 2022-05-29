@@ -17,8 +17,6 @@ class PropertyExistenceCheckerTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->checkerEntity = new PropertyExistenceChecker(TestEntity::class);
         $this->checkerEntityWithTranslations = new PropertyExistenceChecker(TranslatableEntity::class);
     }

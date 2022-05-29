@@ -39,6 +39,6 @@ doctrine:
         auto_mapping: true
         mappings:
             BatchEntityImportBundle:
-                type: annotation
+                type: attribute
                 prefix: JG\BatchEntityImportBundle\Tests\Fixtures\Entity
                 dir: '%kernel.project_dir%/tests/Fixtures/Entity/'

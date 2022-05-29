@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Validator\Constraints;
 
+use Attribute;
 use Symfony\Component\Validator\Constraint;
 
-/**
- * @Annotation
- */
+#[Attribute]
 class FileExtension extends Constraint
 {
-    public string  $message = 'validation.file.extension';
-    public array   $extensions = [];
+    public string $message = 'validation.file.extension';
+    public array $extensions = [];
 
     public function getDefaultOption(): string
     {

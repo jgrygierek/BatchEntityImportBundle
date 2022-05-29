@@ -19,8 +19,6 @@ class ImportControllerTraitTest extends WebTestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->client = self::createClient();
 
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);

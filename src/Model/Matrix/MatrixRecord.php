@@ -7,11 +7,9 @@ namespace JG\BatchEntityImportBundle\Model\Matrix;
 class MatrixRecord
 {
     private ?object $entity = null;
-    private array $data;
 
-    public function __construct(array $data = [])
+    public function __construct(private array $data = [])
     {
-        $this->data = $data;
     }
 
     public function getEntity(): ?object

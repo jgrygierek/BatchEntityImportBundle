@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class FileImportTest extends AbstractValidationTestCase
 {
     private FileImport $fileImport;
-    private ?string    $path;
+    private ?string $path;
 
     protected function setUp(): void
     {
@@ -24,8 +24,6 @@ class FileImportTest extends AbstractValidationTestCase
 
     protected function tearDown(): void
     {
-        parent::tearDown();
-
         if (file_exists($this->path)) {
             unlink($this->path);
         }

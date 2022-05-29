@@ -8,11 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 abstract class AbstractEntity
 {
-    /**
-     * @ORM\Column(type="integer", options={"unsigned":true})
-     * @ORM\Id
-     * @ORM\GeneratedValue()
-     */
+    #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
     protected ?int $id = null;
 
     public function getId(): ?int

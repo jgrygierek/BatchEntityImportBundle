@@ -6,13 +6,8 @@ namespace JG\BatchEntityImportBundle\Model\Form;
 
 class FormFieldDefinition
 {
-    private string $class;
-    private array  $options;
-
-    public function __construct(string $class, array $options = [])
+    public function __construct(private readonly string $class, private readonly array $options = [])
     {
-        $this->class = $class;
-        $this->options = $options;
     }
 
     public function getClass(): string
