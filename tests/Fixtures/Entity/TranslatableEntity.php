@@ -40,7 +40,7 @@ class TranslatableEntity extends AbstractEntity implements TranslatableInterface
         return $this->testPrivateProperty;
     }
 
-    public function __call($method, $arguments)
+    public function __call(string $method, array $arguments)
     {
         return $this->proxyCurrentLocaleTranslation($method, $arguments);
     }

@@ -12,10 +12,9 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 class MatrixRecordUniqueValidator extends AbstractValidator
 {
     /**
-     * @param Matrix                        $value
-     * @param Constraint|MatrixRecordUnique $constraint
+     * @param Matrix $value
      */
-    public function validate($value, Constraint $constraint): void
+    public function validate($value, Constraint|MatrixRecordUnique $constraint): void
     {
         $this->validateArguments($value, $constraint);
         $this->prepareContext();
@@ -43,7 +42,7 @@ class MatrixRecordUniqueValidator extends AbstractValidator
     private function getHashedMatrixRecordsDataForDuplicationCheck(array $records, array $fieldsUsedInDuplicationCheck): array
     {
         return array_map(
-            fn (MatrixRecord $record) => $this->getHash($this->getMatrixRecordDataForDuplicationCheck($record, $fieldsUsedInDuplicationCheck)),
+            fn (MatrixRecord $record): string => $this->getHash($this->getMatrixRecordDataForDuplicationCheck($record, $fieldsUsedInDuplicationCheck)),
             $records
         );
     }

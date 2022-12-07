@@ -42,7 +42,8 @@
         "doctrine/doctrine-fixtures-bundle": "^3.4.1",
         "friendsofphp/php-cs-fixer": "^3.0",
         "knplabs/doctrine-behaviors": "^2.0.8",
-        "matthiasnoback/symfony-dependency-injection-test": "^4.1.1",
+        "matthiasnoback/symfony-dependency-injection-test": "^4.2.1",
+        "rector/rector": "^0.15.0",
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^5.1|^6.0",
         "symfony/dom-crawler": "^5.1.4|^6.0",
@@ -65,6 +66,8 @@
     "scripts": {
         "php-cs-fixer": "vendor/bin/php-cs-fixer fix -v --dry-run --diff",
         "php-cs-fixer-fix": "vendor/bin/php-cs-fixer fix -v --diff",
+        "rector": "@rector-fix --dry-run",
+        "rector-fix": "vendor/bin/rector process",
         "tests": "vendor/bin/simple-phpunit",
         "tests-cov": "vendor/bin/simple-phpunit --coverage-clover=coverage.xml"
     }
