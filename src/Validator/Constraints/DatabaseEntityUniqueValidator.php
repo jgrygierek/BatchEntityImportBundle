@@ -22,10 +22,9 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     }
 
     /**
-     * @param Matrix                          $value
-     * @param Constraint|DatabaseEntityUnique $constraint
+     * @param Matrix $value
      */
-    public function validate($value, Constraint $constraint): void
+    public function validate($value, Constraint|DatabaseEntityUnique $constraint): void
     {
         $this->duplicatedRecords = [];
         $this->validateArguments($value, $constraint);

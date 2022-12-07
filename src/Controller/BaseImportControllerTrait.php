@@ -150,7 +150,7 @@ trait BaseImportControllerTrait
 
     protected function manualSubmitMatrixForm(FormInterface $form, Matrix $matrix): void
     {
-        $data = ['records' => array_map(static fn (MatrixRecord $record) => $record->getData(), $matrix->getRecords())];
+        $data = ['records' => array_map(static fn (MatrixRecord $record): array => $record->getData(), $matrix->getRecords())];
 
         $csrfTokenManager = $form->getConfig()->getOption('csrf_token_manager');
         if ($csrfTokenManager) {

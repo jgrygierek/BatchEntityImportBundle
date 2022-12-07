@@ -16,7 +16,7 @@ class DatabaseEntityUnique extends Constraint
     public string $entityClassName;
     public array $fields;
 
-    public function __construct($options = null, array $groups = null, $payload = null)
+    public function __construct(mixed $options = null, array $groups = null, mixed $payload = null)
     {
         parent::__construct($options, $groups, $payload);
 

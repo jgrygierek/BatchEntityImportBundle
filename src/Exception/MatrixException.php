@@ -11,8 +11,4 @@ use Exception;
  */
 class MatrixException extends Exception implements BatchEntityImportExceptionInterface
 {
-    public function __construct($message = '')
-    {
-        parent::__construct($message);
-    }
 }
