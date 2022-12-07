@@ -17,7 +17,7 @@ class TemplateExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('batch_entity_import_template', [$this, 'getTemplate']),
+            new TwigFunction('batch_entity_import_template', $this->getTemplate(...)),
         ];
     }
 

@@ -27,17 +27,17 @@ class MatrixRecord
         return $this->data;
     }
 
-    public function __isset($name): bool
+    public function __isset(string $name): bool
     {
         return array_key_exists($name, $this->data);
     }
 
-    public function __set($name, $value): void
+    public function __set(string $name, null|string|int $value): void
     {
         $this->data[$name] = $value;
     }
 
-    public function __get($name)
+    public function __get(string $name): null|string|int
     {
         return $this->data[$name];
     }
