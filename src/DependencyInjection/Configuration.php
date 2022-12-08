@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -14,8 +15,9 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('batch_entity_import');
 
-        $nodeBuilder = $treeBuilder->getRootNode()->children();
-        $this->addTemplatesConfig($nodeBuilder);
+        /** @var ArrayNodeDefinition $rootNode */
+        $rootNode = $treeBuilder->getRootNode();
+        $this->addTemplatesConfig($rootNode->children());
 
         return $treeBuilder;
     }

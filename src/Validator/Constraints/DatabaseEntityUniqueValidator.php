@@ -22,9 +22,10 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     }
 
     /**
-     * @param Matrix $value
+     * @param Matrix               $value
+     * @param DatabaseEntityUnique $constraint
      */
-    public function validate($value, Constraint|DatabaseEntityUnique $constraint): void
+    public function validate($value, $constraint): void
     {
         $this->duplicatedRecords = [];
         $this->validateArguments($value, $constraint);
@@ -52,9 +53,6 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         }
     }
 
-    /**
-     * @param Constraint|mixed $constraint
-     */
     protected function validateArguments(Matrix $value, Constraint $constraint): void
     {
         if (!$constraint instanceof DatabaseEntityUnique) {

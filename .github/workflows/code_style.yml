@@ -1,6 +1,6 @@
 name: Code Style
 
-on: [ push, pull_request ]
+on: [ push ]
 
 jobs:
     php-cs-fixer:
@@ -8,9 +8,41 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: Prepare github actions
-                uses: actions/checkout@v2
+                uses: actions/checkout@v3
 
             -   name: Run PHP CS Fixer
                 uses: docker://oskarstark/php-cs-fixer-ga
                 with:
                     args: --diff --dry-run
+
+    php-stan:
+        name: PHPStan
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Prepare github actions
+                uses: actions/checkout@v3
+
+            -   name: Get composer cache directory
+                id: composer-cache
+                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+            -   name: Cache composer dependencies
+                uses: actions/cache@v3
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: ${{ runner.os }}-composer-
+
+            -   name: Run composer
+                uses: php-actions/composer@v6
+                with:
+                    php_version: '8.1'
+                    php_extensions: gd zip
+                    memory_limit: -1
+                    args: --no-progress --optimize-autoloader
+
+            -   name: Run PHPStan
+                uses: php-actions/phpstan@v3
+                with:
+                    path: src/
+                    memory_limit: -1
