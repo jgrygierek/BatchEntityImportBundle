@@ -38,9 +38,8 @@ class MatrixRecordType extends AbstractType
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
             function (FormEvent $event) use ($fieldDefinitions): void {
-                /** @var MatrixRecord $record */
                 $record = $event->getData();
-                if ($record) {
+                if ($record instanceof MatrixRecord) {
                     foreach ($record->getData() as $columnName => $value) {
                         $this->addField($fieldDefinitions, $columnName, $event);
                     }
