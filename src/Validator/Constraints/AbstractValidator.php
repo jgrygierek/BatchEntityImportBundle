@@ -7,12 +7,11 @@ namespace JG\BatchEntityImportBundle\Validator\Constraints;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
-use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 abstract class AbstractValidator extends ConstraintValidator
 {
-    protected function validateArguments(Matrix $value, Constraint $constraint): void
+    protected function validateArguments(Matrix $value, MatrixRecordUnique|DatabaseEntityUnique $constraint): void
     {
         $header = $value->getHeader();
         if (!empty(array_diff($constraint->fields, $header))) {
@@ -25,10 +24,7 @@ abstract class AbstractValidator extends ConstraintValidator
         $this->context->setNode($this->context->getValue(), $this->context->getObject(), $this->context->getMetadata(), '');
     }
 
-    /**
-     * @param MatrixRecord|mixed $record
-     */
-    protected function addErrorToMatrixRecord(MatrixRecord $record, Constraint $constraint, int $index, array $fields): void
+    protected function addErrorToMatrixRecord(MatrixRecord $record, MatrixRecordUnique|DatabaseEntityUnique $constraint, int $index, array $fields): void
     {
         $this->context
             ->buildViolation($constraint->message, ['%fields%' => implode(', ', $fields)])
