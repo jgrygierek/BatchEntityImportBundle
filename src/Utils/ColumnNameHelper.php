@@ -6,18 +6,18 @@ namespace JG\BatchEntityImportBundle\Utils;
 
 class ColumnNameHelper
 {
-    public static function underscoreToPascalCase(string $value): string
+    public static function toPascalCase(string $value): string
     {
         $value = self::removeTranslationSuffix($value);
 
-        return str_replace(' ', '', ucwords(str_replace('_', ' ', $value)));
+        return str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $value)));
     }
 
-    public static function underscoreToCamelCase(string $value): string
+    public static function toCamelCase(string $value): string
     {
         $value = self::removeTranslationSuffix($value);
 
-        return lcfirst(self::underscoreToPascalCase($value));
+        return lcfirst(self::toPascalCase($value));
     }
 
     public static function removeTranslationSuffix(string $value): string
@@ -32,6 +32,6 @@ class ColumnNameHelper
 
     public static function getSetterName(string $name): string
     {
-        return 'set' . self::underscoreToPascalCase($name);
+        return 'set' . self::toPascalCase($name);
     }
 }

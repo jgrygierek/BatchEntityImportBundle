@@ -58,7 +58,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             }
 
             $locale = ColumnNameHelper::getLocale($name);
-            $propertyName = ColumnNameHelper::underscoreToCamelCase($name);
+            $propertyName = ColumnNameHelper::toCamelCase($name);
             $setterName = ColumnNameHelper::getSetterName($name);
 
             try {

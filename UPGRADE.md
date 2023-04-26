@@ -1,3 +1,15 @@
+UPGRADE TO 3.1
+=======================
+
+CSV File
+--------------
+* Now CSV file can contain spaces and dashes as a header name, for example "my column name" or "my-column-name".
+
+Import Configuration class
+--------------
+* When header name contains spaces we should use underscores instead of spaces when defining fields names in fields definitions and in constraints.
+
+
 UPGRADE TO 3.0
 =======================
 
