@@ -27,6 +27,8 @@ class MatrixTest extends AbstractValidationTestCase
         yield [['column_name'], [['column_name' => '']]];
         yield [['column_name'], [['column_name' => '', ' ' => '']]];
         yield [['', 'column_name'], [['column_name' => '']]];
+        yield [['column-name'], [['column-name' => '']]];
+        yield [['column name'], [['column name' => '']]];
     }
 
     /**
@@ -42,7 +44,7 @@ class MatrixTest extends AbstractValidationTestCase
     {
         yield [[], [['column_name' => '']]];
         yield [[' '], [['column_name' => '']]];
-        yield [['wrong-column-name'], [['column_name' => '']]];
+        yield [['wrong@column!name'], [['column_name' => '']]];
         yield [['column_name'], []];
         yield [['column_name'], [[' ' => '']]];
     }
@@ -87,7 +89,7 @@ class MatrixTest extends AbstractValidationTestCase
             'test_private_property_no_setter' => false,
             'test_private_property:en' => false,
             'test_translation_property' => false,
-            'test_translation_property:en' => true,
+            'test-translation-property:en' => true,
         ];
 
         $matrix = new Matrix(array_keys($expected));

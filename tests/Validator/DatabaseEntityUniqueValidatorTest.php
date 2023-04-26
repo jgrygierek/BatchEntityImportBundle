@@ -41,12 +41,12 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $this->validator->validate(
             MatrixFactory::createFromPostData([
                 [
-                    'field_1' => 0,
+                    'field_1' => 1,
                     'field_2' => 100,
                 ],
                 [
-                    'field_1' => 0,
-                    'field_2' => 100,
+                    'field_1' => 2,
+                    'field_2' => 101,
                 ],
             ]),
             $constraint
@@ -65,11 +65,15 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
                 'field_1' => 0,
                 'field_2' => 100,
             ],
+            [
+                'field_1' => 0,
+                'field_2' => 100,
+            ],
         ]);
         $constraint = new DatabaseEntityUnique(['fields' => ['field_1'], 'entityClassName' => TestEntity::class]);
         $this->validator->validate($matrix, $constraint);
         $violations = $this->context->getViolations();
-        $this->assertCount(1, $violations);
+        $this->assertCount(2, $violations);
         $this->assertSame($matrix->getRecords()[0], $violations->get(0)->getInvalidValue());
     }
 

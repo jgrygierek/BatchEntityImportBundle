@@ -98,7 +98,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     {
         $criteria = [];
         foreach ($matrixDataToCompare as $fieldName => $value) {
-            $criteria[ColumnNameHelper::underscoreToCamelCase($fieldName)][] = ['=', $value];
+            $criteria[ColumnNameHelper::toCamelCase($fieldName)][] = ['=', $value];
         }
 
         $entityToOverride = $matrixRecord->getEntity();

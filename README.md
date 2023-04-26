@@ -84,7 +84,7 @@ services:
 ### Fields definitions
 
 If you want to change types of rendered fields, instead of using default ones,
-you have to override method in your import configuration.
+you have to override method in your import configuration. If name of field contains spaces, you should use underscores instead.
 
 To avoid errors during data import, you can add here validation rules.
 
@@ -129,7 +129,7 @@ This bundle provides two new validators.
 1) **DatabaseEntityUnique** validator can be used to check if record data does not exist yet in database.
 2) **MatrixRecordUnique** validator can be used to check duplication without checking database, just only matrix records values.
 
-Names of fields should be the same as names of columns in your uploaded file.
+Names of fields should be the same as names of columns in your uploaded file. With one exception! If name contains spaces, you should use underscores instead.
 
 ```php
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
@@ -344,4 +344,3 @@ protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, bo
     );
 }
 ```
-

@@ -7,11 +7,15 @@ namespace JG\BatchEntityImportBundle\Model\Matrix;
 class MatrixRecord
 {
     private ?object $entity = null;
-    private array $data;
+    private array $data = [];
 
     public function __construct(array $data = [])
     {
-        $this->data = $data;
+        foreach ($data as $name => $value) {
+            if (!empty(\trim((string) $name))) {
+                $this->data[\str_replace(' ', '_', (string) $name)] = $value;
+            }
+        }
     }
 
     public function getEntity(): ?object
@@ -34,11 +38,17 @@ class MatrixRecord
         return array_key_exists($name, $this->data);
     }
 
+    /**
+     * @param string|int|null $value
+     */
     public function __set(string $name, $value): void
     {
         $this->data[$name] = $value;
     }
 
+    /**
+     * @return string|int|null
+     */
     public function __get(string $name)
     {
         return $this->data[$name];

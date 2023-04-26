@@ -17,7 +17,7 @@ class Matrix
      * @Assert\All({
      *     @Assert\NotBlank(),
      *     @Assert\Type("string"),
-     *     @Assert\Regex(pattern="/^([\w]+)(:[\w]+)?$/", message="validation.matrix.header.name")
+     *     @Assert\Regex(pattern="/^([\w -]+)(:[\w]+)?$/", message="validation.matrix.header.name")
      * })
      */
     private array $header;
@@ -70,9 +70,11 @@ class Matrix
 
     private function clearHeader(array $header): array
     {
-        return array_values(
-            array_filter($header, fn (?string $columnName): bool => $this->isColumnNameValid($columnName))
+        $header = array_values(
+            array_filter($header, fn (?string $columnName): bool => $this->isColumnNameValid($columnName)),
         );
+
+        return \array_map(static fn (string $name) => \str_replace(' ', '_', $name), $header);
     }
 
     private function clearRecordData(array $data): array
