@@ -34,7 +34,7 @@ class ImportControllerTraitTest extends WebTestCase
         // insert new data
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test.csv', $importUrl);
         $this->client->submitForm('btn-submit');
-        $this->checkData('test2', $updatedEntityId, $importUrl);
+        $this->checkData(['test2', 'lorem ipsum 2', 'qwerty2', 'test2_en', 'test2_pl'], $updatedEntityId, $importUrl);
 
         // update existing data
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test_updated_data.csv', $importUrl);
@@ -44,11 +44,48 @@ class ImportControllerTraitTest extends WebTestCase
                     [
                         'entity' => $updatedEntityId,
                         'test_private_property' => 'new_value',
+                        'test-private-property2' => 'new_value2',
+                        'test_public_property' => 'new_value3',
+                        'test-translation-property:en' => 'new_value4',
+                        'testTranslationProperty:pl' => 'new_value5',
                     ],
                 ],
             ],
         ]);
-        $this->checkData('new_value', $updatedEntityId, $importUrl);
+        $this->checkData(['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'], $updatedEntityId, $importUrl);
+    }
+
+    public function testDuplicationFoundInDatabase(): void
+    {
+        $importUrl = '/jg_batch_entity_import_bundle/import';
+        $updatedEntityId = self::DEFAULT_RECORDS_NUMBER + 2;
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        // insert new data
+        $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test.csv', $importUrl);
+        $this->client->submitForm('btn-submit');
+        $this->checkData(['test2', 'lorem ipsum 2', 'qwerty2', 'test2_en', 'test2_pl'], $updatedEntityId, $importUrl);
+
+        // update existing data
+        $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test_updated_data.csv', $importUrl);
+
+        $this->client->submitForm('btn-submit', [
+            'matrix' => [
+                'records' => [
+                    [
+                        'entity' => $updatedEntityId,
+                        'test_private_property' => 'test',
+                        'test_public_property' => 'qwerty',
+                        'test-private-property2' => 'lorem ipsum',
+                    ],
+                ],
+            ],
+        ]);
+
+        $response = $this->client->getResponse();
+        self::assertTrue($response->isSuccessful());
+        self::assertStringContainsString('Such entity already exists for the same values of fields: test_private_property, test_public_property.', $response->getContent());
+        self::assertStringContainsString('Such entity already exists for the same values of fields: test-private-property2.', $response->getContent());
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER + self::NEW_RECORDS_NUMBER, $this->getRepository()->findAll());
     }
 
     public function testImportFileWrongExtension(): void
@@ -87,7 +124,7 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertEquals($importUrl, $this->client->getRequest()->getRequestUri());
     }
 
-    private function checkData(string $expectedValue, int $entityId, string $importUrl = '/jg_batch_entity_import_bundle/import'): void
+    private function checkData(array $expectedValues, int $entityId, string $importUrl = '/jg_batch_entity_import_bundle/import'): void
     {
         $repository = $this->getRepository();
         self::assertTrue($this->client->getResponse()->isRedirect($importUrl));
@@ -99,7 +136,11 @@ class ImportControllerTraitTest extends WebTestCase
         /** @var TranslatableEntity|null $item */
         $item = $repository->find($entityId);
         self::assertNotEmpty($item);
-        self::assertSame($expectedValue, $item->getTestPrivateProperty());
+        self::assertSame($expectedValues[0], $item->getTestPrivateProperty());
+        self::assertSame($expectedValues[1], $item->getTestPrivateProperty2());
+        self::assertSame($expectedValues[2], $item->testPublicProperty);
+        self::assertSame($expectedValues[3], $item->translate('en')->getTestTranslationProperty());
+        self::assertSame($expectedValues[4], $item->translate('pl')->getTestTranslationProperty());
     }
 
     private function getRepository(): EntityRepository

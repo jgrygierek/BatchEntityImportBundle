@@ -29,30 +29,15 @@ class ImportConfigurationTest extends WebTestCase
         $databaseLoader->reload();
     }
 
-    public function testItemImportedSuccessfully(): void
+    /**
+     * @dataProvider matrixDataProvider
+     */
+    public function testItemImportedSuccessfully(array $header, array $records): void
     {
         $repository = $this->entityManager->getRepository(TestEntity::class);
         self::assertEmpty($repository->findAll());
 
-        $matrix = new Matrix(
-            [
-                'unknown_column',
-                'test_private_property',
-                'test_public_property',
-            ],
-            [
-                [
-                    'unknown_column' => 'value_1',
-                    'test_private_property' => 'value_2',
-                    'test_public_property' => 'public_value_1',
-                ],
-                [
-                    'unknown_column' => 'value_3',
-                    'test_private_property' => 'value_4',
-                    'test_public_property' => 'public_value_2',
-                ],
-            ]
-        );
+        $matrix = new Matrix($header, $records);
 
         $config = new BaseConfiguration($this->entityManager);
         $config->import($matrix);
@@ -72,6 +57,112 @@ class ImportConfigurationTest extends WebTestCase
         self::assertNotEmpty($item);
         self::assertSame('value_4', $item->getTestPrivateProperty());
         self::assertSame('public_value_2', $item->testPublicProperty);
+    }
+
+    public function matrixDataProvider(): Generator
+    {
+        yield 'columns names with pascalCase' => [
+            [
+                'unknownColumn',
+                'testPrivateProperty',
+                'testPublicProperty',
+            ],
+            [
+                [
+                    'unknownColumn' => 'value_1',
+                    'testPrivateProperty' => 'value_2',
+                    'testPublicProperty' => 'public_value_1',
+                ],
+                [
+                    'unknownColumn' => 'value_3',
+                    'testPrivateProperty' => 'value_4',
+                    'testPublicProperty' => 'public_value_2',
+                ],
+            ],
+        ];
+
+        yield 'columns names with CamelCase' => [
+            [
+                'UnknownColumn',
+                'TestPrivateProperty',
+                'TestPublicProperty',
+            ],
+            [
+                [
+                    'UnknownColumn' => 'value_1',
+                    'TestPrivateProperty' => 'value_2',
+                    'TestPublicProperty' => 'public_value_1',
+                ],
+                [
+                    'UnknownColumn' => 'value_3',
+                    'TestPrivateProperty' => 'value_4',
+                    'TestPublicProperty' => 'public_value_2',
+                ],
+            ],
+        ];
+
+        yield 'columns names with underscore' => [
+            [
+                'unknown_column',
+                'test_private_property',
+                'test_public_property',
+            ],
+            [
+                [
+                    'unknown_column' => 'value_1',
+                    'test_private_property' => 'value_2',
+                    'test_public_property' => 'public_value_1',
+                ],
+                [
+                    'unknown_column' => 'value_3',
+                    'test_private_property' => 'value_4',
+                    'test_public_property' => 'public_value_2',
+                ],
+            ],
+        ];
+
+        yield 'columns names with with dash' => [
+            [
+                'unknown-column',
+                'test-private-property',
+                'test-private-property-dash',
+                'test-public-property',
+            ],
+            [
+                [
+                    'unknown-column' => 'value_1',
+                    'test-private-property' => 'value_2',
+                    'test-private-property-dash' => 'value_2',
+                    'test-public-property' => 'public_value_1',
+                ],
+                [
+                    'unknown-column' => 'value_3',
+                    'test-private-property' => 'value_4',
+                    'test-private-property-dash' => 'value_4',
+                    'test-public-property' => 'public_value_2',
+                ],
+            ],
+        ];
+
+        yield 'columns names with with space' => [
+            [
+                'unknown column',
+                'test private property',
+                'test public property',
+            ],
+            [
+                [
+                    'unknown column' => 'value_1',
+                    'test private property' => 'value_2',
+                    'test public property' => 'public_value_1',
+                ],
+                [
+                    'unknown column' => 'value_3',
+                    'test private property' => 'value_4',
+                    'test public property' => 'public_value_2',
+                ],
+            ],
+        ];
     }
 
     public function testTranslatableItemImportedSuccessfully(): void

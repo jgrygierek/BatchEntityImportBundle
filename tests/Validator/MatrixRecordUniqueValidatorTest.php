@@ -61,27 +61,27 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
         ];
 
         yield [
-            'fields' => ['field_1', 'field_2'],
+            'fields' => ['field-1', 'field_2'],
             'data' => [
                 [
-                    'field_1' => 0,
-                    'field_2' => 100,
+                    'field-1' => 0,
+                    'field 2' => 100,
                 ],
                 [
-                    'field_1' => 1,
-                    'field_2' => 101,
+                    'field-1' => 1,
+                    'field 2' => 101,
                 ],
                 [
-                    'field_1' => 1,
-                    'field_2' => 102,
+                    'field-1' => 1,
+                    'field 2' => 102,
                 ],
                 [
-                    'field_1' => 2,
-                    'field_2' => 102,
+                    'field-1' => 2,
+                    'field 2' => 102,
                 ],
                 [
-                    'field_1' => 3,
-                    'field_2' => 103,
+                    'field-1' => 3,
+                    'field 2' => 103,
                 ],
             ],
         ];
@@ -137,28 +137,28 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
         ];
 
         yield [
-            'fields' => ['field_1', 'field_2'],
+            'fields' => ['field-1', 'field_2'],
             'duplicated_records' => [3],
             'data' => [
                 [
-                    'field_1' => 0,
-                    'field_2' => 100,
+                    'field-1' => 0,
+                    'field 2' => 100,
                 ],
                 [
-                    'field_1' => 0,
-                    'field_2' => 101,
+                    'field-1' => 0,
+                    'field 2' => 101,
                 ],
                 [
-                    'field_1' => 1,
-                    'field_2' => 101,
+                    'field-1' => 1,
+                    'field 2' => 101,
                 ],
                 [
-                    'field_1' => 1,
-                    'field_2' => 101,
+                    'field-1' => 1,
+                    'field 2' => 101,
                 ],
                 [
-                    'field_1' => 2,
-                    'field_2' => 102,
+                    'field-1' => 2,
+                    'field 2' => 102,
                 ],
             ],
         ];

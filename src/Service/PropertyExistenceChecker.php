@@ -28,7 +28,7 @@ class PropertyExistenceChecker
     public function propertyExists(string $name): bool
     {
         $locale = ColumnNameHelper::getLocale($name);
-        $name = ColumnNameHelper::underscoreToCamelCase($name);
+        $name = ColumnNameHelper::toCamelCase($name);
 
         return $locale
             ? $this->translationPropertyExists($name)
