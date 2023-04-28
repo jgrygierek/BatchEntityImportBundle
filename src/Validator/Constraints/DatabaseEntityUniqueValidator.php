@@ -118,7 +118,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         }
     }
 
-    private function isRecordDuplicatedInDatabase(EntityManager $em, string $class, array $criteria)
+    private function isRecordDuplicatedInDatabase(EntityManager $em, string $class, array $criteria): bool
     {
         $query = $em->createQuery($this->buildDQL($class, $criteria));
         $this->passParametersToQuery($query, $criteria);

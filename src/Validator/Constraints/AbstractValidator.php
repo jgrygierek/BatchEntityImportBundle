@@ -12,6 +12,9 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 abstract class AbstractValidator extends ConstraintValidator
 {
+    /**
+     * @param MatrixRecordUnique|DatabaseEntityUnique $constraint
+     */
     protected function validateArguments(Matrix $value, Constraint $constraint): void
     {
         $header = $value->getHeader();
@@ -26,7 +29,7 @@ abstract class AbstractValidator extends ConstraintValidator
     }
 
     /**
-     * @param MatrixRecord|mixed $record
+     * @param MatrixRecordUnique|DatabaseEntityUnique $constraint
      */
     protected function addErrorToMatrixRecord(MatrixRecord $record, Constraint $constraint, int $index, array $fields): void
     {
