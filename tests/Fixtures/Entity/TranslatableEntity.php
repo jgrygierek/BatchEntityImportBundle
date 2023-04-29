@@ -28,6 +28,10 @@ class TranslatableEntity extends AbstractEntity implements TranslatableInterface
     /**
      * @ORM\Column(type="string")
      */
+    private string $testPrivateProperty2 = '';
+    /**
+     * @ORM\Column(type="string")
+     */
     private string $testPrivatePropertyNoSetter = '';
 
     public function setTestPrivateProperty(string $testPrivateProperty): void
@@ -40,7 +44,17 @@ class TranslatableEntity extends AbstractEntity implements TranslatableInterface
         return $this->testPrivateProperty;
     }
 
-    public function __call($method, $arguments)
+    public function setTestPrivateProperty2(string $testPrivateProperty2): void
+    {
+        $this->testPrivateProperty2 = $testPrivateProperty2;
+    }
+
+    public function getTestPrivateProperty2(): string
+    {
+        return $this->testPrivateProperty2;
+    }
+
+    public function __call(string $method, array $arguments)
     {
         return $this->proxyCurrentLocaleTranslation($method, $arguments);
     }

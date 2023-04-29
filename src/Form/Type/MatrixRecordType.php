@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Form\Type;
 
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
@@ -37,9 +38,8 @@ class MatrixRecordType extends AbstractType
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
             function (FormEvent $event) use ($fieldDefinitions): void {
-                /** @var MatrixRecord $record */
                 $record = $event->getData();
-                if ($record) {
+                if ($record instanceof MatrixRecord) {
                     foreach ($record->getData() as $columnName => $value) {
                         $this->addField($fieldDefinitions, $columnName, $event);
                     }
@@ -74,7 +74,7 @@ class MatrixRecordType extends AbstractType
                     'placeholder' => '---',
                     'translation_domain' => false,
                     'required' => false,
-                    'query_builder' => static function (EntityRepository $er) use ($entityTranslationRelationName) {
+                    'query_builder' => static function (EntityRepository $er) use ($entityTranslationRelationName): QueryBuilder {
                         $qb = $er->createQueryBuilder('qb')->select('qb');
                         if ($entityTranslationRelationName) {
                             $qb->addSelect(['t'])->leftJoin("qb.$entityTranslationRelationName", 't');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
 use const ARRAY_FILTER_USE_KEY;
+
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -16,7 +17,7 @@ class Matrix
      * @Assert\All({
      *     @Assert\NotBlank(),
      *     @Assert\Type("string"),
-     *     @Assert\Regex(pattern="/^([\w]+)(:[\w]+)?$/", message="validation.matrix.header.name")
+     *     @Assert\Regex(pattern="/^([\w -]+)(:[\w]+)?$/", message="validation.matrix.header.name")
      * })
      */
     private array $header;
@@ -69,14 +70,16 @@ class Matrix
 
     private function clearHeader(array $header): array
     {
-        return array_values(
-            array_filter($header, fn (?string $columnName) => $this->isColumnNameValid($columnName))
+        $header = array_values(
+            array_filter($header, fn (?string $columnName): bool => $this->isColumnNameValid($columnName)),
         );
+
+        return \array_map(static fn (string $name) => \str_replace(' ', '_', $name), $header);
     }
 
     private function clearRecordData(array $data): array
     {
-        return array_filter($data, fn (?string $columnName) => $this->isColumnNameValid($columnName), ARRAY_FILTER_USE_KEY);
+        return array_filter($data, fn (?string $columnName): bool => $this->isColumnNameValid($columnName), ARRAY_FILTER_USE_KEY);
     }
 
     private function isColumnNameValid(?string $name): bool

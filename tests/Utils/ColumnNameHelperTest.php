@@ -15,7 +15,7 @@ class ColumnNameHelperTest extends TestCase
      */
     public function testToPascalCaseSuccess(string $underscoreString, string $expected): void
     {
-        self::assertEquals($expected, ColumnNameHelper::underscoreToPascalCase($underscoreString));
+        self::assertEquals($expected, ColumnNameHelper::toPascalCase($underscoreString));
     }
 
     public function pascalCaseDataProvider(): Generator
@@ -23,6 +23,7 @@ class ColumnNameHelperTest extends TestCase
         yield ['aa_bb_cc', 'AaBbCc'];
         yield ['aa_bB_cc', 'AaBBCc'];
         yield ['aa bb cc', 'AaBbCc'];
+        yield ['aa-bb-cc', 'AaBbCc'];
         yield ['AaBbCc', 'AaBbCc'];
         yield ['', ''];
     }
@@ -32,7 +33,7 @@ class ColumnNameHelperTest extends TestCase
      */
     public function testToCamelCaseSuccess(string $underscoreString, string $expected): void
     {
-        self::assertEquals($expected, ColumnNameHelper::underscoreToCamelCase($underscoreString));
+        self::assertEquals($expected, ColumnNameHelper::toCamelCase($underscoreString));
     }
 
     public function camelCaseDataProvider(): Generator
@@ -40,7 +41,26 @@ class ColumnNameHelperTest extends TestCase
         yield ['aa_bb_cc', 'aaBbCc'];
         yield ['aa_bB_cc', 'aaBBCc'];
         yield ['aa bb cc', 'aaBbCc'];
+        yield ['aa-bb-cc', 'aaBbCc'];
         yield ['AaBbCc', 'aaBbCc'];
         yield ['', ''];
+    }
+
+    /**
+     * @dataProvider setterDataProvider
+     */
+    public function testCovnertToSetter(string $underscoreString, string $expected): void
+    {
+        self::assertEquals($expected, ColumnNameHelper::getSetterName($underscoreString));
+    }
+
+    public function setterDataProvider(): Generator
+    {
+        yield ['aa_bb_cc', 'setAaBbCc'];
+        yield ['aa_bB_cc', 'setAaBBCc'];
+        yield ['aa bb cc', 'setAaBbCc'];
+        yield ['aa-bb-cc', 'setAaBbCc'];
+        yield ['AaBbCc', 'setAaBbCc'];
+        yield ['', 'set'];
     }
 }

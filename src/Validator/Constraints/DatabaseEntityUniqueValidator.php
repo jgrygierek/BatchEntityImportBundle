@@ -24,10 +24,10 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     }
 
     /**
-     * @param Matrix                          $value
-     * @param Constraint|DatabaseEntityUnique $constraint
+     * @param Matrix               $value
+     * @param DatabaseEntityUnique $constraint
      */
-    public function validate($value, Constraint $constraint): void
+    public function validate($value, $constraint): void
     {
         $this->duplicatedRecords = [];
         $this->validateArguments($value, $constraint);
@@ -55,9 +55,6 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         }
     }
 
-    /**
-     * @param Constraint|mixed $constraint
-     */
     protected function validateArguments(Matrix $value, Constraint $constraint): void
     {
         if (!$constraint instanceof DatabaseEntityUnique) {
@@ -101,7 +98,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     {
         $criteria = [];
         foreach ($matrixDataToCompare as $fieldName => $value) {
-            $criteria[ColumnNameHelper::underscoreToCamelCase($fieldName)][] = ['=', $value];
+            $criteria[ColumnNameHelper::toCamelCase($fieldName)][] = ['=', $value];
         }
 
         $entityToOverride = $matrixRecord->getEntity();
@@ -121,7 +118,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         }
     }
 
-    private function isRecordDuplicatedInDatabase(EntityManager $em, string $class, array $criteria)
+    private function isRecordDuplicatedInDatabase(EntityManager $em, string $class, array $criteria): bool
     {
         $query = $em->createQuery($this->buildDQL($class, $criteria));
         $this->passParametersToQuery($query, $criteria);

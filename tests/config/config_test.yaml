@@ -23,6 +23,7 @@ framework:
     annotations: ~
     test: true
     session:
+        name: my_custom_php_session_id
         handler_id: ~
     validation:
         enable_annotations: true
