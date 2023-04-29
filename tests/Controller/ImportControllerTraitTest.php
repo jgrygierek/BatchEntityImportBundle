@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Controller;
 
 use Doctrine\ORM\EntityRepository;
+use Generator;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -19,6 +20,8 @@ class ImportControllerTraitTest extends WebTestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->client = self::createClient();
 
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
@@ -26,9 +29,11 @@ class ImportControllerTraitTest extends WebTestCase
         $databaseLoader->loadFixtures();
     }
 
-    public function testControllerWorksOk(): void
+    /**
+     * @dataProvider importActionUrlDataProvider
+     */
+    public function testControllerWorksOk(string $importUrl): void
     {
-        $importUrl = '/jg_batch_entity_import_bundle/import';
         $updatedEntityId = self::DEFAULT_RECORDS_NUMBER + 2;
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
         // insert new data
@@ -86,6 +91,12 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertStringContainsString('Such entity already exists for the same values of fields: test_private_property, test_public_property.', $response->getContent());
         self::assertStringContainsString('Such entity already exists for the same values of fields: test-private-property2.', $response->getContent());
         self::assertCount(self::DEFAULT_RECORDS_NUMBER + self::NEW_RECORDS_NUMBER, $this->getRepository()->findAll());
+    }
+
+    public function importActionUrlDataProvider(): Generator
+    {
+        yield ['/jg_batch_entity_import_bundle/import'];
+        yield ['/jg_batch_entity_import_bundle/subscribed_service/import'];
     }
 
     public function testImportFileWrongExtension(): void
