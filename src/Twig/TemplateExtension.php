@@ -10,14 +10,17 @@ use UnexpectedValueException;
 
 class TemplateExtension extends AbstractExtension
 {
-    public function __construct(private readonly array $availableTemplates = [])
+    private array $availableTemplates;
+
+    public function __construct(array $availableTemplates = [])
     {
+        $this->availableTemplates = $availableTemplates;
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('batch_entity_import_template', $this->getTemplate(...)),
+            new TwigFunction('batch_entity_import_template', [$this, 'getTemplate']),
         ];
     }
 

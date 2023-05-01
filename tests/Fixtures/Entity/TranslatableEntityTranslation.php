@@ -9,12 +9,16 @@ use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslationTrait;
 use Stringable;
 
-#[ORM\Entity]
+/**
+ * @ORM\Entity()
+ */
 class TranslatableEntityTranslation extends AbstractEntity implements TranslationInterface, Stringable
 {
     use TranslationTrait;
 
-    #[ORM\Column(type: 'string')]
+    /**
+     * @ORM\Column(type="string")
+     */
     private string $testTranslationProperty = '';
 
     public function __toString(): string

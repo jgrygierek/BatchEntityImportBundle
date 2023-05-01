@@ -1,3 +1,11 @@
+jg.batch_entity_import_bundle.test_controller.subscribed_service.import:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithSubscribedImportService::import
+    path: /jg_batch_entity_import_bundle/subscribed_service/import
+
+jg.batch_entity_import_bundle.test_controller.subscribed_service.import_save:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithSubscribedImportService::importSave
+    path: /jg_batch_entity_import_bundle/subscribed_service/import_save
+
 jg.batch_entity_import_bundle.test_controller.with_interface.import:
     controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithInterface::import
     path: /jg_batch_entity_import_bundle/import

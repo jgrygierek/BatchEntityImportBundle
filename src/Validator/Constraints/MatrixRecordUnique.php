@@ -15,7 +15,7 @@ class MatrixRecordUnique extends Constraint
     public string $message = 'validation.matrix.record.unique';
     public array $fields = [];
 
-    public function __construct(mixed $options = null, array $groups = null, mixed $payload = null)
+    public function __construct($options = null, array $groups = null, $payload = null)
     {
         parent::__construct($options, $groups, $payload);
 

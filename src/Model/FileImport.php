@@ -10,9 +10,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class FileImport
 {
-    #[CustomAssert\FileExtension(['csv', 'xls', 'xlsx', 'ods'])]
-    #[Assert\File]
-    #[Assert\NotNull]
+    /**
+     * @Assert\File()
+     * @Assert\NotNull()
+     * @CustomAssert\FileExtension({"csv", "xls", "xlsx", "ods"})
+     */
     private ?UploadedFile $file = null;
 
     public function getFile(): ?UploadedFile

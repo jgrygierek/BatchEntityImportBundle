@@ -25,7 +25,6 @@ framework:
     session:
         name: my_custom_php_session_id
         handler_id: ~
-        storage_factory_id: session.storage.factory.mock_file
     validation:
         enable_annotations: true
 
@@ -40,6 +39,6 @@ doctrine:
         auto_mapping: true
         mappings:
             BatchEntityImportBundle:
-                type: attribute
+                type: annotation
                 prefix: JG\BatchEntityImportBundle\Tests\Fixtures\Entity
                 dir: '%kernel.project_dir%/tests/Fixtures/Entity/'

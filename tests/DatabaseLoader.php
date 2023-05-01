@@ -14,8 +14,12 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Data\TranslatableEntityFixtures;
 
 class DatabaseLoader
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager, Connection $connection)
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager, Connection $connection)
     {
+        $this->entityManager = $entityManager;
+
         $connection->getConfiguration()->setSQLLogger(null);
     }
 
