@@ -38,12 +38,12 @@ class MatrixRecord
         return array_key_exists($name, $this->data);
     }
 
-    public function __set(string $name, null|string|int $value): void
+    public function __set(string $name, mixed $value): void
     {
         $this->data[$name] = $value;
     }
 
-    public function __get(string $name): null|string|int
+    public function __get(string $name): mixed
     {
         return $this->data[$name];
     }
