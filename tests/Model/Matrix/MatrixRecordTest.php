@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\Model\Matrix;
 use Generator;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
+use stdClass;
 
 class MatrixRecordTest extends AbstractValidationTestCase
 {
@@ -21,18 +22,26 @@ class MatrixRecordTest extends AbstractValidationTestCase
 
     public function getValidDataProvider(): Generator
     {
+        $class = new stdClass();
+
         yield [
             [
                 'column_name' => '',
                 '' => ' ',
                 'column name2' => '',
                 'column-name3' => '',
+                'column-name4' => true,
+                'column-name5' => $class,
+                'column-name6' => 12,
                 '1' => '',
             ],
             [
                 'column_name' => '',
                 'column_name2' => '',
                 'column-name3' => '',
+                'column-name4' => true,
+                'column-name5' => $class,
+                'column-name6' => 12,
                 '1' => '',
             ],
         ];
