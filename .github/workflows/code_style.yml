@@ -3,9 +3,25 @@ name: Code Style
 on: [ push, pull_request ]
 
 jobs:
+    pre_job:
+        runs-on: ubuntu-latest
+        outputs:
+            should_skip: ${{ steps.skip_check.outputs.should_skip }}
+        steps:
+            - id: skip_check
+              uses: fkirc/skip-duplicate-actions@v5
+              with:
+                  concurrent_skipping: always
+                  skip_after_successful_duplicate: true
+                  do_not_skip: '["pull_request"]'
+
     php-cs-fixer:
         name: PHP CS Fixer
         runs-on: ubuntu-latest
+        needs:
+            - pre_job
+        if: needs.pre_job.outputs.should_skip != 'true'
+
         steps:
             -   name: Prepare github actions
                 uses: actions/checkout@v3
@@ -18,6 +34,10 @@ jobs:
     php-stan:
         name: PHPStan
         runs-on: ubuntu-latest
+        needs:
+            - pre_job
+        if: needs.pre_job.outputs.should_skip != 'true'
+
         steps:
             -   name: Prepare github actions
                 uses: actions/checkout@v3
