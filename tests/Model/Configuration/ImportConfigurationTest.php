@@ -230,6 +230,44 @@ class ImportConfigurationTest extends WebTestCase
         self::assertSame('public_value_2', $item->testPublicProperty);
     }
 
+    public function testUpdateMissingTranslationSuccessfully(): void
+    {
+        $existingItem = new TranslatableEntity();
+        $existingItem->translate('en')->setTestTranslationProperty('old_value_en');
+        $existingItem->mergeNewTranslations();
+        $this->entityManager->persist($existingItem);
+        $this->entityManager->flush();
+
+        $repository = $this->entityManager->getRepository(TranslatableEntity::class);
+        self::assertCount(1, $repository->findAll());
+
+        $matrix = new Matrix(
+            [
+                'id',
+                'test_translation_property:en',
+                'test_translation_property:pl',
+            ],
+            [
+                [
+                    'id' => 1,
+                    'test_translation_property:en' => 'value_en',
+                    'test_translation_property:pl' => 'value_pl',
+                ],
+            ]
+        );
+
+        $config = self::$kernel->getContainer()->get(TranslatableEntityBaseConfiguration::class);
+        $config->import($matrix);
+
+        self::assertCount(1, $repository->findAll());
+
+        /** @var TranslatableEntity|null $item */
+        $item = $repository->find(1);
+        self::assertNotEmpty($item);
+        self::assertSame('value_en', $item->translate('en')->getTestTranslationProperty());
+        self::assertSame('value_pl', $item->translate('pl')->getTestTranslationProperty());
+    }
+
     /**
      * @dataProvider exceptionCheckProvider
      */
