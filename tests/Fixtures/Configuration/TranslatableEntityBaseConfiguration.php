@@ -23,7 +23,7 @@ class TranslatableEntityBaseConfiguration extends AbstractImportConfiguration
     public function getNewEntity(MatrixRecord $record): object
     {
         $data = $record->getData();
-        $existingEntity = isset($data['id']) && $data['id'] ? $this->getRepository()->find($data['id']) : null;
+        $existingEntity = !empty($data['id']) ? $this->getRepository()->find($data['id']) : null;
 
         if (!$existingEntity) {
             return parent::getNewEntity($record);
