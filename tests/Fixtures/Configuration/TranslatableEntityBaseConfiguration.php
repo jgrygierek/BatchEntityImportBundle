@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Configuration;
 
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 
@@ -31,5 +32,17 @@ class TranslatableEntityBaseConfiguration extends AbstractImportConfiguration
                 'test-private-property2',
             ]]),
         ];
+    }
+
+    public function getNewEntity(MatrixRecord $record): object
+    {
+        $data = $record->getData();
+        $existingEntity = !empty($data['id']) ? $this->getRepository()->find($data['id']) : null;
+
+        if (!$existingEntity) {
+            return parent::getNewEntity($record);
+        }
+
+        return $existingEntity;
     }
 }

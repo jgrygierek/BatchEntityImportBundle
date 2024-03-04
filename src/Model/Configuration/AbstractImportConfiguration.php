@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Model\Configuration;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
@@ -63,7 +64,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
             try {
                 if ($entity instanceof TranslatableInterface && $locale) {
-                    $translatedEntity = $entity->translate($locale);
+                    $translatedEntity = $entity->translate($locale, false);
                     if (method_exists($translatedEntity, $setterName)) {
                         $translatedEntity->$setterName($value);
                     } else {
@@ -118,5 +119,10 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     public function allowOverrideEntity(): bool
     {
         return true;
+    }
+
+    protected function getRepository(): EntityRepository
+    {
+        return $this->em->getRepository($this->getEntityClassName());
     }
 }
