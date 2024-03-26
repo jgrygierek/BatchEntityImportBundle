@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
 use InvalidArgumentException;
+use JG\BatchEntityImportBundle\Service\CsvDelimiterDetector;
 use PhpOffice\PhpSpreadsheet\Reader\BaseReader;
+use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MatrixFactory
@@ -36,7 +38,7 @@ class MatrixFactory
             $data,
             static function (array &$row) use ($header): void {
                 $row = array_combine($header, $row);
-            }
+            },
         );
     }
 
@@ -48,6 +50,12 @@ class MatrixFactory
             throw new InvalidArgumentException("Reader for extension $extension is not supported by PhpOffice.");
         }
 
-        return new $readerClass();
+        $reader = new $readerClass();
+        if ($reader instanceof Csv) {
+            $detectedDelimiter = (new CsvDelimiterDetector())->detect($file->getContent());
+            $reader->setDelimiter($detectedDelimiter->value);
+        }
+
+        return $reader;
     }
 }

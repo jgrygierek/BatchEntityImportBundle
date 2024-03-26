@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Model\Matrix;
 
 use Generator;
+use JG\BatchEntityImportBundle\Enums\CsvDelimiterEnum;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use PhpOffice\PhpSpreadsheet\Exception as SpreadsheetException;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -22,14 +24,18 @@ class MatrixFactoryTest extends TestCase
      * @throws SpreadsheetException
      * @throws Exception
      */
-    public function testCreateFromUploadedFileSuccess(string $fileExtension): void
+    public function testCreateFromUploadedFileSuccess(string $fileExtension, CsvDelimiterEnum $delimiter = CsvDelimiterEnum::COMMA): void
     {
         foreach ($this->contentProvider() as $data) {
-            $file = $this->createFile($fileExtension, $data[0]);
+            $file = $this->createFile($fileExtension, $delimiter, \array_merge([$data['header']], $data['records']));
             $matrix = MatrixFactory::createFromUploadedFile($file);
 
-            self::assertEquals($data[1], !empty($matrix->getHeader()));
-            self::assertCount($data[2], $matrix->getRecords());
+            self::assertCount(count($data['expectedHeader']), $matrix->getHeader());
+            self::assertCount(count($data['expectedRecords']), $matrix->getRecords());
+
+            foreach ($data['expectedRecords'] as $index => $record) {
+                self::assertSame($record, \array_values($matrix->getRecords()[$index]->getData()));
+            }
 
             unlink($file->getPathname());
         }
@@ -37,11 +43,13 @@ class MatrixFactoryTest extends TestCase
 
     public function dataProvider(): Generator
     {
-        yield ['csv'];
+        yield ['csv', CsvDelimiterEnum::COMMA];
+        yield ['csv', CsvDelimiterEnum::SEMICOLON];
         yield ['xls'];
         yield ['xlsx'];
         yield ['ods'];
-        yield ['CSV'];
+        yield ['CSV', CsvDelimiterEnum::COMMA];
+        yield ['CSV', CsvDelimiterEnum::SEMICOLON];
         yield ['XLS'];
         yield ['XLSX'];
         yield ['ODS'];
@@ -49,10 +57,36 @@ class MatrixFactoryTest extends TestCase
 
     public function contentProvider(): Generator
     {
-        yield [[['header1', 'header2', 'header3'], ['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
-        yield [[['header1', 'header2', 'header3']], true, 0];
-        yield [[[null], ['abcd']], false, 0];
-        yield [[], false, 0];
+        yield [
+            'header' => ['header1', 'header2', 'header3'],
+            'expectedHeader' => ['header1', 'header2', 'header3'],
+            'records' => [['aaaa', 'bbbb', 'cccc'], ['xxxx', 'yyyy', 'zzzz']],
+            'expectedRecords' => [['aaaa', 'bbbb', 'cccc'], ['xxxx', 'yyyy', 'zzzz']],
+        ];
+        yield [
+            'header' => ['header1', 'header2', 'header3'],
+            'expectedHeader' => ['header1', 'header2', 'header3'],
+            'records' => [],
+            'expectedRecords' => [],
+        ];
+        yield [
+            'header' => ['header1:en'],
+            'expectedHeader' => ['header1:en'],
+            'records' => [['aaaa']],
+            'expectedRecords' => [['aaaa']],
+        ];
+        yield [
+            'header' => [null],
+            'expectedHeader' => [],
+            'records' => [['abcd']],
+            'expectedRecords' => [],
+        ];
+        yield [
+            'header' => [],
+            'expectedHeader' => [],
+            'records' => [],
+            'expectedRecords' => [],
+        ];
     }
 
     /**
@@ -89,7 +123,7 @@ class MatrixFactoryTest extends TestCase
      * @throws SpreadsheetException
      * @throws WriterException
      */
-    private function createFile(string $fileExtension, array $data = []): UploadedFile
+    private function createFile(string $fileExtension, CsvDelimiterEnum $delimiter, array $data = []): UploadedFile
     {
         $fileExtension = strtolower($fileExtension);
         $filename = 'file.' . $fileExtension;
@@ -98,6 +132,9 @@ class MatrixFactoryTest extends TestCase
         $spreadsheet->getActiveSheet()->fromArray($data);
 
         $writer = IOFactory::createWriter($spreadsheet, ucfirst($fileExtension));
+        if ($writer instanceof Csv) {
+            $writer->setDelimiter($delimiter->value);
+        }
         $writer->save($filename);
 
         return new UploadedFile($filename, $filename);

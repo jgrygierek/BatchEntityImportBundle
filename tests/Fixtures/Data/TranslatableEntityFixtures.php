@@ -17,9 +17,16 @@ class TranslatableEntityFixtures extends Fixture
             $entity = new TranslatableEntity();
             $entity->setTestPrivateProperty('abcd_' . $i);
 
-            /** @var TranslatableEntityTranslation $translatedEntity */
-            $translatedEntity = $entity->translate('en');
-            $translatedEntity->setTestTranslationProperty('qwerty_' . $i);
+            if ($i < 15) {
+                /** @var TranslatableEntityTranslation $translatedEntity */
+                $translatedEntity = $entity->translate('en');
+                $translatedEntity->setTestTranslationProperty('qwerty_en_' . $i);
+            }
+
+            if ($i > 4) {
+                $translatedEntity = $entity->translate('pl');
+                $translatedEntity->setTestTranslationProperty('qwerty_pl_' . $i);
+            }
 
             $manager->persist($entity);
             $entity->mergeNewTranslations();
