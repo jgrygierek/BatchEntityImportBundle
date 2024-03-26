@@ -13,6 +13,7 @@ services:
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
     JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration: ~
+    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityConfiguration: ~
 
     Symfony\Component\Security\Core\Security: ~
 

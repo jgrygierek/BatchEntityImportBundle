@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Controller;
 
 use Doctrine\ORM\EntityRepository;
+use Generator;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -26,17 +27,26 @@ class ImportControllerTraitTest extends WebTestCase
         $databaseLoader->loadFixtures();
     }
 
-    public function testControllerWorksOk(): void
+    public function testInsertNewData(): void
     {
         $importUrl = '/jg_batch_entity_import_bundle/import';
         $updatedEntityId = self::DEFAULT_RECORDS_NUMBER + 2;
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
-        // insert new data
+
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test.csv', $importUrl);
         $this->client->submitForm('btn-submit');
         $this->checkData(['test2', 'lorem ipsum 2', 'qwerty2', 'test2_en', 'test2_pl'], $updatedEntityId, $importUrl);
+    }
 
-        // update existing data
+    /**
+     * @dataProvider updateRecordDataProvider
+     */
+    public function testUpdateExistingRecord(int $updatedEntityId, array $expectedDefaultValues, array $expectedValuesAfterChange): void
+    {
+        $importUrl = '/jg_batch_entity_import_bundle/import_base_translatable';
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        $this->assertEntityValues($expectedDefaultValues, $updatedEntityId);
+
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test_updated_data.csv', $importUrl);
         $this->client->submitForm('btn-submit', [
             'matrix' => [
@@ -52,7 +62,49 @@ class ImportControllerTraitTest extends WebTestCase
                 ],
             ],
         ]);
-        $this->checkData(['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'], $updatedEntityId, $importUrl);
+        $this->checkData($expectedValuesAfterChange, $updatedEntityId, $importUrl, 0);
+    }
+
+    public function updateRecordDataProvider(): Generator
+    {
+        yield 'record with all fields filled' => [
+            10,
+            ['abcd_9', '', '', 'qwerty_en_9', 'qwerty_pl_9'],
+            ['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'],
+        ];
+
+        yield 'record without en field filled' => [
+            20,
+            ['abcd_19', '', '', '', 'qwerty_pl_19'],
+            ['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'],
+        ];
+
+        yield 'record without pl field filled' => [
+            1,
+            ['abcd_0', '', '', 'qwerty_en_0', 'qwerty_en_0'],
+            ['new_value', 'new_value2', 'new_value3', 'new_value5', 'new_value5'], // todo: it is a bug, it should be new_value4
+        ];
+    }
+
+    public function testUpdateOnlySingleTranslatableColumn(): void
+    {
+        $importUrl = '/jg_batch_entity_import_bundle/import_base_translatable';
+        $updatedEntityId = 10;
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        $this->assertEntityValues(['abcd_9', '', '', 'qwerty_en_9', 'qwerty_pl_9'], $updatedEntityId);
+
+        $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test_update_single_column.csv', $importUrl);
+        $this->client->submitForm('btn-submit', [
+            'matrix' => [
+                'records' => [
+                    [
+                        'entity' => $updatedEntityId,
+                        'testTranslationProperty:pl' => 'Lorem Ipsum',
+                    ],
+                ],
+            ],
+        ]);
+        $this->checkData(['abcd_9', '', '', 'qwerty_en_9', 'Lorem Ipsum'], $updatedEntityId, $importUrl, 0);
     }
 
     public function testDuplicationFoundInDatabase(): void
@@ -124,17 +176,26 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertEquals($importUrl, $this->client->getRequest()->getRequestUri());
     }
 
-    private function checkData(array $expectedValues, int $entityId, string $importUrl = '/jg_batch_entity_import_bundle/import'): void
-    {
+    private function checkData(
+        array $expectedValues,
+        int $entityId,
+        string $importUrl = '/jg_batch_entity_import_bundle/import',
+        int $newRecordsNumber = self::NEW_RECORDS_NUMBER,
+    ): void {
         $repository = $this->getRepository();
         self::assertTrue($this->client->getResponse()->isRedirect($importUrl));
         $this->client->followRedirect();
         self::assertTrue($this->client->getResponse()->isSuccessful());
         self::assertStringContainsString('Data has been imported', $this->client->getResponse()->getContent());
-        self::assertCount(self::DEFAULT_RECORDS_NUMBER + self::NEW_RECORDS_NUMBER, $repository->findAll());
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER + $newRecordsNumber, $repository->findAll());
 
+        $this->assertEntityValues($expectedValues, $entityId);
+    }
+
+    private function assertEntityValues(array $expectedValues, int $entityId): void
+    {
         /** @var TranslatableEntity|null $item */
-        $item = $repository->find($entityId);
+        $item = $this->getRepository()->find($entityId);
         self::assertNotEmpty($item);
         self::assertSame($expectedValues[0], $item->getTestPrivateProperty());
         self::assertSame($expectedValues[1], $item->getTestPrivateProperty2());

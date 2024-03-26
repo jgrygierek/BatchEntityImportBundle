@@ -13,3 +13,11 @@ jg.batch_entity_import_bundle.test_controller.no_service.import:
 jg.batch_entity_import_bundle.test_controller.no_service.import_save:
     controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithoutConfigurationService::importSave
     path: /jg_batch_entity_import_bundle/import_save_no_service
+
+jg.batch_entity_import_bundle.test_controller.base_translatable_config.import:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithBaseTranslatableConfiguration::import
+    path: /jg_batch_entity_import_bundle/import_base_translatable
+
+jg.batch_entity_import_bundle.test_controller.base_translatable_config.import_save:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithBaseTranslatableConfiguration::importSave
+    path: /jg_batch_entity_import_bundle/import_save_base_translatable

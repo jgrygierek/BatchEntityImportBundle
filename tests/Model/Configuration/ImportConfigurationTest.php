@@ -8,10 +8,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Generator;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
+use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -27,6 +28,15 @@ class ImportConfigurationTest extends WebTestCase
         $this->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
         $databaseLoader->reload();
+    }
+
+    public function testBasicMethods(): void
+    {
+        $config = $this->createMock(AbstractImportConfiguration::class);
+
+        self::assertNull($config->getEntityTranslationRelationName());
+        self::assertEmpty($config->getMatrixConstraints());
+        self::assertEmpty($config->getFieldsDefinitions());
     }
 
     /**
@@ -193,10 +203,10 @@ class ImportConfigurationTest extends WebTestCase
                     'test_translation_property:en' => 'value_7',
                     'test_translation_property:pl' => 'value_8',
                 ],
-            ]
+            ],
         );
 
-        $config = self::$kernel->getContainer()->get(TranslatableEntityBaseConfiguration::class);
+        $config = self::$kernel->getContainer()->get(TranslatableEntityConfiguration::class);
         $config->import($matrix);
 
         self::assertCount(2, $repository->findAll());
