@@ -44,7 +44,7 @@ class MatrixRecordType extends AbstractType
                         $this->addField($fieldDefinitions, $columnName, $event);
                     }
                 }
-            }
+            },
         );
     }
 
@@ -82,7 +82,7 @@ class MatrixRecordType extends AbstractType
 
                         return $qb;
                     },
-                ]
+                ],
             );
     }
 

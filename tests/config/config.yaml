@@ -20,14 +20,12 @@ services:
         alias: service_container
 
 framework:
-    annotations: ~
+    annotations: false
     test: true
     session:
         name: my_custom_php_session_id
         handler_id: ~
         storage_factory_id: session.storage.factory.mock_file
-    validation:
-        enable_annotations: true
 
 twig: ~
 
@@ -46,3 +44,8 @@ doctrine:
                 type: attribute
                 prefix: JG\BatchEntityImportBundle\Tests\Fixtures\Entity
                 dir: '%kernel.project_dir%/tests/Fixtures/Entity/'
+
+security:
+    firewalls:
+        main:
+            security: false
