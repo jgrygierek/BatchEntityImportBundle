@@ -82,7 +82,7 @@ class ImportControllerTraitTest extends WebTestCase
         yield 'record without pl field filled' => [
             1,
             ['abcd_0', '', '', 'qwerty_en_0', 'qwerty_en_0'],
-            ['new_value', 'new_value2', 'new_value3', 'new_value5', 'new_value5'], // todo: it is a bug, it should be new_value4
+            ['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'],
         ];
     }
 

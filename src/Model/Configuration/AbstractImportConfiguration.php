@@ -63,7 +63,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
             try {
                 if ($entity instanceof TranslatableInterface && $locale) {
-                    $translatedEntity = $entity->translate($locale);
+                    $translatedEntity = $entity->translate($locale, false);
                     if (method_exists($translatedEntity, $setterName)) {
                         $translatedEntity->$setterName($value);
                     } else {
