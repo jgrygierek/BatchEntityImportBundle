@@ -23,8 +23,7 @@
     ],
     "require": {
         "php": ">=8.1.0",
-        "doctrine/annotations": "^1.14",
-        "doctrine/lexer": "^1.2.1",
+        "doctrine/annotations": "^1.14|^2.0",
         "doctrine/orm": "^2.9",
         "phpoffice/phpspreadsheet": "^1.22.0",
         "symfony/config": "^5.4|^6.0",
@@ -41,7 +40,7 @@
     "require-dev": {
         "doctrine/doctrine-bundle": "^2.4.0",
         "doctrine/doctrine-fixtures-bundle": "^3.4.1",
-        "friendsofphp/php-cs-fixer": "^v3.8.0",
+        "friendsofphp/php-cs-fixer": "^v3.62.0",
         "knplabs/doctrine-behaviors": "^2.0.8",
         "matthiasnoback/symfony-dependency-injection-test": "^4.2.1",
         "phpstan/phpstan": "^1.9.2",
