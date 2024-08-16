@@ -9,9 +9,7 @@ use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\FieldsTypeConfiguration;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -62,21 +60,6 @@ class MatrixRecordTypeTest extends WebTestCase
         self::assertInstanceOf(IntegerType::class, $form->get('age')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextareaType::class, $form->get('description')->getConfig()->getType()->getInnerType());
-    }
-
-    public function testValidFormWithTranslatableField(): void
-    {
-        $data = ['description:pl' => 'Lorem Ipsum'];
-        $configuration = new TranslatableEntityConfiguration($this->createMock(EntityManagerInterface::class));
-        $matrixRecord = new MatrixRecord($data);
-
-        $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
-        $form->submit($data);
-
-        self::assertTrue($form->isSynchronized());
-
-        self::assertSame(TranslatableEntity::class, $form->get('entity')->getConfig()->getOption('class'));
-        self::assertInstanceOf(TextType::class, $form->get('description:pl')->getConfig()->getType()->getInnerType());
     }
 
     public function testInvalidFormWithoutConfiguration(): void

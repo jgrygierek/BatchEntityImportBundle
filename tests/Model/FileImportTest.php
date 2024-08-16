@@ -40,7 +40,7 @@ class FileImportTest extends AbstractValidationTestCase
         self::assertEmpty($this->getErrors($this->fileImport));
     }
 
-    public function validExtensionsProvider(): Generator
+    public static function validExtensionsProvider(): Generator
     {
         yield ['csv'];
         yield ['xls'];
@@ -67,7 +67,7 @@ class FileImportTest extends AbstractValidationTestCase
         self::assertNotEmpty($this->getErrors($this->fileImport));
     }
 
-    public function invalidExtensionsProvider(): Generator
+    public static function invalidExtensionsProvider(): Generator
     {
         yield ['jpg'];
         yield ['pdf'];

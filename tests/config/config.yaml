@@ -12,8 +12,7 @@ services:
         tags: [ 'controller.service_arguments' ]
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
-    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration: ~
-    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityConfiguration: ~
+    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration: ~
 
     Symfony\Component\Security\Core\Security: ~
 
@@ -34,13 +33,16 @@ twig: ~
 
 doctrine:
     dbal:
-        driver: pdo_sqlite
-        url: sqlite://root@localhost/var/batch_entity_import_test.db
+        default_connection: default
+        connections:
+            default:
+                driver: pdo_sqlite
+                url: sqlite://root@localhost/var/batch_entity_import_test.db
 
     orm:
         auto_mapping: true
         mappings:
-            BatchEntityImportBundle:
+            Main:
                 type: attribute
                 prefix: JG\BatchEntityImportBundle\Tests\Fixtures\Entity
                 dir: '%kernel.project_dir%/tests/Fixtures/Entity/'

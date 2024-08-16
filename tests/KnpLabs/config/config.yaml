@@ -1,0 +1,19 @@
+services:
+    _defaults:
+        public: true
+        autowire: true
+        autoconfigure: true
+
+    JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Controller\:
+        resource: '../Fixtures/Controller'
+        tags: [ 'controller.service_arguments' ]
+
+    JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration: ~
+
+doctrine:
+    orm:
+        mappings:
+            KnpLabs:
+                type: attribute
+                prefix: JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity
+                dir: '%kernel.project_dir%/tests/KnpLabs/Fixtures/Entity/'

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
+namespace JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Controller;
 
 use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectInterface;
 use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectTrait;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityBaseConfiguration;
+use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ControllerWithBaseTranslatableConfiguration extends AbstractController implements ImportConfigurationAutoInjectInterface
+class ControllerWithInterface extends AbstractController implements ImportConfigurationAutoInjectInterface
 {
     use ImportConfigurationAutoInjectTrait;
     use ImportControllerTrait;
@@ -32,16 +32,16 @@ class ControllerWithBaseTranslatableConfiguration extends AbstractController imp
 
     protected function redirectToImport(): RedirectResponse
     {
-        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.base_translatable_config.import');
+        return $this->redirectToRoute('test_controller.translatable.with_interface.import');
     }
 
     protected function getMatrixSaveActionUrl(): string
     {
-        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.base_translatable_config.import_save');
+        return $this->generateUrl('test_controller.translatable.with_interface.import_save');
     }
 
     protected function getImportConfigurationClassName(): string
     {
-        return TranslatableEntityBaseConfiguration::class;
+        return TranslatableEntityConfiguration::class;
     }
 }

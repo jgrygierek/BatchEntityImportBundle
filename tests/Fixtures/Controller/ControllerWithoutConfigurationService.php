@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
 
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfigurationWithoutService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,16 +29,16 @@ class ControllerWithoutConfigurationService extends AbstractController
 
     protected function redirectToImport(): RedirectResponse
     {
-        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.no_service.import');
+        return $this->redirectToRoute('test_controller.no_service.import');
     }
 
     protected function getMatrixSaveActionUrl(): string
     {
-        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.no_service.import_save');
+        return $this->generateUrl('test_controller.no_service.import_save');
     }
 
     protected function getImportConfigurationClassName(): string
     {
-        return BaseConfiguration::class;
+        return BaseConfigurationWithoutService::class;
     }
 }

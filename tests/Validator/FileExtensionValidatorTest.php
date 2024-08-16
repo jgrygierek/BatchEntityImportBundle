@@ -46,7 +46,7 @@ class FileExtensionValidatorTest extends ConstraintValidatorTestCase
             ->assertRaised();
     }
 
-    public function dataProvider(): Generator
+    public static function dataProvider(): Generator
     {
         yield ['csv'];
         yield ['xls'];

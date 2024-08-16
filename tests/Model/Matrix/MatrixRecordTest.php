@@ -20,7 +20,7 @@ class MatrixRecordTest extends AbstractValidationTestCase
         self::assertSame($expectedRecordData, $matrixRecord->getData());
     }
 
-    public function getValidDataProvider(): Generator
+    public static function getValidDataProvider(): Generator
     {
         $class = new stdClass();
 

@@ -32,7 +32,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    public function dataProvider(): Generator
+    public static function dataProvider(): Generator
     {
         yield [
             'fields' => ['field_1'],
@@ -107,7 +107,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
         }
     }
 
-    public function duplicatedDataProvider(): Generator
+    public static function duplicatedDataProvider(): Generator
     {
         yield [
             'fields' => ['field_1'],

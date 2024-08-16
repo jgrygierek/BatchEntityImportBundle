@@ -10,13 +10,16 @@ use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Data\TestEntityFixtures;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Data\TranslatableEntityFixtures;
 
 class DatabaseLoader
 {
+    use SkippedTestsTrait;
+
     public function __construct(private readonly EntityManagerInterface $entityManager, Connection $connection)
     {
-        $connection->getConfiguration()->setSQLLogger(null);
+        $connection->getConfiguration()->setSQLLogger();
     }
 
     public function reload(): void
@@ -34,7 +37,10 @@ class DatabaseLoader
     public function loadFixtures(): void
     {
         $loader = new Loader();
-        $loader->addFixture(new TranslatableEntityFixtures());
+        $loader->addFixture(new TestEntityFixtures());
+        if ($this->isKnpLabsDoctrineBehaviorsInstalled()) {
+            $loader->addFixture(new TranslatableEntityFixtures());
+        }
 
         $purger = new ORMPurger();
         $executor = new ORMExecutor($this->entityManager, $purger);
