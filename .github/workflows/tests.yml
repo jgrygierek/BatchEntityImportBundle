@@ -50,10 +50,13 @@ jobs:
                     key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: ${{ runner.os }}-composer-
 
-            -   name: Run composer
-                run: |
-                    COMPOSER_MEMORY_LIMIT=-1 composer require knplabs/doctrine-behaviors --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
-                    COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
+            -   name: Run composer with knplabs/doctrine-behaviors
+                if: matrix.vendors-version != '' ||  matrix.php-versions != '8.3'
+                run: COMPOSER_MEMORY_LIMIT=-1 composer require knplabs/doctrine-behaviors --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
+                    
+            -   name: Run composer without knplabs/doctrine-behaviors
+                if: matrix.vendors-version == '' &&  matrix.php-versions == '8.3'
+                run: COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
 
             -   name: Run tests
                 run: composer tests-cov
