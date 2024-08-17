@@ -30,7 +30,7 @@ jobs:
 
         steps:
             -   name: Prepare github actions
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
@@ -44,14 +44,16 @@ jobs:
                 run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
             -   name: Cache composer dependencies
-                uses: actions/cache@v3
+                uses: actions/cache@v4
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
                     key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
                     restore-keys: ${{ runner.os }}-composer-
 
             -   name: Run composer
-                run: COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
+                run: |
+                    COMPOSER_MEMORY_LIMIT=-1 composer require knplabs/doctrine-behaviors --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
+                    COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
 
             -   name: Run tests
                 run: composer tests-cov

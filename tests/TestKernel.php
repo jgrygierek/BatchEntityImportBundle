@@ -25,19 +25,27 @@ class TestKernel extends Kernel
 
     public function registerBundles(): array
     {
-        return [
+        $bundles = [
             new SecurityBundle(),
             new BatchEntityImportBundle(),
             new DoctrineBundle(),
             new FrameworkBundle(),
             new TwigBundle(),
-            new DoctrineBehaviorsBundle(),
         ];
+
+        if (\class_exists(DoctrineBehaviorsBundle::class)) {
+            $bundles[] = new DoctrineBehaviorsBundle();
+        }
+
+        return $bundles;
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
-        $loader->load(__DIR__ . '/config/config_test.yaml');
+        $loader->load(__DIR__ . '/config/config.yaml');
+        if (\class_exists(DoctrineBehaviorsBundle::class)) {
+            $loader->load(__DIR__ . '/KnpLabs/config/config.yaml');
+        }
 
         foreach ($this->configs as $config) {
             $loader->load($config);
@@ -79,9 +87,12 @@ class TestKernel extends Kernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import(__DIR__ . '/config/routes.yaml');
+        if (\class_exists(DoctrineBehaviorsBundle::class)) {
+            $routes->import(__DIR__ . '/KnpLabs/config/routes.yaml');
+        }
     }
 
-    protected function configureContainer(ContainerBuilder $containerBuilder, LoaderInterface $loader): void
+    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
     }
 }

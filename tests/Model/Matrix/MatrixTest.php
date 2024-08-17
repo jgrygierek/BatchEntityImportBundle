@@ -9,7 +9,6 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TranslatableEntity;
 
 class MatrixTest extends AbstractValidationTestCase
 {
@@ -22,7 +21,7 @@ class MatrixTest extends AbstractValidationTestCase
         self::assertEmpty($this->getErrors($matrix));
     }
 
-    public function getValidDataProvider(): Generator
+    public static function getValidDataProvider(): Generator
     {
         yield [['column_name'], [['column_name' => '']]];
         yield [['column_name'], [['column_name' => '', ' ' => '']]];
@@ -40,7 +39,7 @@ class MatrixTest extends AbstractValidationTestCase
         self::assertNotEmpty($this->getErrors($matrix));
     }
 
-    public function getInvalidDataProvider(): Generator
+    public static function getInvalidDataProvider(): Generator
     {
         yield [[], [['column_name' => '']]];
         yield [[' '], [['column_name' => '']]];
@@ -78,22 +77,5 @@ class MatrixTest extends AbstractValidationTestCase
         $matrix = new Matrix(array_keys($expected));
 
         self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class));
-    }
-
-    public function testHeaderInfoForTranslatableEntity(): void
-    {
-        $expected = [
-            'unknown_column_name' => false,
-            'test_public_property' => true,
-            'test_private_property' => true,
-            'test_private_property_no_setter' => false,
-            'test_private_property:en' => false,
-            'test_translation_property' => false,
-            'test-translation-property:en' => true,
-        ];
-
-        $matrix = new Matrix(array_keys($expected));
-
-        self::assertSame($expected, $matrix->getHeaderInfo(TranslatableEntity::class));
     }
 }

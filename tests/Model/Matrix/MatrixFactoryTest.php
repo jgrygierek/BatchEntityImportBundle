@@ -41,7 +41,7 @@ class MatrixFactoryTest extends TestCase
         }
     }
 
-    public function dataProvider(): Generator
+    public static function dataProvider(): Generator
     {
         yield ['csv', CsvDelimiterEnum::COMMA];
         yield ['csv', CsvDelimiterEnum::SEMICOLON];
@@ -97,7 +97,7 @@ class MatrixFactoryTest extends TestCase
     {
         $this->expectExceptionMessage('Reader for extension Txt is not supported by PhpOffice.');
 
-        $file = new UploadedFile(__DIR__ . '/../../Fixtures/Resources/test.txt', 'test.txt');
+        $file = new UploadedFile(__DIR__ . '/../../Fixtures/Resources/test_wrong_extension.txt', 'test_wrong_extension.txt');
         MatrixFactory::createFromUploadedFile($file);
     }
 
@@ -111,7 +111,7 @@ class MatrixFactoryTest extends TestCase
         self::assertCount($recordsNumber, $matrix->getRecords());
     }
 
-    public function postContentProvider(): Generator
+    public static function postContentProvider(): Generator
     {
         yield [[['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];
         yield [[['aaaa', 'bbbb', '123']], true, 1];

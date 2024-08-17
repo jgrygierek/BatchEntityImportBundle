@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace JG\BatchEntityImportBundle\Tests\Fixtures\Entity;
+namespace JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\AbstractEntity;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
 use Knp\DoctrineBehaviors\Model\Translatable\TranslationTrait;
 use Stringable;

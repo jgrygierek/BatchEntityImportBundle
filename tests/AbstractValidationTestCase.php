@@ -8,8 +8,10 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class AbstractValidationTestCase extends TestCase
+abstract class AbstractValidationTestCase extends TestCase
 {
+    use SkippedTestsTrait;
+
     protected ValidatorInterface $validator;
 
     protected function setUp(): void

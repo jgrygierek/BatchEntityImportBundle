@@ -62,7 +62,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             $setterName = ColumnNameHelper::getSetterName($name);
 
             try {
-                if ($entity instanceof TranslatableInterface && $locale) {
+                if (\interface_exists(TranslatableInterface::class) && $entity instanceof TranslatableInterface && $locale) {
                     $translatedEntity = $entity->translate($locale, false);
                     if (method_exists($translatedEntity, $setterName)) {
                         $translatedEntity->$setterName($value);
@@ -83,7 +83,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         $this->em->persist($entity);
 
-        if ($entity instanceof TranslatableInterface) {
+        if (\interface_exists(TranslatableInterface::class) && $entity instanceof TranslatableInterface) {
             $entity->mergeNewTranslations();
         }
     }

@@ -7,7 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
 use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectInterface;
 use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectTrait;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\TranslatableEntityConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,16 +32,16 @@ class ControllerWithInterface extends AbstractController implements ImportConfig
 
     protected function redirectToImport(): RedirectResponse
     {
-        return $this->redirectToRoute('jg.batch_entity_import_bundle.test_controller.with_interface.import');
+        return $this->redirectToRoute('test_controller.with_interface.import');
     }
 
     protected function getMatrixSaveActionUrl(): string
     {
-        return $this->generateUrl('jg.batch_entity_import_bundle.test_controller.with_interface.import_save');
+        return $this->generateUrl('test_controller.with_interface.import_save');
     }
 
     protected function getImportConfigurationClassName(): string
     {
-        return TranslatableEntityConfiguration::class;
+        return BaseConfiguration::class;
     }
 }
