@@ -20,7 +20,7 @@ class PropertyExistenceChecker
     public function __construct(string $entityClass)
     {
         $this->reflectionClass = new ReflectionClass($entityClass);
-        if (is_subclass_of($entityClass, TranslatableInterface::class)) {
+        if (\interface_exists(TranslatableInterface::class) && is_subclass_of($entityClass, TranslatableInterface::class)) {
             $this->translationReflectionClass = new ReflectionClass($this->reflectionClass->newInstanceWithoutConstructor()->translate());
         }
     }

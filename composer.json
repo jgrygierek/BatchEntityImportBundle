@@ -75,6 +75,7 @@
     "scripts": {
         "php-cs-fixer": "vendor/bin/php-cs-fixer fix -v --dry-run --diff",
         "php-cs-fixer-fix": "vendor/bin/php-cs-fixer fix -v --diff",
+        "phpstan": "vendor/bin/phpstan analyse src",
         "rector": "@rector-fix --dry-run",
         "rector-fix": "vendor/bin/rector process",
         "tests": "vendor/bin/simple-phpunit",

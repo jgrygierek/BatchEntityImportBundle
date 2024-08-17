@@ -43,7 +43,9 @@ class TestKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $loader->load(__DIR__ . '/config/config.yaml');
-        $loader->load(__DIR__ . '/KnpLabs/config/config.yaml');
+        if (\class_exists(DoctrineBehaviorsBundle::class)) {
+            $loader->load(__DIR__ . '/KnpLabs/config/config.yaml');
+        }
 
         foreach ($this->configs as $config) {
             $loader->load($config);
@@ -85,10 +87,12 @@ class TestKernel extends Kernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import(__DIR__ . '/config/routes.yaml');
-        $routes->import(__DIR__ . '/KnpLabs/config/routes.yaml');
+        if (\class_exists(DoctrineBehaviorsBundle::class)) {
+            $routes->import(__DIR__ . '/KnpLabs/config/routes.yaml');
+        }
     }
 
-    protected function configureContainer(ContainerBuilder $containerBuilder, LoaderInterface $loader): void
+    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
     }
 }
