@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\Model;
 use Generator;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileImportTest extends AbstractValidationTestCase
@@ -89,12 +90,15 @@ class FileImportTest extends AbstractValidationTestCase
 
     private function createUploadedFile(string $fileExtension, bool $withContent = true): UploadedFile
     {
-        $name = 'test_file' . ($fileExtension ? '.' . $fileExtension : '');
+        $filesystem = new Filesystem();
+        $filesystem->dumpFile($this->path, $withContent ? 'test_content' : '');
 
-        if ($withContent) {
-            file_put_contents($this->path, 'test_content');
-        }
-
-        return new UploadedFile($this->path, $name, null, null, true);
+        return new UploadedFile(
+            $this->path,
+            'test_file' . ($fileExtension ? '.' . $fileExtension : ''),
+            null,
+            null,
+            true,
+        );
     }
 }

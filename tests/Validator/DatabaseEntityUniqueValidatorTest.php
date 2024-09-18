@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Validator;
 
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
@@ -34,7 +34,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
 
     public function testNoDuplication(): void
     {
-        $queryMock = $this->createMock(AbstractQuery::class);
+        $queryMock = $this->createMock(Query::class);
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
         $constraint = new DatabaseEntityUnique(['fields' => ['field_1'], 'entityClassName' => TestEntity::class]);
@@ -49,14 +49,14 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
                     'field_2' => 101,
                 ],
             ]),
-            $constraint
+            $constraint,
         );
         $this->assertNoViolation();
     }
 
     public function testDuplications(): void
     {
-        $queryMock = $this->createMock(AbstractQuery::class);
+        $queryMock = $this->createMock(Query::class);
         $queryMock->method('getArrayResult')->willReturn(['']);
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
