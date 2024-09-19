@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Validator\Constraints;
 
 use Doctrine\ORM\AbstractQuery;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
@@ -17,7 +17,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     private array $duplicatedRecords = [];
     private array $correctRecords = [];
 
-    public function __construct(private readonly EntityManager $entityManager)
+    public function __construct(private readonly EntityManagerInterface $entityManager)
     {
     }
 
@@ -116,7 +116,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         }
     }
 
-    private function isRecordDuplicatedInDatabase(EntityManager $em, string $class, array $criteria): bool
+    private function isRecordDuplicatedInDatabase(EntityManagerInterface $em, string $class, array $criteria): bool
     {
         $query = $em->createQuery($this->buildDQL($class, $criteria));
         $this->passParametersToQuery($query, $criteria);

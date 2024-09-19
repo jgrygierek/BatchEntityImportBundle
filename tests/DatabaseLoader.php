@@ -7,7 +7,6 @@ namespace JG\BatchEntityImportBundle\Tests;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\Loader;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Data\TestEntityFixtures;
@@ -17,9 +16,8 @@ class DatabaseLoader
 {
     use SkippedTestsTrait;
 
-    public function __construct(private readonly EntityManagerInterface $entityManager, Connection $connection)
+    public function __construct(private readonly EntityManagerInterface $entityManager)
     {
-        $connection->getConfiguration()->setSQLLogger();
     }
 
     public function reload(): void

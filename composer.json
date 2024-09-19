@@ -24,7 +24,7 @@
     "require": {
         "php": ">=8.1.0",
         "doctrine/annotations": "^1.14|^2.0",
-        "doctrine/orm": "^2.9",
+        "doctrine/orm": "^2.9|^3.2",
         "phpoffice/phpspreadsheet": "^2.2.2",
         "symfony/config": "^5.4|^6.0|^7.0",
         "symfony/dependency-injection": "^5.4|^6.0|^7.0",
@@ -38,6 +38,7 @@
         "twig/twig": "^2.14|^3.0"
     },
     "require-dev": {
+        "dg/bypass-finals": "^v1.8",
         "doctrine/doctrine-bundle": "^2.4.0",
         "doctrine/doctrine-fixtures-bundle": "^3.4.1",
         "friendsofphp/php-cs-fixer": "^v3.62.0",

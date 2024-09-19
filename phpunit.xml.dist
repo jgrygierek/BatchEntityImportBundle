@@ -22,4 +22,8 @@
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>
+
+    <extensions>
+        <extension class="JG\BatchEntityImportBundle\Tests\Fixtures\Hook\BypassFinalHook"/>
+    </extensions>
 </phpunit>
