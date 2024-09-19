@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
+use TypeError;
 use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
+use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
-use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
-use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
-use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
-use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
-use TypeError;
 
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
@@ -51,6 +52,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     {
         $entity = $this->getEntity($record);
         $data = $record->getData();
+        $fieldDefinitions = $this->getFieldsDefinitions();
 
         foreach ($data as $name => $value) {
             if (empty($headerInfo[$name])) {
@@ -71,6 +73,23 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                     }
                 } elseif (!$locale) {
                     if (method_exists($entity, $setterName)) {
+                        
+                        $reflection = new \ReflectionMethod($entity, $setterName);
+                        $params = $reflection->getParameters();
+
+                        if (!empty($params)) {
+                            if (isset($fieldDefinitions[$name])) {
+                                
+                                $fieldDefinition = $fieldDefinitions[$name];
+                                $fieldType = $fieldDefinition->getClass();
+                                $fieldOptions = $fieldDefinition->getOptions();
+
+                                if ($fieldType === ArrayTextType::class) {
+                                    $separator = $fieldOptions['separator'];
+                                    $value = explode($separator, $value);
+                                }
+                            }
+                        }
                         $entity->$setterName($value);
                     } else {
                         $entity->$propertyName = $value;

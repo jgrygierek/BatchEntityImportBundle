@@ -34,6 +34,10 @@
                 <source>success.import</source>
                 <target>Data has been imported</target>
             </trans-unit>
+            <trans-unit id="form.separator">
+                <source>form.separator</source>
+                <target>Separator</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
