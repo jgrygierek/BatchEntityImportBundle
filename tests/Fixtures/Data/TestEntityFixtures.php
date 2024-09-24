@@ -16,6 +16,10 @@ class TestEntityFixtures extends Fixture
             $entity = new TestEntity();
             $entity->setTestPrivateProperty('abcd_' . $i);
 
+            if (1 === $i % 2) {
+                $entity->setTestArrayField(['arr_val_' . $i, null, $i]);
+            }
+
             $manager->persist($entity);
         }
 

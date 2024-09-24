@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Form\Type;
 
 use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
@@ -43,6 +44,7 @@ class MatrixRecordTypeTest extends WebTestCase
         self::assertInstanceOf(TextType::class, $form->get('age')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextType::class, $form->get('description')->getConfig()->getType()->getInnerType());
+        self::assertInstanceOf(TextType::class, $form->get('array_field')->getConfig()->getType()->getInnerType());
     }
 
     public function testValidFormWithFieldsConfig(): void
@@ -60,6 +62,7 @@ class MatrixRecordTypeTest extends WebTestCase
         self::assertInstanceOf(IntegerType::class, $form->get('age')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextareaType::class, $form->get('description')->getConfig()->getType()->getInnerType());
+        self::assertInstanceOf(ArrayTextType::class, $form->get('array_field')->getConfig()->getType()->getInnerType());
     }
 
     public function testInvalidFormWithoutConfiguration(): void
@@ -76,6 +79,7 @@ class MatrixRecordTypeTest extends WebTestCase
             'age' => 12,
             'name' => 'John Doe',
             'description' => 'Lorem Ipsum',
+            'array_field' => 'value1|value2|value3',
         ];
     }
 }

@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace JG\BatchEntityImportBundle\Tests\Form\Type;
 
+use Generator;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormBuilderInterface;
+use UnexpectedValueException;
 
 class ArrayTextTypeTest extends TypeTestCase
 {
@@ -19,10 +22,9 @@ class ArrayTextTypeTest extends TypeTestCase
     protected function setUp(): void
     {
         $this->translator = $this->createMock(TranslatorInterface::class);
-        $this->translator->method('trans')
-            ->willReturnCallback(function ($key, $params, $domain) {
-                return 'separator';
-            });
+        $this->translator
+            ->method('trans')
+            ->willReturnCallback(static fn ($key, $params, $domain) => 'separator');
 
         parent::setUp();
     }
@@ -57,22 +59,67 @@ class ArrayTextTypeTest extends TypeTestCase
         $this->assertEquals('a|b|c', $form->getData());
     }
 
-    public function testTransform(): void
+    /**
+     * @dataProvider transformDataProvider
+     */
+    public function testTransform(string $expected, mixed $data): void
     {
         $type = new ArrayTextType($this->translator);
         $type->buildForm($this->createMock(FormBuilderInterface::class), ['separator' => '|', 'empty_data' => '']);
 
-        $this->assertEquals('a|b|c', $type->transform(['a', 'b', 'c']));
-        $this->assertNull($type->transform(null));
+        $this->assertEquals($expected, $type->transform($data));
     }
 
-    public function testReverseTransform(): void
+    public static function transformDataProvider(): Generator
+    {
+        yield ['', null];
+        yield ['', ''];
+        yield ['', []];
+        yield ['', ['']];
+        yield [' ', [' ']];
+        yield ['', [null]];
+        yield ['a|b|c', ['a', 'b', 'c']];
+        yield ['a|b|', ['a', 'b', null]];
+        yield ['a||c', ['a', '', 'c']];
+        yield ['a||c', ['a', null, 'c']];
+        yield ['a||c', ['a', '', 'c']];
+        yield ['|b|c', [null, 'b', 'c']];
+        yield ['|b|c', ['', 'b', 'c']];
+    }
+
+    /**
+     * @dataProvider reverseTransformDataProvider
+     */
+    public function testReverseTransform(?string $data, mixed $expected): void
     {
         $type = new ArrayTextType($this->translator);
         $type->buildForm($this->createMock(FormBuilderInterface::class), ['separator' => '|', 'empty_data' => '']);
 
-        $this->assertEquals(['a', 'b', 'c'], $type->reverseTransform('a|b|c'));
-        $this->assertEquals('', $type->reverseTransform(null));
+        $this->assertEquals($expected, $type->reverseTransform($data));
+    }
+
+    public static function reverseTransformDataProvider(): Generator
+    {
+        yield ['', []];
+        yield [' ', [' ']];
+        yield ['a|b|c', ['a', 'b', 'c']];
+        yield ['a|b|', ['a', 'b', null]];
+        yield ['a||c', ['a', '', 'c']];
+        yield ['a||c', ['a', null, 'c']];
+        yield ['a||c', ['a', '', 'c']];
+        yield ['|b|c', [null, 'b', 'c']];
+        yield ['|b|c', ['', 'b', 'c']];
+    }
+
+    public function testReverseTransformWrongValueException(): void
+    {
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Only strings are allowed');
+
+        $type = new ArrayTextType($this->translator);
+        $type->buildForm($this->createMock(FormBuilderInterface::class), ['separator' => '|', 'empty_data' => '']);
+
+        $type->reverseTransform([]);
     }
 
     public function testBuildView(): void

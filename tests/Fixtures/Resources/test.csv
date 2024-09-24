@@ -1,8 +1,8 @@
-test_private_property,test-private-property2,test public property
-test,lorem ipsum,qwerty
-test2,lorem ipsum 2,qwerty2
+test_private_property,test-private-property2,test public property,test_array_field
+test1,lorem ipsum 1,qwerty1,
+test2,lorem ipsum 2,qwerty2,arr_val_1|arr_val_2|arr_val_3
 test3,lorem ipsum 3,qwerty3
-test4,lorem ipsum 4,qwerty4
+test4,lorem ipsum 4,qwerty4,arr_val_1|
 test5,lorem ipsum 5,qwerty5
 test6,lorem ipsum 6,qwerty6
 test7,lorem ipsum 7,qwerty7

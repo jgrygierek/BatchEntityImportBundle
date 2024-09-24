@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Configuration;
 
+use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
@@ -24,6 +25,7 @@ class FieldsTypeConfiguration extends AbstractImportConfiguration
             'age' => new FormFieldDefinition(IntegerType::class),
             'name' => new FormFieldDefinition(TextType::class),
             'description' => new FormFieldDefinition(TextareaType::class),
+            'array_field' => new FormFieldDefinition(ArrayTextType::class),
         ];
     }
 }
