@@ -32,18 +32,16 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->separator = $options['separator'];
-
-        if ('' === $options['empty_data']) {
-            $builder->addViewTransformer($this);
-        }
+        $this->separator = $options['separator'] ?? self::DEFAULT_SEPARATOR;
     }
 
     public function transform(mixed $value): string
     {
-        return \is_array($value)
-            ? implode($this->separator ?: self::DEFAULT_SEPARATOR, $value)
-            : '';
+        if (!\is_array($value)) {
+            throw new UnexpectedValueException('Only arrays are allowed');
+        }
+
+        return implode($this->separator, $value);
     }
 
     public function reverseTransform(mixed $value): array
@@ -52,9 +50,9 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
             throw new UnexpectedValueException('Only strings are allowed');
         }
 
-        return empty($value)
-            ? []
-            : explode($this->separator ?: self::DEFAULT_SEPARATOR, $value);
+        return $value
+            ? explode($this->separator ?: self::DEFAULT_SEPARATOR, $value)
+            : [];
     }
 
     public function getBlockPrefix(): string
@@ -67,7 +65,7 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
         $view->vars['help'] = $this->translator->trans(
             'form.separator',
             ['%separator%' => $options['separator']],
-            'BatchEntityImportBundle'
+            'BatchEntityImportBundle',
         );
     }
 }

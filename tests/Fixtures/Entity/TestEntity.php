@@ -18,7 +18,7 @@ class TestEntity extends AbstractEntity implements Stringable
     private string $testPrivateProperty2 = '';
     #[ORM\Column(type: 'string')]
     private string $testPrivatePropertyNoSetter = '';
-    #[ORM\Column(type: 'simple_array', nullable: true)]
+    #[ORM\Column(type: 'json', nullable: true)]
     private array $testArrayField = [];
 
     public function setTestPrivateProperty(string $testPrivateProperty): void

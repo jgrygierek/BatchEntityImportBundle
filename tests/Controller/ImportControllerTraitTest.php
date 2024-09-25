@@ -42,6 +42,8 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertNull($this->getRepository()->find($newEntityId4));
 
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test.csv');
+        self::assertStringContainsString('Separator: &quot;|&quot;', $this->client->getResponse()->getContent());
+
         $this->client->submitForm('btn-submit');
 
         $this->checkData();
@@ -86,13 +88,13 @@ class ImportControllerTraitTest extends WebTestCase
     {
         yield 'record with all fields filled' => [
             10,
-            ['abcd_9', '', '', ['arr_val_9', '', '9']],
+            ['abcd_9', '', '', ['arr_val_9', null, 9]],
             'arr_val_A|arr_val_B',
             ['new_value', 'new_value2', 'new_value3', ['arr_val_A', 'arr_val_B']],
         ];
         yield 'record with all fields filled, set empty array' => [
             10,
-            ['abcd_9', '', '', ['arr_val_9', '', '9']],
+            ['abcd_9', '', '', ['arr_val_9', null, 9]],
             '',
             ['new_value', 'new_value2', 'new_value3', []],
         ];
