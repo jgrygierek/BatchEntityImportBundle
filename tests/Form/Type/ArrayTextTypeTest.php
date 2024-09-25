@@ -24,7 +24,9 @@ class ArrayTextTypeTest extends TypeTestCase
         $this->translator = $this->createMock(TranslatorInterface::class);
         $this->translator
             ->method('trans')
-            ->willReturnCallback(static fn ($key, $params, $domain) => 'separator');
+            ->willReturnCallback(static function ($key, $params, $domain) {
+                return sprintf('separator : "%s"', $params['%separator%'] ?? '');
+            });
 
         parent::setUp();
     }
