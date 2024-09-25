@@ -36,7 +36,7 @@
             </trans-unit>
             <trans-unit id="form.separator">
                 <source>form.separator</source>
-                <target>Separator</target>
+                <target>Separator: "%separator%"</target>
             </trans-unit>
         </body>
     </file>

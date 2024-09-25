@@ -66,8 +66,8 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
     {
         $view->vars['help'] = $this->translator->trans(
             'form.separator',
-            [],
-            'BatchEntityImportBundle',
-        ) . ' : "' . $options['separator'] . '"';
+            ['%separator%' => $options['separator']],
+            'BatchEntityImportBundle'
+        );
     }
 }
