@@ -1,3 +1,28 @@
+UPGRADE TO 3.2
+=======================
+
+Import data to array
+--------------
+* If your entity has an array field, and you want to import data from CSV file to it, it is now possible.
+
+```php
+use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
+
+public function getFieldsDefinitions(): array
+{
+    return [
+        'roles' => new FormFieldDefinition(
+            ArrayTextType::class,
+            [
+                'separator' => '&',
+            ]
+        ),
+    ];
+}
+```
+
+
 UPGRADE TO 3.1
 =======================
 

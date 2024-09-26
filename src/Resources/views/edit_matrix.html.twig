@@ -24,6 +24,7 @@
                     {% for elem in record.children %}
                         <td>
                             {{ form_widget(elem) }}
+                            {{ form_help(elem) }}
                             {{ form_errors(elem) }}
                         </td>
                     {% endfor %}

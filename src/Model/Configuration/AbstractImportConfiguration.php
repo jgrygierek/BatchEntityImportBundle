@@ -10,6 +10,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
+use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
@@ -51,6 +53,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     {
         $entity = $this->getEntity($record);
         $data = $record->getData();
+        $fieldDefinitions = $this->getFieldsDefinitions();
 
         foreach ($data as $name => $value) {
             if (empty($headerInfo[$name])) {
@@ -60,6 +63,13 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             $locale = ColumnNameHelper::getLocale($name);
             $propertyName = ColumnNameHelper::toCamelCase($name);
             $setterName = ColumnNameHelper::getSetterName($name);
+
+            if (isset($fieldDefinitions[$name])) {
+                $fieldDefinition = $fieldDefinitions[$name];
+                if (ArrayTextType::class === $fieldDefinition->getClass()) {
+                    $value = $this->parseValueForArrayType($fieldDefinition, $value);
+                }
+            }
 
             try {
                 if (\interface_exists(TranslatableInterface::class) && $entity instanceof TranslatableInterface && $locale) {
@@ -118,5 +128,12 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     public function allowOverrideEntity(): bool
     {
         return true;
+    }
+
+    private function parseValueForArrayType(FormFieldDefinition $fieldDefinition, ?string $value): array
+    {
+        return $value
+            ? explode($fieldDefinition->getOptions()['separator'] ?? ArrayTextType::DEFAULT_SEPARATOR, $value)
+            : [];
     }
 }

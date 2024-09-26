@@ -7,3 +7,7 @@ services:
     JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator:
         arguments: [ '@doctrine.orm.entity_manager' ]
         tags: [ validator.constraint_validator ]
+    JG\BatchEntityImportBundle\Form\Type\ArrayTextType:
+        arguments:
+            $translator: '@translator'
+        tags: ['form.type']

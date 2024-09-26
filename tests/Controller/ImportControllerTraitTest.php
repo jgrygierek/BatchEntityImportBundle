@@ -30,19 +30,38 @@ class ImportControllerTraitTest extends WebTestCase
 
     public function testInsertNewData(): void
     {
-        $updatedEntityId = self::DEFAULT_RECORDS_NUMBER + 2;
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
 
+        $newEntityId1 = self::DEFAULT_RECORDS_NUMBER + 1;
+        $newEntityId2 = self::DEFAULT_RECORDS_NUMBER + 2;
+        $newEntityId3 = self::DEFAULT_RECORDS_NUMBER + 3;
+        $newEntityId4 = self::DEFAULT_RECORDS_NUMBER + 4;
+        self::assertNull($this->getRepository()->find($newEntityId1));
+        self::assertNull($this->getRepository()->find($newEntityId2));
+        self::assertNull($this->getRepository()->find($newEntityId3));
+        self::assertNull($this->getRepository()->find($newEntityId4));
+
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test.csv');
+        self::assertStringContainsString('Separator: &quot;|&quot;', $this->client->getResponse()->getContent());
+
         $this->client->submitForm('btn-submit');
-        $this->checkData(['test2', 'lorem ipsum 2', 'qwerty2', 'test2_en', 'test2_pl'], $updatedEntityId);
+
+        $this->checkData();
+        $this->assertEntityValues(['test1', 'lorem ipsum 1', 'qwerty1', []], $newEntityId1);
+        $this->assertEntityValues(['test2', 'lorem ipsum 2', 'qwerty2', ['arr_val_1', 'arr_val_2', 'arr_val_3']], $newEntityId2);
+        $this->assertEntityValues(['test3', 'lorem ipsum 3', 'qwerty3', []], $newEntityId3);
+        $this->assertEntityValues(['test4', 'lorem ipsum 4', 'qwerty4', ['arr_val_1', '']], $newEntityId4);
     }
 
     /**
      * @dataProvider updateRecordDataProvider
      */
-    public function testUpdateExistingRecord(int $updatedEntityId, array $expectedDefaultValues, array $expectedValuesAfterChange): void
-    {
+    public function testUpdateExistingRecord(
+        int $updatedEntityId,
+        array $expectedDefaultValues,
+        string $arrayFieldValue,
+        array $expectedValuesAfterChange,
+    ): void {
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
         $this->assertEntityValues($expectedDefaultValues, $updatedEntityId);
 
@@ -55,31 +74,35 @@ class ImportControllerTraitTest extends WebTestCase
                         'test_private_property' => 'new_value',
                         'test-private-property2' => 'new_value2',
                         'test_public_property' => 'new_value3',
+                        'test_array_field' => $arrayFieldValue,
                     ],
                 ],
             ],
         ]);
-        $this->checkData($expectedValuesAfterChange, $updatedEntityId, 0);
+
+        $this->checkData(0);
+        $this->assertEntityValues($expectedValuesAfterChange, $updatedEntityId);
     }
 
     public static function updateRecordDataProvider(): Generator
     {
         yield 'record with all fields filled' => [
             10,
-            ['abcd_9', '', '', 'qwerty_en_9', 'qwerty_pl_9'],
-            ['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'],
+            ['abcd_9', '', '', ['arr_val_9', null, 9]],
+            'arr_val_A|arr_val_B',
+            ['new_value', 'new_value2', 'new_value3', ['arr_val_A', 'arr_val_B']],
         ];
-
-        yield 'record without en field filled' => [
-            20,
-            ['abcd_19', '', '', '', 'qwerty_pl_19'],
-            ['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'],
+        yield 'record with all fields filled, set empty array' => [
+            10,
+            ['abcd_9', '', '', ['arr_val_9', null, 9]],
+            '',
+            ['new_value', 'new_value2', 'new_value3', []],
         ];
-
-        yield 'record without pl field filled' => [
-            1,
-            ['abcd_0', '', '', 'qwerty_en_0', 'qwerty_en_0'],
-            ['new_value', 'new_value2', 'new_value3', 'new_value4', 'new_value5'],
+        yield 'record with empty array' => [
+            11,
+            ['abcd_10', '', '', []],
+            'arr_val_A|arr_val_B',
+            ['new_value', 'new_value2', 'new_value3', ['arr_val_A', 'arr_val_B']],
         ];
     }
 
@@ -90,7 +113,9 @@ class ImportControllerTraitTest extends WebTestCase
         // insert new data
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test.csv');
         $this->client->submitForm('btn-submit');
-        $this->checkData(['test2', 'lorem ipsum 2', 'qwerty2'], $updatedEntityId);
+
+        $this->checkData();
+        $this->assertEntityValues(['test2', 'lorem ipsum 2', 'qwerty2', ['arr_val_1', 'arr_val_2', 'arr_val_3']], $updatedEntityId);
 
         // update existing data
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test_updated_data.csv');
@@ -100,9 +125,10 @@ class ImportControllerTraitTest extends WebTestCase
                 'records' => [
                     [
                         'entity' => $updatedEntityId,
-                        'test_private_property' => 'test',
-                        'test_public_property' => 'qwerty',
-                        'test-private-property2' => 'lorem ipsum',
+                        'test_private_property' => 'test1',
+                        'test_public_property' => 'qwerty1',
+                        'test-private-property2' => 'lorem ipsum 1',
+                        'test_array_field' => 'arr_val_1|arr_val_2|arr_val_3',
                     ],
                 ],
             ],
@@ -155,19 +181,14 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertEquals(self::URL, $this->client->getRequest()->getRequestUri());
     }
 
-    private function checkData(
-        array $expectedValues,
-        int $entityId,
-        int $newRecordsNumber = self::NEW_RECORDS_NUMBER,
-    ): void {
+    private function checkData(int $newRecordsNumber = self::NEW_RECORDS_NUMBER): void
+    {
         $repository = $this->getRepository();
         self::assertTrue($this->client->getResponse()->isRedirect(self::URL));
         $this->client->followRedirect();
         self::assertTrue($this->client->getResponse()->isSuccessful());
         self::assertStringContainsString('Data has been imported', $this->client->getResponse()->getContent());
         self::assertCount(self::DEFAULT_RECORDS_NUMBER + $newRecordsNumber, $repository->findAll());
-
-        $this->assertEntityValues($expectedValues, $entityId);
     }
 
     private function assertEntityValues(array $expectedValues, int $entityId): void
@@ -178,6 +199,7 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertSame($expectedValues[0], $item->getTestPrivateProperty());
         self::assertSame($expectedValues[1], $item->getTestPrivateProperty2());
         self::assertSame($expectedValues[2], $item->testPublicProperty);
+        self::assertSame($expectedValues[3], $item->getTestArrayField());
     }
 
     private function getRepository(): EntityRepository
