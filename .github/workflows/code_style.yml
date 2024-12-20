@@ -1,6 +1,12 @@
 name: Code Style
 
-on: [ push, pull_request ]
+on:
+    push:
+        branches:
+            - '**'
+    pull_request:
+        branches:
+            - master
 
 jobs:
     pre_job:
@@ -18,8 +24,7 @@ jobs:
     php-cs-fixer:
         name: PHP CS Fixer
         runs-on: ubuntu-latest
-        needs:
-            - pre_job
+        needs: pre_job
         if: needs.pre_job.outputs.should_skip != 'true'
 
         steps:
