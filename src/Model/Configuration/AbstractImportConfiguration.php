@@ -130,6 +130,11 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return true;
     }
 
+    public function getAllowedFileExtensions(): array
+    {
+        return ['csv', 'xls', 'xlsx', 'ods'];
+    }
+
     private function parseValueForArrayType(FormFieldDefinition $fieldDefinition, ?string $value): array
     {
         return $value

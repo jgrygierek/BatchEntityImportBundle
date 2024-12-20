@@ -1,3 +1,19 @@
+UPGRADE TO 3.6
+=======================
+
+Import data to array
+--------------
+
+* By default, allowed file extensions are set to `'csv', 'xls', 'xlsx', 'ods'`.
+However, if you want to change it, you can override this method in your import configuration.
+
+```php
+public function getAllowedFileExtensions(): array
+{
+    return ['csv', 'xls', 'xlsx', 'ods'];
+}
+```
+
 UPGRADE TO 3.5
 =======================
 

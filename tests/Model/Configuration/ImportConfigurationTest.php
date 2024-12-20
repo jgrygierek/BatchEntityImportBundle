@@ -30,11 +30,15 @@ class ImportConfigurationTest extends WebTestCase
 
     public function testBasicMethods(): void
     {
-        $config = $this->createMock(AbstractImportConfiguration::class);
+        $config = $this->getMockBuilder(AbstractImportConfiguration::class)
+            ->disableOriginalConstructor()
+            ->setMethodsExcept(['getMatrixConstraints', 'getFieldsDefinitions', 'getAllowedFileExtensions'])
+            ->getMock();
 
         self::assertNull($config->getEntityTranslationRelationName());
         self::assertEmpty($config->getMatrixConstraints());
         self::assertEmpty($config->getFieldsDefinitions());
+        self::assertSame(['csv', 'xls', 'xlsx', 'ods'], $config->getAllowedFileExtensions());
     }
 
     /**

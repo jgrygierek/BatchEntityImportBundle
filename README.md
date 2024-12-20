@@ -28,6 +28,7 @@ Importing entities with preview and edit features for Symfony.
   * [Matrix validation](#matrix-validation)
   * [Passing services to configuration class](#passing-services-to-configuration-class)
   * [Show & hide entity override column](#show--hide-entity-override-column)
+  * [Set allowed file extensions](#set-allowed-file-extensions)
   * [Optimizing queries](#optimizing-queries)
 * [Creating controller](#creating-controller)
 * [Translations](#translations)
@@ -162,13 +163,25 @@ public function __construct(EntityManagerInterface $em, TestService $service)
 ### Show & hide entity override column
 
 If you want to hide/show an entity column that allows you to override entity `default: true`,
-you have to override this method in your import configuration
+you have to override this method in your import configuration.
 
 ```php
 public function allowOverrideEntity(): bool
 {
     return true;
 }
+```
+
+### Set allowed file extensions
+
+By default, allowed file extensions are set to `'csv', 'xls', 'xlsx', 'ods'`.
+However, if you want to change it, you can override this method in your import configuration.
+
+```php
+  public function getAllowedFileExtensions(): array
+  {
+      return ['csv', 'xls', 'xlsx', 'ods'];
+  }
 ```
 
 ### Optimizing queries
