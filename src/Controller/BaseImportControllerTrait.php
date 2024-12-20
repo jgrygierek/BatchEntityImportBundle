@@ -44,7 +44,7 @@ trait BaseImportControllerTrait
      */
     protected function doImport(Request $request, ValidatorInterface $validator): Response
     {
-        $fileImport = new FileImport();
+        $fileImport = new FileImport($this->getImportConfiguration()->getAllowedFileExtensions());
 
         $form = $this->createForm(FileImportType::class, $fileImport);
         $form->handleRequest($request);

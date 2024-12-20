@@ -38,6 +38,11 @@ interface ImportConfigurationInterface
     public function getMatrixConstraints(): array;
 
     /**
+     * Use this method to set allowed file extensions.
+     */
+    public function getAllowedFileExtensions(): array;
+
+    /**
      * Import data from matrix to database.
      */
     public function import(Matrix $matrix): void;

@@ -12,14 +12,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileImportTest extends AbstractValidationTestCase
 {
-    private FileImport $fileImport;
     private ?string $path;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->fileImport = new FileImport();
         $this->path = tempnam(sys_get_temp_dir(), 'upl');
     }
 
@@ -35,57 +33,69 @@ class FileImportTest extends AbstractValidationTestCase
     /**
      * @dataProvider validExtensionsProvider
      */
-    public function testValidFile(string $extension): void
+    public function testValidFile(string $extension, array $allowedExtensions): void
     {
-        $this->setUploadedFile($extension);
-        self::assertEmpty($this->getErrors($this->fileImport));
+        $fileImport = new FileImport($allowedExtensions);
+        $this->setUploadedFile($fileImport, $extension);
+
+        self::assertEmpty($this->getErrors($fileImport));
     }
 
     public static function validExtensionsProvider(): Generator
     {
-        yield ['csv'];
-        yield ['xls'];
-        yield ['xlsx'];
-        yield ['ods'];
-        yield ['CSV'];
-        yield ['XLS'];
-        yield ['XLSX'];
-        yield ['ODS'];
+        yield ['csv', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['xls', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['xlsx', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['ods', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['CSV', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['XLS', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['XLSX', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['ODS', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['csv', ['CSV', 'XLS', 'XLSX', 'ODS']];
+        yield ['xls', ['CSV', 'XLS', 'XLSX', 'ODS']];
+        yield ['xlsx', ['CSV', 'XLS', 'XLSX', 'ODS']];
+        yield ['ods', ['CSV', 'XLS', 'XLSX', 'ODS']];
     }
 
     public function testEmptyFileError(): void
     {
-        $this->setUploadedFile('csv', false);
-        self::assertNotEmpty($this->getErrors($this->fileImport));
+        $fileImport = new FileImport(['csv', 'xls', 'xlsx', 'ods']);
+        $this->setUploadedFile($fileImport, 'csv', false);
+
+        self::assertNotEmpty($this->getErrors($fileImport));
     }
 
     /**
      * @dataProvider invalidExtensionsProvider
      */
-    public function testInvalidExtensionError(string $extension): void
+    public function testInvalidExtensionError(string $extension, array $allowedExtensions): void
     {
-        $this->setUploadedFile($extension);
-        self::assertNotEmpty($this->getErrors($this->fileImport));
+        $fileImport = new FileImport($allowedExtensions);
+        $this->setUploadedFile($fileImport, $extension);
+
+        self::assertNotEmpty($this->getErrors($fileImport));
     }
 
     public static function invalidExtensionsProvider(): Generator
     {
-        yield ['jpg'];
-        yield ['pdf'];
-        yield ['txt'];
-        yield [''];
+        yield ['jpg', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['pdf', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['txt', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['', ['csv', 'xls', 'xlsx', 'ods']];
+        yield ['csv', []];
     }
 
     public function testEmptyContentError(): void
     {
-        $this->fileImport->setFile($this->createUploadedFile('csv', false));
+        $fileImport = new FileImport(['csv', 'xls', 'xlsx', 'ods']);
+        $fileImport->setFile($this->createUploadedFile('csv', false));
 
-        self::assertNotEmpty($this->getErrors($this->fileImport));
+        self::assertNotEmpty($this->getErrors($fileImport));
     }
 
-    private function setUploadedFile(string $fileExtension, bool $withContent = true): void
+    private function setUploadedFile(FileImport $fileImport, string $fileExtension, bool $withContent = true): void
     {
-        $this->fileImport->setFile($this->createUploadedFile($fileExtension, $withContent));
+        $fileImport->setFile($this->createUploadedFile($fileExtension, $withContent));
     }
 
     private function createUploadedFile(string $fileExtension, bool $withContent = true): UploadedFile
