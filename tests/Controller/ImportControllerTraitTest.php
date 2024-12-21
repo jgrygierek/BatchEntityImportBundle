@@ -6,8 +6,10 @@ namespace JG\BatchEntityImportBundle\Tests\Controller;
 
 use Doctrine\ORM\EntityRepository;
 use Generator;
+use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -17,7 +19,8 @@ class ImportControllerTraitTest extends WebTestCase
     private const DEFAULT_RECORDS_NUMBER = 20;
     private const NEW_RECORDS_NUMBER = 30;
     private const URL = '/jg_batch_entity_import_bundle/import';
-    protected KernelBrowser $client;
+    private KernelBrowser $client;
+    private readonly TestableEventDispatcher $eventDispatcher;
 
     protected function setUp(): void
     {
@@ -26,6 +29,10 @@ class ImportControllerTraitTest extends WebTestCase
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
         $databaseLoader->reload();
         $databaseLoader->loadFixtures();
+
+        $this->eventDispatcher = self::$kernel->getContainer()->get(TestableEventDispatcher::class);
+        $this->assertInstanceOf(TestableEventDispatcher::class, $this->eventDispatcher);
+        $this->eventDispatcher->resetDispatchedEvents();
     }
 
     public function testInsertNewData(): void
@@ -51,6 +58,8 @@ class ImportControllerTraitTest extends WebTestCase
         $this->assertEntityValues(['test2', 'lorem ipsum 2', 'qwerty2', ['arr_val_1', 'arr_val_2', 'arr_val_3']], $newEntityId2);
         $this->assertEntityValues(['test3', 'lorem ipsum 3', 'qwerty3', []], $newEntityId3);
         $this->assertEntityValues(['test4', 'lorem ipsum 4', 'qwerty4', ['arr_val_1', '']], $newEntityId4);
+
+        $this->checkDispatchedEvents(self::NEW_RECORDS_NUMBER);
     }
 
     /**
@@ -82,6 +91,8 @@ class ImportControllerTraitTest extends WebTestCase
 
         $this->checkData(0);
         $this->assertEntityValues($expectedValuesAfterChange, $updatedEntityId);
+
+        $this->checkDispatchedEvents(1);
     }
 
     public static function updateRecordDataProvider(): Generator
@@ -116,8 +127,10 @@ class ImportControllerTraitTest extends WebTestCase
 
         $this->checkData();
         $this->assertEntityValues(['test2', 'lorem ipsum 2', 'qwerty2', ['arr_val_1', 'arr_val_2', 'arr_val_3']], $updatedEntityId);
+        $this->checkDispatchedEvents(self::NEW_RECORDS_NUMBER);
 
         // update existing data
+        $this->eventDispatcher->resetDispatchedEvents();
         $this->submitSelectFileForm(__DIR__ . '/../Fixtures/Resources/test_updated_data.csv');
 
         $this->client->submitForm('btn-submit', [
@@ -142,6 +155,8 @@ class ImportControllerTraitTest extends WebTestCase
         );
         self::assertStringContainsString('Such entity already exists for the same values of fields: test-private-property2.', $response->getContent());
         self::assertCount(self::DEFAULT_RECORDS_NUMBER + self::NEW_RECORDS_NUMBER, $this->getRepository()->findAll());
+
+        $this->checkDispatchedEvents(0);
     }
 
     public function testImportFileWrongExtension(): void
@@ -151,6 +166,8 @@ class ImportControllerTraitTest extends WebTestCase
 
         self::assertStringContainsString('Wrong file extension.', $this->client->getResponse()->getContent());
         self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+
+        $this->checkDispatchedEvents(0);
     }
 
     public function testInvalidDataTypeFlashMessage(): void
@@ -160,6 +177,8 @@ class ImportControllerTraitTest extends WebTestCase
 
         $this->client->submitForm('btn-submit');
         self::assertStringContainsString('Invalid type of data. Probably missing validation.', $this->client->getResponse()->getContent());
+
+        $this->checkDispatchedEvents(0);
     }
 
     public function testImportConfigurationServiceNotFound(): void
@@ -168,6 +187,8 @@ class ImportControllerTraitTest extends WebTestCase
         $this->expectException(ServiceNotFoundException::class);
         $this->client->request('GET', '/jg_batch_entity_import_bundle/import_no_service');
         $this->client->submitForm('btn-submit', ['file_import[file]' => __DIR__ . '/../Fixtures/Resources/test.csv']);
+
+        $this->checkDispatchedEvents(0);
     }
 
     private function submitSelectFileForm(string $uploadedFile): void
@@ -205,5 +226,16 @@ class ImportControllerTraitTest extends WebTestCase
     private function getRepository(): EntityRepository
     {
         return self::$kernel->getContainer()->get('doctrine.orm.entity_manager')->getRepository(TestEntity::class);
+    }
+
+    private function checkDispatchedEvents(int $expectedNumber): void
+    {
+        $dispatchedEvents = $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class);
+        self::assertCount($expectedNumber, $dispatchedEvents);
+        foreach ($dispatchedEvents as $event) {
+            self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $event);
+            self::assertSame(TestEntity::class, $event->class);
+            self::assertNotEmpty($event->id);
+        }
     }
 }

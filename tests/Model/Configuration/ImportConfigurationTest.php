@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Tests\Model\Configuration;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Generator;
+use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
@@ -13,17 +14,23 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Throwable;
 
 class ImportConfigurationTest extends WebTestCase
 {
     protected ?EntityManagerInterface $entityManager;
+    protected TestableEventDispatcher $eventDispatcher;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
+        $this->eventDispatcher = self::$kernel->getContainer()->get(TestableEventDispatcher::class);
+        $this->eventDispatcher->resetDispatchedEvents();
+
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
         $databaseLoader->reload();
     }
@@ -51,7 +58,7 @@ class ImportConfigurationTest extends WebTestCase
 
         $matrix = new Matrix($header, $records);
 
-        $config = new BaseConfiguration($this->entityManager);
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
         $config->import($matrix);
 
         self::assertCount(2, $repository->findAll());
@@ -69,6 +76,17 @@ class ImportConfigurationTest extends WebTestCase
         self::assertNotEmpty($item);
         self::assertSame('value_4', $item->getTestPrivateProperty());
         self::assertSame('public_value_2', $item->testPublicProperty);
+
+        $dispatchedEvents = $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class);
+        self::assertCount(2, $dispatchedEvents);
+
+        self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[0]);
+        self::assertSame(TestEntity::class, $dispatchedEvents[0]->class);
+        self::assertSame('1', $dispatchedEvents[0]->id);
+
+        self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[1]);
+        self::assertSame(TestEntity::class, $dispatchedEvents[1]->class);
+        self::assertSame('2', $dispatchedEvents[1]->id);
     }
 
     public static function matrixDataProvider(): Generator
@@ -180,17 +198,22 @@ class ImportConfigurationTest extends WebTestCase
     /**
      * @dataProvider exceptionCheckProvider
      */
-    public function testExceptionsDuringImport(string $exceptionClass, array $data): void
+    public function testExceptionsDuringImport(string $expectedExceptionClass, array $data): void
     {
-        $this->expectException($exceptionClass);
-
         $repository = $this->entityManager->getRepository(TestEntity::class);
         self::assertEmpty($repository->findAll());
 
         $matrix = new Matrix(['test_private_property'], $data);
 
-        $config = new BaseConfiguration($this->entityManager);
-        $config->import($matrix);
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
+
+        $exception = null;
+        try {
+            $config->import($matrix);
+        } catch (Throwable $exception) {
+        }
+        self::assertInstanceOf($expectedExceptionClass, $exception);
+        self::assertFalse($this->eventDispatcher->hasEvent(RecordImportedSuccessfullyEvent::class));
     }
 
     public static function exceptionCheckProvider(): Generator

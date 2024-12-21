@@ -152,9 +152,9 @@ public function getMatrixConstraints(): array
 If you want to pass some additional services to your configuration, just override constructor.
 
 ```php
-public function __construct(EntityManagerInterface $em, TestService $service)
+public function __construct(EntityManagerInterface $em, EventDispatcherInterface $eventDispatcher, TestService $service)
 {
-    parent::__construct($em);
+    parent::__construct($em, $eventDispatcher);
 
     $this->testService = $service;
 }
