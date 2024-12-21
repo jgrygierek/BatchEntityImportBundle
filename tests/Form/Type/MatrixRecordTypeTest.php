@@ -17,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class MatrixRecordTypeTest extends WebTestCase
 {
@@ -32,7 +33,7 @@ class MatrixRecordTypeTest extends WebTestCase
     public function testValidFormWithBaseConfig(): void
     {
         $data = $this->getRecordData();
-        $configuration = new BaseConfiguration($this->createMock(EntityManagerInterface::class));
+        $configuration = new BaseConfiguration($this->createMock(EntityManagerInterface::class), $this->createMock(EventDispatcherInterface::class));
         $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
@@ -50,7 +51,7 @@ class MatrixRecordTypeTest extends WebTestCase
     public function testValidFormWithFieldsConfig(): void
     {
         $data = $this->getRecordData();
-        $configuration = new FieldsTypeConfiguration($this->createMock(EntityManagerInterface::class));
+        $configuration = new FieldsTypeConfiguration($this->createMock(EntityManagerInterface::class), $this->createMock(EventDispatcherInterface::class));
         $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);

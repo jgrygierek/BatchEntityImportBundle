@@ -11,6 +11,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class MatrixTypeTest extends TypeTestCase
 {
@@ -20,7 +21,7 @@ class MatrixTypeTest extends TypeTestCase
     {
         parent::setUp();
 
-        $this->baseConfig = new BaseConfiguration($this->createMock(EntityManagerInterface::class));
+        $this->baseConfig = new BaseConfiguration($this->createMock(EntityManagerInterface::class), $this->createMock(EventDispatcherInterface::class));
     }
 
     public function testValidForm(): void
