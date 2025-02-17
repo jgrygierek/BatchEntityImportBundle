@@ -1,14 +1,54 @@
+# UPGRADE TO 3.8
+
+## RecordImportedSuccessfullyEvent
+
+- For each successfully processed record, event `RecordImportedSuccessfullyEvent` is dispatched.
+
 # UPGRADE TO 3.7
 
-### Preset entity id before updating - [go to the documentation](README.md#updating-entities)
+## Preset entity id before updating
+- If you want to update your entities automatically, you can do it in your import file:
+    - Add `entity_id` in header and:
+      - Add entity ID to row
+      - Leave it empty (if you want to set it manually or import it as new record)
+- Otherwise, you can still update it manually in next step.
 
 # UPGRADE TO 3.6
 
-### Set allowed file extensions - [go to the documentation](README.md#set-allowed-file-extensions)
+## Allowed file extensions
+
+- By default, allowed file extensions are set to `'csv', 'xls', 'xlsx', 'ods'`.
+- You can override it in your import configuration:
+
+  ```php
+  public function getAllowedFileExtensions(): array
+  {
+      return ['csv', 'xls', 'xlsx', 'ods'];
+  }
+  ```
 
 # UPGRADE TO 3.5
 
-### Import data to array - [go to the documentation](README.md#importing-data-to-array-field)
+## Import data to array
+
+- If your entity has an array field, and you want to import data from CSV file to it, it is now possible:
+
+  ```php
+  use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+  use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
+  
+  public function getFieldsDefinitions(): array
+  {
+      return [
+          'roles' => new FormFieldDefinition(
+              ArrayTextType::class,
+              [
+                  'separator' => '&',
+              ]
+          ),
+      ];
+  }
+  ```
 
 # UPGRADE TO 3.1
 
@@ -29,31 +69,33 @@
 
 ## Import Configuration class
 - Added new validator to check matrix record data uniqueness in database.
-```php
-use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 
-public function getMatrixConstraints(): array
-{
-    return [
-        new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
-    ];
-}
-```
+  ```php
+  use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
+  
+  public function getMatrixConstraints(): array
+  {
+      return [
+          new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
+      ];
+  }
+  ```
 
 # UPGRADE TO 2.4
 
 ## Import Configuration class
 - Added new validator to check matrix record data uniqueness.
-```php
-use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 
-public function getMatrixConstraints(): array
-{
-    return [
-        new MatrixRecordUnique(['fields' => ['field_name']]),
-    ];
-}
-```
+  ```php
+  use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
+  
+  public function getMatrixConstraints(): array
+  {
+      return [
+          new MatrixRecordUnique(['fields' => ['field_name']]),
+      ];
+  }
+  ```
 
 ## Controller
 - List of options passed to form in `createMatrixForm()` method, should contain new `constraints` element:
@@ -72,10 +114,11 @@ public function getMatrixConstraints(): array
 
 ## Import Configuration class
 - Now configuration class should be always registered as a service:
-```yaml
-services:
-    App\Model\ImportConfiguration\UserImportConfiguration: ~
-```
+
+  ```yaml
+  services:
+      App\Model\ImportConfiguration\UserImportConfiguration: ~
+  ```
 
 ## Controller
 - Entity Manager is no longer passed as an argument of actions.
