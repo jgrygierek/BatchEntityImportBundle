@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Event;
 
-class RecordImportedSuccessfullyEvent
+readonly class RecordImportedSuccessfullyEvent
 {
-    public function __construct(readonly public string $class, readonly public string $id)
+    public function __construct(public string $class, public string $id)
     {
     }
 }

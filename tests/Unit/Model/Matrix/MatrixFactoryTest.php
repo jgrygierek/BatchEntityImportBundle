@@ -13,14 +13,13 @@ use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use PhpOffice\PhpSpreadsheet\Writer\Exception as WriterException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class MatrixFactoryTest extends TestCase
 {
-    /**
-     * @dataProvider importFilesDataProvider
-     */
+    #[DataProvider('importFilesDataProvider')]
     public function testCreateFromRealUploadedFileSuccess(string $file, array $expectedHeader, int $expectedRecordNumber): void
     {
         $uploadedFile = new UploadedFile($file, $file);
@@ -51,11 +50,10 @@ class MatrixFactoryTest extends TestCase
     }
 
     /**
-     * @dataProvider dataProvider
-     *
      * @throws SpreadsheetException
      * @throws Exception
      */
+    #[DataProvider('dataProvider')]
     public function testCreateFromGeneratedUploadFileSuccess(string $fileExtension, CsvDelimiterEnum $delimiter = CsvDelimiterEnum::COMMA): void
     {
         foreach ($this->contentProvider() as $data) {
@@ -133,9 +131,7 @@ class MatrixFactoryTest extends TestCase
         MatrixFactory::createFromUploadedFile($file);
     }
 
-    /**
-     * @dataProvider postContentProvider
-     */
+    #[DataProvider('postContentProvider')]
     public function testCreateFromPostDataSuccess(array $data, bool $isHeader, int $recordsNumber): void
     {
         $matrix = MatrixFactory::createFromPostData($data);

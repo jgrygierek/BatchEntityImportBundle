@@ -8,6 +8,7 @@ use Generator;
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
 use JG\BatchEntityImportBundle\Tests\SkippedTestsTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class PropertyExistenceCheckerTest extends TestCase
@@ -23,9 +24,7 @@ class PropertyExistenceCheckerTest extends TestCase
         $this->checkerEntity = new PropertyExistenceChecker(TranslatableEntity::class);
     }
 
-    /**
-     * @dataProvider dataProviderValidProperty
-     */
+    #[DataProvider('dataProviderValidProperty')]
     public function testEntityWithTranslationsHasProperty(string $property): void
     {
         self::assertTrue($this->checkerEntity->propertyExists($property));
@@ -41,9 +40,7 @@ class PropertyExistenceCheckerTest extends TestCase
         yield ['testTranslationProperty:en'];
     }
 
-    /**
-     * @dataProvider dataProviderWrongProperty
-     */
+    #[DataProvider('dataProviderWrongProperty')]
     public function testEntityWithTranslationsWithoutProperty(string $property): void
     {
         self::assertFalse($this->checkerEntity->propertyExists($property));

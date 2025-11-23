@@ -41,7 +41,7 @@ jobs:
             -   name: Run composer
                 uses: php-actions/composer@v6
                 with:
-                    php_version: 8.1
+                    php_version: 8.2
                     php_extensions: gd zip
                     memory_limit: -1
                     args: --no-progress --optimize-autoloader
@@ -51,4 +51,4 @@ jobs:
                 with:
                     path: src/
                     memory_limit: -1
-                    php_version: 8.1
+                    php_version: 8.2

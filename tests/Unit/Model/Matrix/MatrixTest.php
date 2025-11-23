@@ -9,12 +9,11 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class MatrixTest extends AbstractValidationTestCase
 {
-    /**
-     * @dataProvider getValidDataProvider
-     */
+    #[DataProvider('getValidDataProvider')]
     public function testValidMatrix(array $header, array $recordsData): void
     {
         $matrix = new Matrix($header, $recordsData);
@@ -30,9 +29,7 @@ class MatrixTest extends AbstractValidationTestCase
         yield [['column name'], [['column name' => '']]];
     }
 
-    /**
-     * @dataProvider getInvalidDataProvider
-     */
+    #[DataProvider('getInvalidDataProvider')]
     public function testInvalidMatrix(array $header, array $recordsData): void
     {
         $matrix = new Matrix($header, $recordsData);

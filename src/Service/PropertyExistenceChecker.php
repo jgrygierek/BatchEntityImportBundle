@@ -37,7 +37,7 @@ class PropertyExistenceChecker
 
     private function translationPropertyExists(string $name): bool
     {
-        return $this->translationReflectionClass && $this->isPropertyWritable($this->translationReflectionClass, $name);
+        return $this->translationReflectionClass instanceof ReflectionClass && $this->isPropertyWritable($this->translationReflectionClass, $name);
     }
 
     private function isPropertyWritable(ReflectionClass $entity, string $name): bool

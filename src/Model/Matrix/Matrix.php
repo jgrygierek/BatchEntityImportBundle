@@ -80,15 +80,15 @@ class Matrix
     private function clearHeader(array $header): array
     {
         $header = array_values(
-            array_filter($header, fn (?string $columnName): bool => $this->isColumnNameValid($columnName)),
+            array_filter($header, $this->isColumnNameValid(...)),
         );
 
-        return \array_map(static fn (string $name) => \str_replace(' ', '_', $name), $header);
+        return \array_map(static fn (string $name): string => \str_replace(' ', '_', $name), $header);
     }
 
     private function clearRecordData(array $data): array
     {
-        return array_filter($data, fn (?string $columnName): bool => $this->isColumnNameValid($columnName), ARRAY_FILTER_USE_KEY);
+        return array_filter($data, $this->isColumnNameValid(...), ARRAY_FILTER_USE_KEY);
     }
 
     private function isColumnNameValid(?string $name): bool

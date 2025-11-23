@@ -7,13 +7,12 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Model\Matrix;
 use Generator;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
 
 class MatrixRecordTest extends AbstractValidationTestCase
 {
-    /**
-     * @dataProvider getValidDataProvider
-     */
+    #[DataProvider('getValidDataProvider')]
     public function testData(array $recordData, array $expectedRecordData): void
     {
         $matrixRecord = new MatrixRecord($recordData);

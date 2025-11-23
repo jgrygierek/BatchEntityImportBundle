@@ -9,6 +9,7 @@ use Generator;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
 use JG\BatchEntityImportBundle\Tests\SkippedTestsTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -42,9 +43,7 @@ class ImportControllerTraitTest extends WebTestCase
         $this->checkData(['test2', 'lorem ipsum 2', 'qwerty2', 'test2_en', 'test2_pl'], $updatedEntityId);
     }
 
-    /**
-     * @dataProvider updateRecordDataProvider
-     */
+    #[DataProvider('updateRecordDataProvider')]
     public function testUpdateExistingRecord(int $updatedEntityId, array $expectedDefaultValues, array $expectedValuesAfterChange): void
     {
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());

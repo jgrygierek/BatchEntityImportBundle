@@ -14,21 +14,22 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 use Throwable;
 
-class ImportConfigurationTest extends WebTestCase
+class ImportConfigurationTest extends AbstractWebTestCase
 {
     private ?EntityManagerInterface $entityManager;
-    private TestableEventDispatcher $eventDispatcher;
+    private readonly TraceableEventDispatcher $eventDispatcher;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
-        $this->eventDispatcher = self::$kernel->getContainer()->get(TestableEventDispatcher::class);
+        $this->eventDispatcher = self::$kernel->getContainer()->get('event_dispatcher');
         $this->eventDispatcher->resetDispatchedEvents();
 
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
@@ -39,7 +40,7 @@ class ImportConfigurationTest extends WebTestCase
     {
         $config = $this->getMockBuilder(AbstractImportConfiguration::class)
             ->disableOriginalConstructor()
-            ->setMethodsExcept(['getMatrixConstraints', 'getFieldsDefinitions', 'getAllowedFileExtensions'])
+            ->onlyMethods(['getEntityClassName'])
             ->getMock();
 
         self::assertNull($config->getEntityTranslationRelationName());
@@ -48,9 +49,7 @@ class ImportConfigurationTest extends WebTestCase
         self::assertSame(['csv', 'xls', 'xlsx', 'ods'], $config->getAllowedFileExtensions());
     }
 
-    /**
-     * @dataProvider matrixDataProvider
-     */
+    #[DataProvider('matrixDataProvider')]
     public function testItemImportedSuccessfully(array $header, array $records): void
     {
         $repository = $this->entityManager->getRepository(TestEntity::class);
@@ -195,9 +194,7 @@ class ImportConfigurationTest extends WebTestCase
         ];
     }
 
-    /**
-     * @dataProvider exceptionCheckProvider
-     */
+    #[DataProvider('exceptionCheckProvider')]
     public function testExceptionsDuringImport(string $expectedExceptionClass, array $data): void
     {
         $repository = $this->entityManager->getRepository(TestEntity::class);
@@ -219,7 +216,7 @@ class ImportConfigurationTest extends WebTestCase
     public static function exceptionCheckProvider(): Generator
     {
         yield [
-            'exception_class' => MatrixRecordInvalidDataTypeException::class,
+            'expectedExceptionClass' => MatrixRecordInvalidDataTypeException::class,
             'data' => [
                 [
                     'test_private_property' => 1,
@@ -227,7 +224,7 @@ class ImportConfigurationTest extends WebTestCase
             ],
         ];
         yield [
-            'exception_class' => DatabaseNotUniqueDataException::class,
+            'expectedExceptionClass' => DatabaseNotUniqueDataException::class,
             'data' => [
                 [
                     'test_private_property' => 'value1',

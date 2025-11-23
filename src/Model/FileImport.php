@@ -31,7 +31,7 @@ class FileImport
     #[Assert\Callback]
     public function validateExtensions(ExecutionContextInterface $context): void
     {
-        $extensions = array_map('strtolower', $this->allowedExtensions);
+        $extensions = array_map(strtolower(...), $this->allowedExtensions);
         if (!in_array(strtolower($this->file->getClientOriginalExtension()), $extensions, true)) {
             $context->buildViolation('validation.file.extension', ['%extensions' => implode(', ', $extensions)])->addViolation();
         }
