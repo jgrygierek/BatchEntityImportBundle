@@ -59,6 +59,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $data = $record->getData();
         $fieldDefinitions = $this->getFieldsDefinitions();
 
+        /** @var string|null $value */
         foreach ($data as $name => $value) {
             if (empty($headerInfo[$name])) {
                 continue;

@@ -16,6 +16,8 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
+use const PHP_VERSION_ID;
+
 class TestKernel extends Kernel
 {
     use MicroKernelTrait;
@@ -52,10 +54,16 @@ class TestKernel extends Kernel
             $loader->load(__DIR__ . '/KnpLabs/config/config.yaml');
         }
 
-        if (self::MAJOR_VERSION === 7) {
+        if (self::MAJOR_VERSION >= 7) {
             $container->extension('framework', [
                 'validation' => ['enable_attributes' => true],
             ]);
+
+            if (PHP_VERSION_ID >= 80400) {
+                $container->extension('doctrine', [
+                    'orm' => ['enable_native_lazy_objects' => true],
+                ]);
+            }
         }
     }
 }

@@ -13,8 +13,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-versions: [ '8.2', '8.4' ]
+                php-versions: [ '8.2', '8.5' ]
                 vendors-version: [ '--prefer-lowest', '' ]
+                with-kpnlabs-doctrine-behaviors: [ true, false ]
 
         steps:
             -   name: Prepare github actions
@@ -39,11 +40,11 @@ jobs:
                     restore-keys: ${{ runner.os }}-composer-
 
             -   name: Run composer with knplabs/doctrine-behaviors
-                if: matrix.vendors-version != '' ||  matrix.php-versions != '8.4'
+                if: matrix.with-kpnlabs-doctrine-behaviors == true
                 run: COMPOSER_MEMORY_LIMIT=-1 composer require knplabs/doctrine-behaviors --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
-                    
+
             -   name: Run composer without knplabs/doctrine-behaviors
-                if: matrix.vendors-version == '' &&  matrix.php-versions == '8.4'
+                if: matrix.with-kpnlabs-doctrine-behaviors == false
                 run: COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
 
             -   name: Run tests

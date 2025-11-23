@@ -100,14 +100,14 @@ trait BaseImportControllerTrait
      */
     protected function doImportSave(Request $request, TranslatorInterface $translator): Response
     {
-        if (!isset($request->get('matrix')['records'])) {
+        if (!isset($request->request->all('matrix')['records'])) {
             $msg = $translator->trans('error.data.not_found', [], 'BatchEntityImportBundle');
             $this->addFlash('error', $msg);
 
             return $this->redirectToImport();
         }
 
-        $matrix = MatrixFactory::createFromPostData($request->get('matrix')['records']);
+        $matrix = MatrixFactory::createFromPostData($request->request->all('matrix')['records']);
         $form = $this->createMatrixForm($matrix);
         $form->handleRequest($request);
 

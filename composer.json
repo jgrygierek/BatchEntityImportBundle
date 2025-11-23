@@ -11,8 +11,7 @@
         "xlsx",
         "csv",
         "ods",
-        "symfony",
-        "symfony"
+        "Symfony"
     ],
     "license": "MIT",
     "authors": [
@@ -26,22 +25,22 @@
         "doctrine/annotations": "^1.14|^2.0",
         "doctrine/orm": "^2.9|^3.2",
         "phpoffice/phpspreadsheet": "^5.2.0",
-        "symfony/config": "^5.4|^6.0|^7.0",
-        "symfony/dependency-injection": "^5.4|^6.0|^7.0",
-        "symfony/doctrine-bridge": "^5.4|^6.0|^7.0",
-        "symfony/form": "^5.4|^6.0|^7.0",
-        "symfony/framework-bundle": "^5.4|^6.0|^7.0",
-        "symfony/property-access": "^5.4|^6.0|^7.0",
-        "symfony/translation": "^5.4|^6.0|^7.0",
-        "symfony/twig-bundle": "^5.4|^6.0|^7.0",
-        "symfony/validator": "^5.4|^6.0|^7.0",
+        "symfony/config": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/dependency-injection": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/doctrine-bridge": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/form": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/framework-bundle": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/property-access": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/translation": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/twig-bundle": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/validator": "^5.4|^6.0|^7.0|^8.0",
         "twig/twig": "^2.14|^3.0"
     },
     "require-dev": {
         "dg/bypass-finals": "^v1.8",
-        "doctrine/doctrine-bundle": "^2.4.0",
-        "doctrine/doctrine-fixtures-bundle": "^3.4.1",
-        "friendsofphp/php-cs-fixer": "^v3.90.0",
+        "doctrine/doctrine-bundle": "^2.4.0|^3.1.0",
+        "doctrine/doctrine-fixtures-bundle": "^3.4.1|^4.3.1",
+        "friendsofphp/php-cs-fixer": "^v3.91.3",
         "matthiasnoback/symfony-dependency-injection-test": "^6.1.0",
         "phpstan/phpstan": "^2.1.32",
         "phpstan/phpstan-doctrine": "^2.0.11",
@@ -50,9 +49,9 @@
         "phpunit/phpunit": "11.5.44",
         "rector/rector": "2.2.8",
         "roave/security-advisories": "dev-latest",
-        "symfony/browser-kit": "^5.4|^6.0|^7.0",
-        "symfony/dom-crawler": "^5.4|^6.0|^7.0",
-        "symfony/security-bundle": "^5.4|^6.0|^7.0"
+        "symfony/browser-kit": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/dom-crawler": "^5.4|^6.0|^7.0|^8.0",
+        "symfony/security-bundle": "^5.4|^6.0|^7.0|^8.0"
     },
     "suggest": {
         "knplabs/doctrine-behaviors": "Use it for translatable records stored in database"
