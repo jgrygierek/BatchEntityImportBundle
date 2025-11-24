@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Service;
 use Generator;
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class PropertyExistenceCheckerTest extends TestCase
@@ -18,9 +19,7 @@ class PropertyExistenceCheckerTest extends TestCase
         $this->checkerEntity = new PropertyExistenceChecker(TestEntity::class);
     }
 
-    /**
-     * @dataProvider dataProviderValidProperty
-     */
+    #[DataProvider('dataProviderValidProperty')]
     public function testEntityHasProperty(string $property): void
     {
         self::assertTrue($this->checkerEntity->propertyExists($property));
@@ -34,9 +33,7 @@ class PropertyExistenceCheckerTest extends TestCase
         yield ['testPublicProperty'];
     }
 
-    /**
-     * @dataProvider dataProviderWrongProperty
-     */
+    #[DataProvider('dataProviderWrongProperty')]
     public function testEntityWithoutProperty(string $property): void
     {
         self::assertFalse($this->checkerEntity->propertyExists($property));

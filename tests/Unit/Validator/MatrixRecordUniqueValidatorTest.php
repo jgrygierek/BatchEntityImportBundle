@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUniqueValidator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
@@ -21,9 +22,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
         return new MatrixRecordUniqueValidator();
     }
 
-    /**
-     * @dataProvider dataProvider
-     */
+    #[DataProvider('dataProvider')]
     public function testNoDuplication(array $fields, array $data): void
     {
         $matrix = MatrixFactory::createFromPostData($data);
@@ -87,9 +86,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
         ];
     }
 
-    /**
-     * @dataProvider duplicatedDataProvider
-     */
+    #[DataProvider('duplicatedDataProvider')]
     public function testDuplications(array $fields, array $expectedDuplicatedRecords, array $data): void
     {
         $matrix = MatrixFactory::createFromPostData($data);
@@ -111,7 +108,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
     {
         yield [
             'fields' => ['field_1'],
-            'duplicated_records' => [1, 3],
+            'expectedDuplicatedRecords' => [1, 3],
             'data' => [
                 [
                     'field_1' => 0,
@@ -138,7 +135,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
 
         yield [
             'fields' => ['field-1', 'field_2'],
-            'duplicated_records' => [3],
+            'expectedDuplicatedRecords' => [3],
             'data' => [
                 [
                     'field-1' => 0,

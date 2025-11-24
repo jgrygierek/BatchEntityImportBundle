@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Model;
 use Generator;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Tests\AbstractValidationTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -30,9 +31,7 @@ class FileImportTest extends AbstractValidationTestCase
         $this->path = null;
     }
 
-    /**
-     * @dataProvider validExtensionsProvider
-     */
+    #[DataProvider('validExtensionsProvider')]
     public function testValidFile(string $extension, array $allowedExtensions): void
     {
         $fileImport = new FileImport($allowedExtensions);
@@ -67,9 +66,7 @@ class FileImportTest extends AbstractValidationTestCase
         self::assertSame('An empty file is not allowed.', $errors[0]->getMessage());
     }
 
-    /**
-     * @dataProvider invalidExtensionsProvider
-     */
+    #[DataProvider('invalidExtensionsProvider')]
     public function testInvalidExtensionError(string $extension, array $allowedExtensions): void
     {
         $fileImport = new FileImport($allowedExtensions);

@@ -23,7 +23,7 @@ class CsvDelimiterDetector
         $delimiterCount = array_fill_keys($delimiters, 0);
 
         foreach ($delimiters as $delimiter) {
-            $delimiterCount[$delimiter] = substr_count($csvContent, $delimiter);
+            $delimiterCount[$delimiter] = substr_count($csvContent, (string) $delimiter);
         }
 
         return array_search(max($delimiterCount), $delimiterCount, true);

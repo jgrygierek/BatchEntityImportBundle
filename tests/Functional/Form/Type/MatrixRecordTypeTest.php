@@ -11,7 +11,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\FieldsTypeConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,7 +19,7 @@ use Symfony\Component\Form\FormFactory;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class MatrixRecordTypeTest extends WebTestCase
+class MatrixRecordTypeTest extends AbstractWebTestCase
 {
     private ?FormFactory $factory;
 

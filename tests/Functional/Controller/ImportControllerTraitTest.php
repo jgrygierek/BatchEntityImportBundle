@@ -9,29 +9,29 @@ use Generator;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
+use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 
-class ImportControllerTraitTest extends WebTestCase
+class ImportControllerTraitTest extends AbstractWebTestCase
 {
     private const DEFAULT_RECORDS_NUMBER = 20;
     private const NEW_RECORDS_NUMBER = 30;
     private const URL = '/jg_batch_entity_import_bundle/import';
     private KernelBrowser $client;
-    private readonly TestableEventDispatcher $eventDispatcher;
+    private readonly TraceableEventDispatcher $eventDispatcher;
 
     protected function setUp(): void
     {
-        $this->client = self::createClient();
+        $this->client = $this->createCustomClient(self::bootKernel());
 
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
         $databaseLoader->reload();
         $databaseLoader->loadFixtures();
 
-        $this->eventDispatcher = self::$kernel->getContainer()->get(TestableEventDispatcher::class);
-        $this->assertInstanceOf(TestableEventDispatcher::class, $this->eventDispatcher);
+        $this->eventDispatcher = self::$kernel->getContainer()->get('event_dispatcher');
         $this->eventDispatcher->resetDispatchedEvents();
     }
 
@@ -62,9 +62,7 @@ class ImportControllerTraitTest extends WebTestCase
         $this->checkDispatchedEvents(self::NEW_RECORDS_NUMBER);
     }
 
-    /**
-     * @dataProvider updateRecordDataProvider
-     */
+    #[DataProvider('updateRecordDataProvider')]
     public function testUpdateExistingRecord(
         int $updatedEntityId,
         array $expectedDefaultValues,

@@ -6,6 +6,8 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Form\Type;
 
 use Generator;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
@@ -18,14 +20,14 @@ use UnexpectedValueException;
 
 class ArrayTextTypeTest extends TypeTestCase
 {
-    private TranslatorInterface $translator;
+    private MockObject $translator;
 
     protected function setUp(): void
     {
         $this->translator = $this->createMock(TranslatorInterface::class);
         $this->translator
             ->method('trans')
-            ->willReturnCallback(static fn ($key, $params) => sprintf('separator: "%s"', $params['%separator%'] ?? ''));
+            ->willReturnCallback(static fn ($key, $params): string => sprintf('separator: "%s"', $params['%separator%'] ?? ''));
 
         parent::setUp();
     }
@@ -60,12 +62,10 @@ class ArrayTextTypeTest extends TypeTestCase
         $this->assertEquals('a|b|c', $form->getData());
     }
 
-    /**
-     * @dataProvider transformDataProvider
-     * @dataProvider transformDataToEmptyStringProvider
-     * @dataProvider transformDataWithWrongSeparatorProvider
-     */
-    public function testTransform(string $separator, array $data, $expected): void
+    #[DataProvider('transformDataProvider')]
+    #[DataProvider('transformDataToEmptyStringProvider')]
+    #[DataProvider('transformDataWithWrongSeparatorProvider')]
+    public function testTransform(string $separator, array $data, string $expected): void
     {
         $type = new ArrayTextType($this->translator);
         $type->buildForm($this->createMock(FormBuilderInterface::class), ['separator' => $separator]);
@@ -111,10 +111,8 @@ class ArrayTextTypeTest extends TypeTestCase
         yield [';', ['a|b|c'], 'a|b|c'];
     }
 
-    /**
-     * @dataProvider transformDataWithDefaultSeparatorProvider
-     * @dataProvider transformDataWithDefaultSeparatorToEmptyStringProvider
-     */
+    #[DataProvider('transformDataWithDefaultSeparatorProvider')]
+    #[DataProvider('transformDataWithDefaultSeparatorToEmptyStringProvider')]
     public function testTransformWithDefaultSeparator(mixed $data, mixed $expected): void
     {
         $type = new ArrayTextType($this->translator);
@@ -143,9 +141,7 @@ class ArrayTextTypeTest extends TypeTestCase
         yield [[null], ''];
     }
 
-    /**
-     * @dataProvider transformWrongValueExceptionDataProvider
-     */
+    #[DataProvider('transformWrongValueExceptionDataProvider')]
     public function testTransformWrongValueException(mixed $value): void
     {
         $this->expectException(UnexpectedValueException::class);
@@ -166,11 +162,9 @@ class ArrayTextTypeTest extends TypeTestCase
         yield [new stdClass()];
     }
 
-    /**
-     * @dataProvider reverseTransformDataProvider
-     * @dataProvider reverseTransformDataWithEmptySeparatorProvider
-     * @dataProvider reverseTransformDataWithWrongSeparatorProvider
-     */
+    #[DataProvider('reverseTransformDataProvider')]
+    #[DataProvider('reverseTransformDataWithEmptySeparatorProvider')]
+    #[DataProvider('reverseTransformDataWithWrongSeparatorProvider')]
     public function testReverseTransform(?string $separator, string $data, mixed $expected): void
     {
         $type = new ArrayTextType($this->translator);
@@ -215,9 +209,7 @@ class ArrayTextTypeTest extends TypeTestCase
         yield [';', 'a|b|c', ['a|b|c']];
     }
 
-    /**
-     * @dataProvider reverseTransformDataWithDefaultSeparatorProvider
-     */
+    #[DataProvider('reverseTransformDataWithDefaultSeparatorProvider')]
     public function testReverseTransformWithDefaultSeparator(string $data, mixed $expected): void
     {
         $type = new ArrayTextType($this->translator);
@@ -240,9 +232,7 @@ class ArrayTextTypeTest extends TypeTestCase
         yield [';b;c', [';b;c']];
     }
 
-    /**
-     * @dataProvider reverseTransformWrongValueExceptionDataProvider
-     */
+    #[DataProvider('reverseTransformWrongValueExceptionDataProvider')]
     public function testReverseTransformWrongValueException(mixed $value): void
     {
         $this->expectException(UnexpectedValueException::class);
