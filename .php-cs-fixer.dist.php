@@ -22,6 +22,6 @@ return $config
         'global_namespace_import' => ['import_classes' => true],
         'native_function_invocation' => false,
         'static_lambda' => true,
+        'phpdoc_align' => ['align' => 'left'],
     ])
-    ->setRiskyAllowed(true)
-;
+    ->setRiskyAllowed(true);

@@ -14,6 +14,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
@@ -21,8 +22,8 @@ use Throwable;
 
 class ImportConfigurationTest extends AbstractWebTestCase
 {
-    private ?EntityManagerInterface $entityManager;
-    private readonly TraceableEventDispatcher $eventDispatcher;
+    private EntityManagerInterface $entityManager;
+    private TestableEventDispatcher|TraceableEventDispatcher $eventDispatcher;
 
     protected function setUp(): void
     {
@@ -204,12 +205,12 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
         $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
 
-        $exception = null;
+        $throwable = null;
         try {
             $config->import($matrix);
-        } catch (Throwable $exception) {
+        } catch (Throwable $throwable) {
         }
-        self::assertInstanceOf($expectedExceptionClass, $exception);
+        self::assertInstanceOf($expectedExceptionClass, $throwable);
         self::assertFalse($this->eventDispatcher->hasEvent(RecordImportedSuccessfullyEvent::class));
     }
 

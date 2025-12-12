@@ -23,9 +23,13 @@ class CsvDelimiterDetector
         $delimiterCount = array_fill_keys($delimiters, 0);
 
         foreach ($delimiters as $delimiter) {
-            $delimiterCount[$delimiter] = substr_count($csvContent, (string) $delimiter);
+            $delimiterCount[$delimiter] = substr_count($csvContent, $delimiter);
         }
 
-        return array_search(max($delimiterCount), $delimiterCount, true);
+        if (empty($delimiterCount)) {
+            return CsvDelimiterEnum::SEMICOLON->value;
+        }
+
+        return array_search(max($delimiterCount), $delimiterCount, true) ?: CsvDelimiterEnum::SEMICOLON->value;
     }
 }

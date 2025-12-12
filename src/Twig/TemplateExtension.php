@@ -10,6 +10,9 @@ use UnexpectedValueException;
 
 class TemplateExtension extends AbstractExtension
 {
+    /**
+     * @param array<string, string> $availableTemplates
+     */
     public function __construct(private readonly array $availableTemplates = [])
     {
     }
@@ -27,6 +30,6 @@ class TemplateExtension extends AbstractExtension
             return $this->availableTemplates[$name];
         }
 
-        throw new UnexpectedValueException("Template $name not found.");
+        throw new UnexpectedValueException(sprintf('Template %s not found.', $name));
     }
 }

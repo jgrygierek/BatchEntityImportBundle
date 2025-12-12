@@ -19,7 +19,7 @@ class MatrixRecordTypeTest extends WebTestCase
 {
     use SkippedTestsTrait;
 
-    private ?FormFactory $factory;
+    private FormFactory $factory;
 
     protected function setUp(): void
     {

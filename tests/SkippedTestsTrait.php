@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests;
 
 use Knp\DoctrineBehaviors\DoctrineBehaviorsBundle;
+use PHPUnit\Framework\Assert;
 
+/**
+ * @mixin Assert
+ */
 trait SkippedTestsTrait
 {
     public function markKnpLabsTestAsSkipped(): void

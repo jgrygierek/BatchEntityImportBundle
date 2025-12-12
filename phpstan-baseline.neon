@@ -1,0 +1,31 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Validator\\ValidatorBuilder\:\:enableAnnotationMapping\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/AbstractValidationTestCase.php
+
+		-
+			message: '#^Property JG\\BatchEntityImportBundle\\Tests\\Fixtures\\Entity\\TestEntity\:\:\$testPrivatePropertyNoSetter is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: tests/Fixtures/Entity/TestEntity.php
+
+		-
+			message: '#^Cannot cast Knp\\DoctrineBehaviors\\Contract\\Entity\\TranslationInterface to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: tests/KnpLabs/Fixtures/Entity/TranslatableEntity.php
+
+		-
+			message: '#^Property JG\\BatchEntityImportBundle\\Tests\\KnpLabs\\Fixtures\\Entity\\TranslatableEntity\:\:\$testPrivatePropertyNoSetter is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: tests/KnpLabs/Fixtures/Entity/TranslatableEntity.php
+
+		-
+			message: '#^Comparison operation "\>\=" between 7 and 7 is always true\.$#'
+			identifier: greaterOrEqual.alwaysTrue
+			count: 1
+			path: tests/TestKernel.php

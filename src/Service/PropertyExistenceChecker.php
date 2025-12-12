@@ -21,7 +21,9 @@ class PropertyExistenceChecker
     {
         $this->reflectionClass = new ReflectionClass($entityClass);
         if (\interface_exists(TranslatableInterface::class) && is_subclass_of($entityClass, TranslatableInterface::class)) {
-            $this->translationReflectionClass = new ReflectionClass($this->reflectionClass->newInstanceWithoutConstructor()->translate());
+            /** @var TranslatableInterface $instance */
+            $instance = $this->reflectionClass->newInstanceWithoutConstructor();
+            $this->translationReflectionClass = new ReflectionClass($instance->translate());
         }
     }
 

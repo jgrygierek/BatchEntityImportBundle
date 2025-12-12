@@ -13,6 +13,9 @@ class Matrix
 {
     private const RESERVED_ENTITY_COLUMN_NAME = 'entity';
     private const RESERVED_ENTITY_ID_COLUMN_NAME = 'entity_id';
+    /**
+     * @var array<int, string>
+     */
     #[Assert\All([
         new Assert\NotBlank(),
         new Assert\Type('string'),
@@ -29,6 +32,10 @@ class Matrix
     #[Assert\NotBlank]
     private array $records = [];
 
+    /**
+     * @param array<string|null> $header
+     * @param array<array<string, string>> $recordsData
+     */
     public function __construct(array $header = [], array $recordsData = [])
     {
         $this->header = $this->clearHeader($header);
@@ -41,6 +48,9 @@ class Matrix
         }
     }
 
+    /**
+     * @return array<string>
+     */
     public function getHeader(): array
     {
         return $this->header;
@@ -54,6 +64,9 @@ class Matrix
         return $this->records;
     }
 
+    /**
+     * @return array<string, bool>
+     */
     public function getHeaderInfo(string $className): array
     {
         $info = [];
@@ -66,26 +79,33 @@ class Matrix
         return $info;
     }
 
+    /**
+     * @param array<string, string|int> $data
+     */
     private function getEntityIdValue(array $data): int|string|null
     {
-        foreach ($data as $name => $value) {
-            if (self::RESERVED_ENTITY_ID_COLUMN_NAME === $name) {
-                return $value;
-            }
-        }
-
-        return null;
+        return $data[self::RESERVED_ENTITY_ID_COLUMN_NAME] ?? null;
     }
 
+    /**
+     * @param array<string|null> $header
+     *
+     * @return string[]
+     */
     private function clearHeader(array $header): array
     {
         $header = array_values(
             array_filter($header, $this->isColumnNameValid(...)),
         );
 
-        return \array_map(static fn (string $name): string => \str_replace(' ', '_', $name), $header);
+        return \array_map(static fn (?string $name): string => \str_replace(' ', '_', $name ?: ''), $header);
     }
 
+    /**
+     * @param array<string, string> $data
+     *
+     * @return array<string, string>
+     */
     private function clearRecordData(array $data): array
     {
         return array_filter($data, $this->isColumnNameValid(...), ARRAY_FILTER_USE_KEY);

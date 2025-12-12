@@ -22,25 +22,36 @@ class MatrixFactory
         $reader = self::getReader($file);
         $spreadsheet = $reader->load($file->getPathname());
 
+        /** @var array<int, array<string|null>> $data */
         $data = $spreadsheet->getActiveSheet()->toArray();
+        /** @var string[] $header */
         $header = array_shift($data);
-        self::addKeysToRows($header, $data);
 
-        return new Matrix($header, $data);
+        return new Matrix(
+            $header,
+            self::addKeysToRows($header, $data),
+        );
     }
 
+    /**
+     * @param array<array<string, mixed>> $data
+     */
     public static function createFromPostData(array $data): Matrix
     {
         return $data ? new Matrix(array_keys($data[0]), $data) : new Matrix();
     }
 
-    private static function addKeysToRows(array $header, array &$data): void
+    /**
+     * @param string[] $header
+     * @param array<array<string|null>> $data
+     *
+     * @return array<array<string,string>>
+     */
+    private static function addKeysToRows(array $header, array $data): array
     {
-        array_walk(
+        return array_map(
+            static fn (array $row): array => array_combine($header, $row),
             $data,
-            static function (array &$row) use ($header): void {
-                $row = array_combine($header, $row);
-            },
         );
     }
 
@@ -49,9 +60,10 @@ class MatrixFactory
         $extension = ucfirst(strtolower($file->getClientOriginalExtension()));
         $readerClass = 'PhpOffice\PhpSpreadsheet\Reader\\' . $extension;
         if (!class_exists($readerClass)) {
-            throw new InvalidArgumentException("Reader for extension $extension is not supported by PhpOffice.");
+            throw new InvalidArgumentException(sprintf('Reader for extension %s is not supported by PhpOffice.', $extension));
         }
 
+        /** @var BaseReader $reader */
         $reader = new $readerClass();
         if ($reader instanceof Csv) {
             $detectedDelimiter = (new CsvDelimiterDetector())->detect($file->getContent());

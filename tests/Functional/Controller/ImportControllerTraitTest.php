@@ -9,6 +9,7 @@ use Generator;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -21,7 +22,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
     private const NEW_RECORDS_NUMBER = 30;
     private const URL = '/jg_batch_entity_import_bundle/import';
     private KernelBrowser $client;
-    private readonly TraceableEventDispatcher $eventDispatcher;
+    private TestableEventDispatcher|TraceableEventDispatcher $eventDispatcher;
 
     protected function setUp(): void
     {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Rector\CodingStyle\Rector\Stmt\NewlineAfterStatementRector;
 use Rector\Config\RectorConfig;
 use Rector\Set\ValueObject\SetList;
 use Rector\Symfony\Set\SymfonySetList;
@@ -29,9 +30,11 @@ return RectorConfig::configure()
         TwigSetList::TWIG_20,
         SymfonySetList::SYMFONY_54,
     ])
-    ->withCodingStyleLevel(0)
+    ->withCodingStyleLevel(10)
+    ->withCodeQualityLevel(10)
     ->withSkip([
         ReturnNeverTypeRector::class,
+        NewlineAfterStatementRector::class,
     ])
     ->withSymfonyContainerXml(
         __DIR__ . '/var/cache/dev/App_KernelDevDebugContainer.xml',

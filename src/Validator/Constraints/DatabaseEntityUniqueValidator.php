@@ -22,7 +22,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     }
 
     /**
-     * @param Matrix               $value
+     * @param Matrix $value
      * @param DatabaseEntityUnique $constraint
      */
     public function validate($value, $constraint): void
@@ -92,15 +92,19 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         $this->correctRecords[$this->getHash($matrixDataToCompare)] = true;
     }
 
+    /**
+     * @return array<string, array<int, array{0: string, 1: scalar}>>
+     */
     private function buildCriteria(MatrixRecord $matrixRecord, array $matrixDataToCompare): array
     {
+        /** @var array<string, array<int, array{0: string, 1: scalar}>> $criteria */
         $criteria = [];
         foreach ($matrixDataToCompare as $fieldName => $value) {
             $criteria[ColumnNameHelper::toCamelCase($fieldName)][] = ['=', $value];
         }
 
         $entityToOverride = $matrixRecord->getEntity();
-        if ($entityToOverride) {
+        if (null !== $entityToOverride) {
             $this->addCriteriaToOmitEntity($criteria, $entityToOverride);
         }
 
@@ -116,6 +120,9 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         }
     }
 
+    /**
+     * @param array<string, array<int, array{0: string, 1: scalar}>> $criteria
+     */
     private function isRecordDuplicatedInDatabase(EntityManagerInterface $em, string $class, array $criteria): bool
     {
         $query = $em->createQuery($this->buildDQL($class, $criteria));
@@ -124,22 +131,28 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         return !empty($query->getArrayResult());
     }
 
+    /**
+     * @param array<string, array<int, array{0: string, 1: scalar}>> $criteria
+     */
     private function buildDQL(string $class, array $criteria): string
     {
         $sql = /* @lang DQL */
-            "SELECT c FROM $class c";
+            sprintf('SELECT c FROM %s c', $class);
 
         $nmb = 0;
         foreach ($criteria as $fieldName => $data) {
             foreach ($data as [$operator, $value]) {
                 $sql .= $nmb > 0 ? ' AND' : ' WHERE';
-                $sql .= " c.$fieldName $operator :param_" . $nmb++;
+                $sql .= sprintf(' c.%s %s :param_', $fieldName, $operator) . $nmb++;
             }
         }
 
         return $sql;
     }
 
+    /**
+     * @param array<string, array<int, array{0: string, 1: scalar}>> $criteria
+     */
     private function passParametersToQuery(AbstractQuery $query, array $criteria): void
     {
         $nmb = 0;

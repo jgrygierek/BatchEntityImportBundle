@@ -20,9 +20,6 @@ use TypeError;
 
 class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
 {
-    /**
-     * @var MockObject|EntityManager
-     */
     private MockObject $entityManagerMock;
 
     protected function createValidator(): DatabaseEntityUniqueValidator

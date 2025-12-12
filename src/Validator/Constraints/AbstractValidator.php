@@ -28,7 +28,7 @@ abstract class AbstractValidator extends ConstraintValidator
     {
         $this->context
             ->buildViolation($constraint->message, ['%fields%' => implode(', ', $fields)])
-            ->atPath("children[records][$index][{$constraint->fields[0]}]")
+            ->atPath(sprintf('children[records][%d][%s]', $index, $constraint->fields[0]))
             ->setInvalidValue($record)
             ->addViolation();
     }

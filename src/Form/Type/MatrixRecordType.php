@@ -79,7 +79,7 @@ class MatrixRecordType extends AbstractType
                     'query_builder' => static function (EntityRepository $er) use ($entityTranslationRelationName): QueryBuilder {
                         $qb = $er->createQueryBuilder('qb')->select('qb');
                         if ($entityTranslationRelationName) {
-                            $qb->addSelect(['t'])->leftJoin("qb.$entityTranslationRelationName", 't');
+                            $qb->addSelect(['t'])->leftJoin('qb.' . $entityTranslationRelationName, 't');
                         }
 
                         return $qb;
@@ -110,7 +110,9 @@ class MatrixRecordType extends AbstractType
         $entity = $form->getData();
         $selectedValue = $entity->entityId;
 
-        foreach ($view['entity']->vars['choices'] ?? [] as $index => $choice) {
+        /** @var object[] $choices */
+        $choices = $view['entity']->vars['choices'] ?? [];
+        foreach ($choices as $index => $choice) {
             if ($choice->value === $selectedValue) {
                 $view['entity']->vars['choices'][$index]->attr['selected'] = 'selected';
             }
