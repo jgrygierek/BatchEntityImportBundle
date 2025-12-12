@@ -271,7 +271,7 @@ For each successfully processed record, event `RecordImportedSuccessfullyEvent` 
 ```php
 class RecordImportedSuccessfullyEvent
 {
-    public function __construct(readonly public string $class, readonly public string $id)
+    public function __construct(public readonly string $class, public readonly string $id)
     {
     }
 }

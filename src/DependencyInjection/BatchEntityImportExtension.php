@@ -48,6 +48,7 @@ class BatchEntityImportExtension extends Extension
         $configuration = new Configuration();
         $config = $processor->processConfiguration($configuration, $configs);
 
+        /** @var array<string,string> $templates */
         $templates = $config['templates'];
         $container->setParameter('batch_entity_import.templates', $templates);
         $container->setParameter('batch_entity_import.templates.select_file', $templates['select_file']);

@@ -13,8 +13,8 @@ use Symfony\Component\Validator\Constraint;
 class DatabaseEntityUnique extends Constraint
 {
     public string $message = 'validation.entity.unique';
-    public string $entityClassName;
-    public array $fields;
+    public string $entityClassName = '';
+    public array $fields = [];
 
     public function __construct(mixed $options = null, ?array $groups = null, mixed $payload = null)
     {
@@ -27,6 +27,9 @@ class DatabaseEntityUnique extends Constraint
         if (empty($options['entityClassName'])) {
             throw new InvalidArgumentException('Option "entityClassName" should not be empty.');
         }
+
+        $this->fields = $options['fields'];
+        $this->entityClassName = $options['entityClassName'];
     }
 
     public function getDefaultOption(): string

@@ -22,6 +22,8 @@ class MatrixRecordUnique extends Constraint
         if (empty($options['fields'])) {
             throw new InvalidArgumentException('Option "fields" should not be empty.');
         }
+
+        $this->fields = $options['fields'];
     }
 
     public function getDefaultOption(): string

@@ -14,8 +14,6 @@ services:
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
     JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration: ~
 
-    Symfony\Component\Security\Core\Security: ~
-
     Psr\Container\ContainerInterface:
         alias: service_container
 
@@ -30,7 +28,6 @@ services:
         class: Symfony\Component\EventDispatcher\EventDispatcher
 
 framework:
-    annotations: false
     test: true
     session:
         name: my_custom_php_session_id
