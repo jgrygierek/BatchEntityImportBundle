@@ -44,6 +44,9 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
         return implode($this->separator, $value);
     }
 
+    /**
+     * @return array<string>
+     */
     public function reverseTransform(mixed $value): array
     {
         if (!is_string($value)) {

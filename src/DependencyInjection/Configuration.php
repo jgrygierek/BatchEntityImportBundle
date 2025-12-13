@@ -22,6 +22,9 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
+    /**
+     * @param NodeBuilder<ArrayNodeDefinition> $parentBuilder
+     */
     private function addTemplatesConfig(NodeBuilder $parentBuilder): void
     {
         $builder = $parentBuilder->arrayNode('templates')->addDefaultsIfNotSet()->children();
@@ -31,6 +34,9 @@ class Configuration implements ConfigurationInterface
         $this->addNodeConfig($builder, 'layout', '@BatchEntityImport/layout.html.twig');
     }
 
+    /**
+     * @param NodeBuilder<ArrayNodeDefinition> $builder
+     */
     private function addNodeConfig(NodeBuilder $builder, string $name, string $value): void
     {
         $builder

@@ -6,11 +6,15 @@ namespace JG\BatchEntityImportBundle\Model\Configuration;
 
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use Symfony\Component\Validator\Constraint;
 
 interface ImportConfigurationInterface
 {
     /**
      * Class of entity used during import process.
+     */
+    /**
+     * @return class-string
      */
     public function getEntityClassName(): string;
 
@@ -34,11 +38,15 @@ interface ImportConfigurationInterface
 
     /**
      * Use this method to pass constraints to the main Matrix form.
+     *
+     * @return array<int, Constraint>
      */
     public function getMatrixConstraints(): array;
 
     /**
      * Use this method to set allowed file extensions.
+     *
+     * @return array<string>
      */
     public function getAllowedFileExtensions(): array;
 

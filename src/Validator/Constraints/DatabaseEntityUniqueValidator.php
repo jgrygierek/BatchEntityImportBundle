@@ -62,66 +62,93 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         parent::validateArguments($value, $constraint);
     }
 
+    /**
+     * @param array<string> $fields
+     *
+     * @return array<string, scalar|null>
+     */
     private function getMatrixRecordDataToCompare(MatrixRecord $matrixRecord, array $fields): array
     {
         $data = [];
         foreach ($fields as $field) {
-            $data[$field] = $matrixRecord->$field;
+            /** @var scalar|null $value */
+            $value = $matrixRecord->$field;
+            $data[$field] = $value;
         }
 
         return $data;
     }
 
+    /**
+     * @param array<string, scalar|null> $matrixDataToCompare
+     */
     private function isDuplicate(array $matrixDataToCompare): bool
     {
         return array_key_exists($this->getHash($matrixDataToCompare), $this->duplicatedRecords);
     }
 
+    /**
+     * @param array<string, scalar|null> $matrixDataToCompare
+     */
     private function isCorrectRecord(array $matrixDataToCompare): bool
     {
         return array_key_exists($this->getHash($matrixDataToCompare), $this->correctRecords);
     }
 
+    /**
+     * @param array<string, scalar|null> $matrixDataToCompare
+     */
     private function addDuplicate(array $matrixDataToCompare): void
     {
         $this->duplicatedRecords[$this->getHash($matrixDataToCompare)] = true;
     }
 
+    /**
+     * @param array<string, scalar|null> $matrixDataToCompare
+     */
     private function markAsCorrectRecord(array $matrixDataToCompare): void
     {
         $this->correctRecords[$this->getHash($matrixDataToCompare)] = true;
     }
 
     /**
-     * @return array<string, array<int, array{0: string, 1: scalar}>>
+     * @param array<string, scalar|null> $matrixDataToCompare
+     *
+     * @return array<string, array<int, array{0: string, 1: scalar|null}>>
      */
     private function buildCriteria(MatrixRecord $matrixRecord, array $matrixDataToCompare): array
     {
-        /** @var array<string, array<int, array{0: string, 1: scalar}>> $criteria */
         $criteria = [];
         foreach ($matrixDataToCompare as $fieldName => $value) {
             $criteria[ColumnNameHelper::toCamelCase($fieldName)][] = ['=', $value];
         }
 
         $entityToOverride = $matrixRecord->getEntity();
-        if (null !== $entityToOverride) {
-            $this->addCriteriaToOmitEntity($criteria, $entityToOverride);
-        }
 
-        return $criteria;
+        return null === $entityToOverride
+            ? $criteria
+            : $this->addCriteriaToOmitEntity($criteria, $entityToOverride);
     }
 
-    private function addCriteriaToOmitEntity(array &$criteria, object $entityToOverride): void
+    /**
+     * @param array<string, array<int, array{0: string, 1: scalar|null}>> $criteria
+     *
+     * @return array<string, array<int, array{0: string, 1: scalar|null}>>
+     */
+    private function addCriteriaToOmitEntity(array $criteria, object $entityToOverride): array
     {
+        /** @var array<string, scalar> $primaryKeyData */
         $primaryKeyData = $this->entityManager->getUnitOfWork()->getEntityIdentifier($entityToOverride);
 
         foreach ($primaryKeyData as $primaryKeyName => $primaryValue) {
             $criteria[$primaryKeyName][] = ['!=', $primaryValue];
         }
+
+        return $criteria;
     }
 
     /**
-     * @param array<string, array<int, array{0: string, 1: scalar}>> $criteria
+     * @param array<string, array<int, array{0: string, 1: scalar|null}>> $criteria
      */
     private function isRecordDuplicatedInDatabase(EntityManagerInterface $em, string $class, array $criteria): bool
     {
@@ -132,7 +159,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     }
 
     /**
-     * @param array<string, array<int, array{0: string, 1: scalar}>> $criteria
+     * @param array<string, array<int, array{0: string, 1: scalar|null}>> $criteria
      */
     private function buildDQL(string $class, array $criteria): string
     {
@@ -151,7 +178,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     }
 
     /**
-     * @param array<string, array<int, array{0: string, 1: scalar}>> $criteria
+     * @param array<string, array<int, array{0: string, 1: scalar|null}>> $criteria
      */
     private function passParametersToQuery(AbstractQuery $query, array $criteria): void
     {

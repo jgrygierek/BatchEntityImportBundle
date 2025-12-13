@@ -59,6 +59,9 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $this->save();
     }
 
+    /**
+     * @param array<string, bool> $headerInfo
+     */
     protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
     {
         $entity = $this->getEntity($record);
@@ -183,6 +186,13 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
      */
     private function getSeparator(FormFieldDefinition $fieldDefinition): string
     {
-        return $fieldDefinition->getOptions()['separator'] ?? ArrayTextType::DEFAULT_SEPARATOR;
+        $options = $fieldDefinition->getOptions();
+        $separator = $options['separator'] ?? null;
+
+        if (!is_string($separator) || '' === $separator) {
+            return ArrayTextType::DEFAULT_SEPARATOR;
+        }
+
+        return $separator;
     }
 }

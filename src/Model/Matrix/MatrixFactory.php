@@ -22,7 +22,7 @@ class MatrixFactory
         $reader = self::getReader($file);
         $spreadsheet = $reader->load($file->getPathname());
 
-        /** @var array<int, array<string|null>> $data */
+        /** @var array<int, array<string>> $data */
         $data = $spreadsheet->getActiveSheet()->toArray();
         /** @var string[] $header */
         $header = array_shift($data);
@@ -34,7 +34,7 @@ class MatrixFactory
     }
 
     /**
-     * @param array<array<string, mixed>> $data
+     * @param array<array<string, string|int>> $data
      */
     public static function createFromPostData(array $data): Matrix
     {
@@ -43,7 +43,7 @@ class MatrixFactory
 
     /**
      * @param string[] $header
-     * @param array<array<string|null>> $data
+     * @param array<array<string>> $data
      *
      * @return array<array<string,string>>
      */

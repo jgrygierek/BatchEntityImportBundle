@@ -54,6 +54,8 @@ class MatrixRecordUniqueValidator extends AbstractValidator
 
     /**
      * @param string[] $fieldsUsedInDuplicationCheck
+     *
+     * @return array<string, scalar|null>
      */
     private function getMatrixRecordDataForDuplicationCheck(MatrixRecord $matrixRecord, array $fieldsUsedInDuplicationCheck): array
     {

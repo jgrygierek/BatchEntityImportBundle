@@ -34,7 +34,7 @@ class Matrix
 
     /**
      * @param array<string|null> $header
-     * @param array<array<string, string>> $recordsData
+     * @param array<array<string, string|int>> $recordsData
      */
     public function __construct(array $header = [], array $recordsData = [])
     {
@@ -65,6 +65,8 @@ class Matrix
     }
 
     /**
+     * @param class-string $className
+     *
      * @return array<string, bool>
      */
     public function getHeaderInfo(string $className): array
@@ -102,16 +104,16 @@ class Matrix
     }
 
     /**
-     * @param array<string, string> $data
+     * @param array<string, string|int> $data
      *
-     * @return array<string, string>
+     * @return array<string, string|int>
      */
     private function clearRecordData(array $data): array
     {
         return array_filter($data, $this->isColumnNameValid(...), ARRAY_FILTER_USE_KEY);
     }
 
-    private function isColumnNameValid(?string $name): bool
+    private function isColumnNameValid(string|int|null $name): bool
     {
         return !empty(trim((string) $name)) && !\in_array($name, [self::RESERVED_ENTITY_COLUMN_NAME, self::RESERVED_ENTITY_ID_COLUMN_NAME], true);
     }
