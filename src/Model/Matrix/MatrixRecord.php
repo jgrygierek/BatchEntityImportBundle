@@ -7,8 +7,14 @@ namespace JG\BatchEntityImportBundle\Model\Matrix;
 class MatrixRecord
 {
     private ?object $entity = null;
+    /**
+     * @var array<string, scalar|null>
+     */
     private array $data = [];
 
+    /**
+     * @param array<string, scalar|null> $data
+     */
     public function __construct(array $data = [], public readonly int|string|null $entityId = null)
     {
         foreach ($data as $name => $value) {
@@ -28,6 +34,9 @@ class MatrixRecord
         $this->entity = $entity;
     }
 
+    /**
+     * @return array<string, scalar|null>
+     */
     public function getData(): array
     {
         return $this->data;
@@ -38,12 +47,12 @@ class MatrixRecord
         return array_key_exists($name, $this->data);
     }
 
-    public function __set(string $name, mixed $value): void
+    public function __set(string $name, int|string|float|bool|null $value): void
     {
         $this->data[$name] = $value;
     }
 
-    public function __get(string $name): mixed
+    public function __get(string $name): int|string|float|bool|null
     {
         return $this->data[$name];
     }

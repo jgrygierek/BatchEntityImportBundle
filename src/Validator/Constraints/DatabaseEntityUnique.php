@@ -14,6 +14,9 @@ class DatabaseEntityUnique extends Constraint
 {
     public string $message = 'validation.entity.unique';
     public string $entityClassName = '';
+    /**
+     * @var string[]
+     */
     public array $fields = [];
 
     public function __construct(mixed $options = null, ?array $groups = null, mixed $payload = null)
@@ -37,6 +40,9 @@ class DatabaseEntityUnique extends Constraint
         return 'entityClassName';
     }
 
+    /**
+     * @return string[]
+     */
     public function getRequiredOptions(): array
     {
         return ['entityClassName', 'fields'];

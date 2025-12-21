@@ -29,7 +29,7 @@ abstract class AbstractWebTestCase extends WebTestCase
                 array $parameters = [],
                 array $files = [],
                 array $server = [],
-                $content = null,
+                ?string $content = null,
                 bool $changeHistory = true,
             ): Crawler {
                 $response = parent::request($method, $uri, $parameters, $files, $server, $content);

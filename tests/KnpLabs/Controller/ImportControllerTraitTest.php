@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityRepository;
 use Generator;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
+use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntityTranslation;
 use JG\BatchEntityImportBundle\Tests\SkippedTestsTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -115,7 +116,10 @@ class ImportControllerTraitTest extends WebTestCase
 
         $response = $this->client->getResponse();
         self::assertTrue($response->isSuccessful());
-        self::assertStringContainsString('Such entity already exists for the same values of fields: test_private_property, test_public_property.', $response->getContent());
+        self::assertStringContainsString(
+            'Such entity already exists for the same values of fields: test_private_property, test_public_property.',
+            $response->getContent()
+        );
         self::assertStringContainsString('Such entity already exists for the same values of fields: test-private-property2.', $response->getContent());
         self::assertCount(self::DEFAULT_RECORDS_NUMBER + self::NEW_RECORDS_NUMBER, $this->getRepository()->findAll());
     }
@@ -162,8 +166,13 @@ class ImportControllerTraitTest extends WebTestCase
         self::assertSame($expectedValues[0], $item->getTestPrivateProperty());
         self::assertSame($expectedValues[1], $item->getTestPrivateProperty2());
         self::assertSame($expectedValues[2], $item->testPublicProperty);
-        self::assertSame($expectedValues[3], $item->translate('en')->getTestTranslationProperty());
-        self::assertSame($expectedValues[4], $item->translate('pl')->getTestTranslationProperty());
+
+        /** @var TranslatableEntityTranslation $translationEn */
+        $translationEn = $item->translate('en');
+        self::assertSame($expectedValues[3], $translationEn->getTestTranslationProperty());
+        /** @var TranslatableEntityTranslation $translationPl */
+        $translationPl = $item->translate('pl');
+        self::assertSame($expectedValues[4], $translationPl->getTestTranslationProperty());
     }
 
     private function getRepository(): EntityRepository

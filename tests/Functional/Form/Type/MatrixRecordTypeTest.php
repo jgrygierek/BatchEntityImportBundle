@@ -21,7 +21,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class MatrixRecordTypeTest extends AbstractWebTestCase
 {
-    private ?FormFactory $factory;
+    private FormFactory $factory;
 
     protected function setUp(): void
     {

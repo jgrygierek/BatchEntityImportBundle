@@ -9,6 +9,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
+use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntityTranslation;
 use JG\BatchEntityImportBundle\Tests\SkippedTestsTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -70,8 +71,12 @@ class ImportConfigurationTest extends WebTestCase
 
         self::assertNotEmpty($item);
         self::assertSame('value_2', $item->getTestPrivateProperty());
-        self::assertSame('value_3', $item->translate('en')->getTestTranslationProperty());
-        self::assertSame('value_4', $item->translate('pl')->getTestTranslationProperty());
+        /** @var TranslatableEntityTranslation $translationEn */
+        $translationEn = $item->translate('en');
+        self::assertSame('value_3', $translationEn->getTestTranslationProperty());
+        /** @var TranslatableEntityTranslation $translationPl */
+        $translationPl = $item->translate('pl');
+        self::assertSame('value_4', $translationPl->getTestTranslationProperty());
         self::assertSame('public_value_1', $item->testPublicProperty);
 
         /** @var TranslatableEntity|null $item */
@@ -79,8 +84,12 @@ class ImportConfigurationTest extends WebTestCase
 
         self::assertNotEmpty($item);
         self::assertSame('value_6', $item->getTestPrivateProperty());
-        self::assertSame('value_7', $item->translate('en')->getTestTranslationProperty());
-        self::assertSame('value_8', $item->translate('pl')->getTestTranslationProperty());
+        /** @var TranslatableEntityTranslation $translationEn */
+        $translationEn = $item->translate('en');
+        self::assertSame('value_7', $translationEn->getTestTranslationProperty());
+        /** @var TranslatableEntityTranslation $translationPl */
+        $translationPl = $item->translate('pl');
+        self::assertSame('value_8', $translationPl->getTestTranslationProperty());
         self::assertSame('public_value_2', $item->testPublicProperty);
     }
 }

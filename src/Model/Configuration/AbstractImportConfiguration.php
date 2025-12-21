@@ -17,11 +17,14 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
+use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
+use Symfony\Component\Validator\Constraint;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use TypeError;
 
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
+    /** @var object[] */
     protected array $updatedEntities = [];
 
     public function __construct(private readonly EntityManagerInterface $em, private readonly EventDispatcherInterface $eventDispatcher)
@@ -38,6 +41,9 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return null;
     }
 
+    /**
+     * @return array<int, Constraint>
+     */
     public function getMatrixConstraints(): array
     {
         return [];
@@ -53,6 +59,9 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $this->save();
     }
 
+    /**
+     * @param array<string, bool> $headerInfo
+     */
     protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
     {
         $entity = $this->getEntity($record);
@@ -77,7 +86,12 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             }
 
             try {
-                if (\interface_exists(TranslatableInterface::class) && $entity instanceof TranslatableInterface && $locale) {
+                if (
+                    \interface_exists(TranslationInterface::class)
+                    && \interface_exists(TranslatableInterface::class)
+                    && $entity instanceof TranslatableInterface && $locale
+                ) {
+                    /** @var TranslationInterface $translatedEntity */
                     $translatedEntity = $entity->translate($locale, false);
                     if (method_exists($translatedEntity, $setterName)) {
                         $translatedEntity->$setterName($value);
@@ -149,15 +163,36 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return true;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function getAllowedFileExtensions(): array
     {
         return ['csv', 'xls', 'xlsx', 'ods'];
     }
 
+    /**
+     * @return array<string>
+     */
     private function parseValueForArrayType(FormFieldDefinition $fieldDefinition, ?string $value): array
     {
         return $value
-            ? explode($fieldDefinition->getOptions()['separator'] ?? ArrayTextType::DEFAULT_SEPARATOR, $value)
+            ? explode($this->getSeparator($fieldDefinition), $value)
             : [];
+    }
+
+    /**
+     * @phpstan-return non-empty-string
+     */
+    private function getSeparator(FormFieldDefinition $fieldDefinition): string
+    {
+        $options = $fieldDefinition->getOptions();
+        $separator = $options['separator'] ?? null;
+
+        if (!is_string($separator) || '' === $separator) {
+            return ArrayTextType::DEFAULT_SEPARATOR;
+        }
+
+        return $separator;
     }
 }

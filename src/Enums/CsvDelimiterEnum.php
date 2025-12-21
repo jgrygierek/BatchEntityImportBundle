@@ -9,6 +9,9 @@ enum CsvDelimiterEnum: string
     case SEMICOLON = ';';
     case COMMA = ',';
 
+    /**
+     * @return string[]
+     */
     public static function asValues(): array
     {
         return [

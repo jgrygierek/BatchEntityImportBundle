@@ -24,6 +24,7 @@ class TranslatableEntityFixtures extends Fixture
             }
 
             if ($i > 4) {
+                /** @var TranslatableEntityTranslation $translatedEntity */
                 $translatedEntity = $entity->translate('pl');
                 $translatedEntity->setTestTranslationProperty('qwerty_pl_' . $i);
             }

@@ -14,6 +14,9 @@ class FileImport
     #[Assert\NotNull]
     private ?UploadedFile $file = null;
 
+    /**
+     * @param string[] $allowedExtensions
+     */
     public function __construct(private readonly array $allowedExtensions = [])
     {
     }
@@ -31,6 +34,10 @@ class FileImport
     #[Assert\Callback]
     public function validateExtensions(ExecutionContextInterface $context): void
     {
+        if (!$this->file instanceof UploadedFile) {
+            return;
+        }
+
         $extensions = array_map(strtolower(...), $this->allowedExtensions);
         if (!in_array(strtolower($this->file->getClientOriginalExtension()), $extensions, true)) {
             $context->buildViolation('validation.file.extension', ['%extensions' => implode(', ', $extensions)])->addViolation();

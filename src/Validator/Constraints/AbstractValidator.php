@@ -24,15 +24,21 @@ abstract class AbstractValidator extends ConstraintValidator
         $this->context->setNode($this->context->getValue(), $this->context->getObject(), $this->context->getMetadata(), '');
     }
 
+    /**
+     * @param array<string> $fields
+     */
     protected function addErrorToMatrixRecord(MatrixRecord $record, MatrixRecordUnique|DatabaseEntityUnique $constraint, int $index, array $fields): void
     {
         $this->context
             ->buildViolation($constraint->message, ['%fields%' => implode(', ', $fields)])
-            ->atPath("children[records][$index][{$constraint->fields[0]}]")
+            ->atPath(sprintf('children[records][%d][%s]', $index, $constraint->fields[0]))
             ->setInvalidValue($record)
             ->addViolation();
     }
 
+    /**
+     * @param array<scalar|null> $data
+     */
     protected function getHash(array $data): string
     {
         return md5(implode('--', $data));

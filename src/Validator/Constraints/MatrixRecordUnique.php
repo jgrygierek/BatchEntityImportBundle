@@ -13,6 +13,9 @@ use Symfony\Component\Validator\Constraint;
 class MatrixRecordUnique extends Constraint
 {
     public string $message = 'validation.matrix.record.unique';
+    /**
+     * @var string[]
+     */
     public array $fields = [];
 
     public function __construct(mixed $options = null, ?array $groups = null, mixed $payload = null)
@@ -31,6 +34,9 @@ class MatrixRecordUnique extends Constraint
         return 'fields';
     }
 
+    /**
+     * @return string[]
+     */
     public function getRequiredOptions(): array
     {
         return ['fields'];

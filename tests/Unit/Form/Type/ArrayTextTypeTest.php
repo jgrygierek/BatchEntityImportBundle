@@ -7,7 +7,6 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Form\Type;
 use Generator;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
@@ -20,7 +19,7 @@ use UnexpectedValueException;
 
 class ArrayTextTypeTest extends TypeTestCase
 {
-    private MockObject $translator;
+    private TranslatorInterface $translator;
 
     protected function setUp(): void
     {

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Form;
 
-class FormFieldDefinition
+readonly class FormFieldDefinition
 {
-    public function __construct(private readonly string $class, private readonly array $options = [])
+    /**
+     * @param array<string, mixed> $options
+     */
+    public function __construct(private string $class, private array $options = [])
     {
     }
 
@@ -15,6 +18,9 @@ class FormFieldDefinition
         return $this->class;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getOptions(): array
     {
         return $this->options;
