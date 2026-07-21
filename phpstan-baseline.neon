@@ -25,7 +25,7 @@ parameters:
 			path: tests/KnpLabs/Fixtures/Entity/TranslatableEntity.php
 
 		-
-			message: '#^Comparison operation "\>\=" between 7 and 7 is always true\.$#'
+			message: '#^Comparison operation "\>\=" between \d+ and 7 is always true\.$#'
 			identifier: greaterOrEqual.alwaysTrue
 			count: 1
 			path: tests/TestKernel.php

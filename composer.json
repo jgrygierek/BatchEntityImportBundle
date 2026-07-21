@@ -22,7 +22,6 @@
     ],
     "require": {
         "php": ">=8.2.0",
-        "doctrine/annotations": "^1.14|^2.0",
         "doctrine/orm": "^2.9|^3.2",
         "phpoffice/phpspreadsheet": "^5.2.0",
         "symfony/config": "^5.4|^6.0|^7.0|^8.0",
@@ -38,6 +37,7 @@
     },
     "require-dev": {
         "dg/bypass-finals": "^v1.8",
+        "doctrine/annotations": "^1.14|^2.0",
         "doctrine/doctrine-bundle": "^2.4.0|^3.1.0",
         "doctrine/doctrine-fixtures-bundle": "^3.4.1|^4.3.1",
         "friendsofphp/php-cs-fixer": "^v3.91.3",
@@ -46,7 +46,7 @@
         "phpstan/phpstan-doctrine": "^2.0.11",
         "phpstan/phpstan-phpunit": "^2.0.8",
         "phpstan/phpstan-symfony": "^2.0.8",
-        "phpunit/phpunit": "11.5.44",
+        "phpunit/phpunit": "11.5.56",
         "rector/rector": "2.2.8",
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^5.4|^6.0|^7.0|^8.0",
