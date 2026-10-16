@@ -20,6 +20,10 @@ class TestEntity extends AbstractEntity implements Stringable
     private string $testPrivatePropertyNoSetter = '';
     #[ORM\Column(type: 'json', nullable: true)]
     private array $testArrayField = [];
+    #[ORM\ManyToOne]
+    private ?TestRelatedEntity $testRelatedEntity = null;
+    #[ORM\ManyToOne]
+    private ?TestRelatedEntity $testSecondRelatedEntity = null;
 
     public function setTestPrivateProperty(string $testPrivateProperty): void
     {
@@ -49,6 +53,26 @@ class TestEntity extends AbstractEntity implements Stringable
     public function setTestArrayField(array $testArrayField): void
     {
         $this->testArrayField = $testArrayField;
+    }
+
+    public function getTestRelatedEntity(): ?TestRelatedEntity
+    {
+        return $this->testRelatedEntity;
+    }
+
+    public function setTestRelatedEntity(?TestRelatedEntity $testRelatedEntity): void
+    {
+        $this->testRelatedEntity = $testRelatedEntity;
+    }
+
+    public function getTestSecondRelatedEntity(): ?TestRelatedEntity
+    {
+        return $this->testSecondRelatedEntity;
+    }
+
+    public function setTestSecondRelatedEntity(?TestRelatedEntity $testSecondRelatedEntity): void
+    {
+        $this->testSecondRelatedEntity = $testSecondRelatedEntity;
     }
 
     public function __toString(): string

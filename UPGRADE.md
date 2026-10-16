@@ -1,3 +1,44 @@
+# UPGRADE TO 3.10
+
+## Import relations
+
+- If your entity has a `ManyToOne` or `OneToOne` relation, it can be imported by a value of any field of related entity (for example `id`, `name` or `slug`).
+- There are two new field types:
+  - `EntityLookupType` - renders a select with all related entities. Recommended for small tables.
+  - `EntityLookupTextType` - renders a text input, value is validated by new `RelatedEntityExists` constraint. Recommended for big tables.
+- Empty value sets relation to `null`.
+- If related entity is not found during import, `MatrixRecordRelatedEntityNotFoundException` is thrown.
+- `AbstractImportConfiguration` constructor has new optional argument `?RelatedEntityFinder $relatedEntityFinder = null`.
+  - It is injected automatically if your configuration is autowired.
+  - If you override constructor and call `parent::__construct($em, $eventDispatcher)`, nothing has to be changed - finder based on passed entity manager will be used.
+
+  ```php
+  use JG\BatchEntityImportBundle\Form\Type\EntityLookupTextType;
+  use JG\BatchEntityImportBundle\Form\Type\EntityLookupType;
+  use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
+
+  public function getFieldsDefinitions(): array
+  {
+      return [
+          'category' => new FormFieldDefinition(
+              EntityLookupType::class,
+              [
+                  'class' => Category::class,
+                  'lookup_field' => 'id', // default: 'id'
+                  'label_field' => 'name', // optional, default: __toString() method
+              ]
+          ),
+          'manufacturer' => new FormFieldDefinition(
+              EntityLookupTextType::class,
+              [
+                  'class' => Manufacturer::class,
+                  'lookup_field' => 'slug',
+              ]
+          ),
+      ];
+  }
+  ```
+
 # UPGRADE TO 3.8
 
 ## RecordImportedSuccessfullyEvent

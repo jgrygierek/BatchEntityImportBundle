@@ -13,3 +13,11 @@ test_controller.no_service.import:
 test_controller.no_service.import_save:
     controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithoutConfigurationService::importSave
     path: /jg_batch_entity_import_bundle/import_save_no_service
+
+test_controller.relations.import:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithRelations::import
+    path: /jg_batch_entity_import_bundle/import_relations
+
+test_controller.relations.import_save:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithRelations::importSave
+    path: /jg_batch_entity_import_bundle/import_save_relations

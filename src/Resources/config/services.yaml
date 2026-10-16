@@ -11,3 +11,20 @@ services:
         arguments:
             $translator: '@translator'
         tags: ['form.type']
+    JG\BatchEntityImportBundle\Service\RelatedEntityFinder:
+        arguments: [ '@doctrine' ]
+        tags:
+            - { name: 'kernel.reset', method: 'reset' }
+    JG\BatchEntityImportBundle\Form\Type\EntityLookupType:
+        arguments:
+            $relatedEntityFinder: '@JG\BatchEntityImportBundle\Service\RelatedEntityFinder'
+        tags:
+            - 'form.type'
+            - { name: 'kernel.reset', method: 'reset' }
+    JG\BatchEntityImportBundle\Form\Type\EntityLookupTextType:
+        arguments:
+            $relatedEntityFinder: '@JG\BatchEntityImportBundle\Service\RelatedEntityFinder'
+        tags: ['form.type']
+    JG\BatchEntityImportBundle\Validator\Constraints\RelatedEntityExistsValidator:
+        arguments: [ '@JG\BatchEntityImportBundle\Service\RelatedEntityFinder' ]
+        tags: [ validator.constraint_validator ]

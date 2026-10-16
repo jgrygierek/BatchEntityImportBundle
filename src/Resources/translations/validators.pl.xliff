@@ -6,6 +6,10 @@
                 <source>validation.entity.unique</source>
                 <target>Aktualnie istnieje już rekord z takimi samymi wartościami dla pól: %fields%.</target>
             </trans-unit>
+            <trans-unit id="validation.entity.related.not_found">
+                <source>validation.entity.related.not_found</source>
+                <target>Nie znaleziono powiązanego rekordu "%value%".</target>
+            </trans-unit>
             <trans-unit id="validation.file.extension">
                 <source>validation.file.extension</source>
                 <target>Nieprawidłowe rozszerzenie pliku. Dozwolone rozszerzenia: %extensions.</target>

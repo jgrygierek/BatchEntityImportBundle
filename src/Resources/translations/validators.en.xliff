@@ -6,6 +6,10 @@
                 <source>validation.entity.unique</source>
                 <target>Such entity already exists for the same values of fields: %fields%.</target>
             </trans-unit>
+            <trans-unit id="validation.entity.related.not_found">
+                <source>validation.entity.related.not_found</source>
+                <target>Related entity "%value%" not found.</target>
+            </trans-unit>
             <trans-unit id="validation.file.extension">
                 <source>validation.file.extension</source>
                 <target>Wrong file extension. Allowed extensions: %extensions.</target>
