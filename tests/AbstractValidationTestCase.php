@@ -16,17 +16,9 @@ abstract class AbstractValidationTestCase extends TestCase
 
     protected function setUp(): void
     {
-        $builder = Validation::createValidatorBuilder();
-
-        if (\property_exists($builder, 'enableAnnotationMapping')) {
-            $builder
-                ->enableAnnotationMapping()
-                ->addDefaultDoctrineAnnotationReader();
-        } else {
-            $builder->enableAttributeMapping();
-        }
-
-        $this->validator = $builder->getValidator();
+        $this->validator = Validation::createValidatorBuilder()
+            ->enableAttributeMapping()
+            ->getValidator();
     }
 
     protected function getErrors(object $entity): array

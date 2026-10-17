@@ -7,9 +7,6 @@ namespace JG\BatchEntityImportBundle\Validator\Constraints;
 use InvalidArgumentException;
 use Symfony\Component\Validator\Constraint;
 
-/**
- * @Annotation
- */
 class MatrixRecordUnique extends Constraint
 {
     public string $message = 'validation.matrix.record.unique';
