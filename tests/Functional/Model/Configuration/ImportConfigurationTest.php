@@ -9,28 +9,35 @@ use Generator;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordRelatedEntityNotFoundException;
+use JG\BatchEntityImportBundle\Form\Type\EntityLookupType;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupTextConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestRelatedEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
 class ImportConfigurationTest extends AbstractWebTestCase
 {
     private EntityManagerInterface $entityManager;
-    private TestableEventDispatcher|TraceableEventDispatcher $eventDispatcher;
+    /** @var TestableEventDispatcher */
+    private EventDispatcherInterface $eventDispatcher;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
-        $this->eventDispatcher = self::$kernel->getContainer()->get('event_dispatcher');
+        $this->eventDispatcher = self::getTestableEventDispatcher();
         $this->eventDispatcher->resetDispatchedEvents();
 
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
@@ -235,5 +242,136 @@ class ImportConfigurationTest extends AbstractWebTestCase
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param class-string<AbstractImportConfiguration> $configurationClass
+     */
+    #[DataProvider('entityLookupConfigurationProvider')]
+    public function testRelatedEntityImportedSuccessfully(string $configurationClass): void
+    {
+        $this->entityManager->persist(new TestRelatedEntity('first'));
+        $this->entityManager->persist(new TestRelatedEntity('second'));
+        $this->entityManager->flush();
+
+        $matrix = new Matrix(
+            ['test_private_property', 'test_related_entity'],
+            [
+                ['test_private_property' => 'value_1', 'test_related_entity' => 'second'],
+                ['test_private_property' => 'value_2', 'test_related_entity' => 'first'],
+                ['test_private_property' => 'value_3', 'test_related_entity' => 'second'],
+                ['test_private_property' => 'value_4', 'test_related_entity' => ''],
+            ],
+        );
+
+        $config = new $configurationClass($this->entityManager, $this->eventDispatcher);
+        $config->import($matrix);
+        $this->entityManager->clear();
+
+        $repository = $this->entityManager->getRepository(TestEntity::class);
+        $relatedNames = [];
+        foreach ($repository->findBy([], ['id' => 'ASC']) as $item) {
+            $relatedNames[$item->getTestPrivateProperty()] = $item->getTestRelatedEntity()?->getName();
+        }
+
+        self::assertSame(
+            ['value_1' => 'second', 'value_2' => 'first', 'value_3' => 'second', 'value_4' => null],
+            $relatedNames,
+        );
+    }
+
+    /**
+     * @param class-string<AbstractImportConfiguration> $configurationClass
+     */
+    #[DataProvider('entityLookupConfigurationProvider')]
+    public function testRelatedEntityNotFound(string $configurationClass): void
+    {
+        $this->entityManager->persist(new TestRelatedEntity('first'));
+        $this->entityManager->flush();
+
+        $matrix = new Matrix(
+            ['test_private_property', 'test_related_entity'],
+            [
+                ['test_private_property' => 'value_1', 'test_related_entity' => 'unknown'],
+            ],
+        );
+
+        $config = new $configurationClass($this->entityManager, $this->eventDispatcher);
+
+        $this->expectException(MatrixRecordRelatedEntityNotFoundException::class);
+        $config->import($matrix);
+    }
+
+    public static function entityLookupConfigurationProvider(): Generator
+    {
+        yield 'select' => [EntityLookupConfiguration::class];
+        yield 'text' => [EntityLookupTextConfiguration::class];
+    }
+
+    public function testImportCalledTwiceOnSameConfiguration(): void
+    {
+        $this->entityManager->persist(new TestRelatedEntity('first'));
+        $this->entityManager->flush();
+
+        $config = new EntityLookupConfiguration($this->entityManager, $this->eventDispatcher);
+
+        $config->import(new Matrix(
+            ['test_private_property', 'test_related_entity'],
+            [['test_private_property' => 'value_1', 'test_related_entity' => 'first']],
+        ));
+        self::assertCount(1, $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class));
+
+        // simulates next request in long-running process: related entity cached in first import is detached now
+        $this->entityManager->clear();
+        $this->eventDispatcher->resetDispatchedEvents();
+
+        $config->import(new Matrix(
+            ['test_private_property', 'test_related_entity'],
+            [['test_private_property' => 'value_2', 'test_related_entity' => 'first']],
+        ));
+
+        $dispatchedEvents = $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class);
+        self::assertCount(1, $dispatchedEvents);
+        self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[0]);
+        self::assertSame('2', $dispatchedEvents[0]->id);
+
+        $this->entityManager->clear();
+        $repository = $this->entityManager->getRepository(TestEntity::class);
+        self::assertCount(2, $repository->findAll());
+        self::assertSame('first', $repository->find(2)?->getTestRelatedEntity()?->getName());
+        self::assertCount(1, $this->entityManager->getRepository(TestRelatedEntity::class)->findAll());
+    }
+
+    public function testRelatedEntityImportedByNumericValues(): void
+    {
+        $this->entityManager->persist(new TestRelatedEntity('first'));
+        $this->entityManager->persist(new TestRelatedEntity('second'));
+        $this->entityManager->flush();
+
+        $config = new class($this->entityManager, $this->eventDispatcher) extends AbstractImportConfiguration {
+            public function getEntityClassName(): string
+            {
+                return TestEntity::class;
+            }
+
+            public function getFieldsDefinitions(): array
+            {
+                return [
+                    'test_related_entity' => new FormFieldDefinition(EntityLookupType::class, ['class' => TestRelatedEntity::class]),
+                ];
+            }
+        };
+
+        // MatrixRecord accepts any scalar, so import() must not fail with TypeError for float value
+        $records = [
+            ['test_private_property' => 'value_1', 'test_related_entity' => 2.0],
+            ['test_private_property' => 'value_2', 'test_related_entity' => 1],
+        ];
+        $config->import(new Matrix(['test_private_property', 'test_related_entity'], $records)); // @phpstan-ignore argument.type
+        $this->entityManager->clear();
+
+        $repository = $this->entityManager->getRepository(TestEntity::class);
+        self::assertSame('second', $repository->find(1)?->getTestRelatedEntity()?->getName());
+        self::assertSame('first', $repository->find(2)?->getTestRelatedEntity()?->getName());
     }
 }

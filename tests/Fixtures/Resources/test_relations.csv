@@ -1,0 +1,4 @@
+test_private_property,test_related_entity,test_second_related_entity
+rel1,1,second
+rel2,2,
+rel3,,unknown

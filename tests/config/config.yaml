@@ -13,6 +13,7 @@ services:
 
     JG\BatchEntityImportBundle\Tests\DatabaseLoader: ~
     JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration: ~
+    JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\RelationsConfiguration: ~
 
     Psr\Container\ContainerInterface:
         alias: service_container

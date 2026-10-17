@@ -11,10 +11,13 @@ use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordRelatedEntityNotFoundException;
+use JG\BatchEntityImportBundle\Form\Type\AbstractEntityLookupType;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
@@ -26,9 +29,17 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 {
     /** @var object[] */
     protected array $updatedEntities = [];
+    private readonly RelatedEntityFinder $relatedEntityFinder;
 
-    public function __construct(private readonly EntityManagerInterface $em, private readonly EventDispatcherInterface $eventDispatcher)
-    {
+    /**
+     * @param RelatedEntityFinder|null $relatedEntityFinder optional for backward compatibility, if not passed, finder based on $em is used
+     */
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        ?RelatedEntityFinder $relatedEntityFinder = null,
+    ) {
+        $this->relatedEntityFinder = $relatedEntityFinder ?? new RelatedEntityFinder($em);
     }
 
     public function getFieldsDefinitions(): array
@@ -51,6 +62,8 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
     public function import(Matrix $matrix): void
     {
+        $this->updatedEntities = [];
+
         $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName());
         foreach ($matrix->getRecords() as $record) {
             $this->prepareRecord($record, $headerInfo);
@@ -82,6 +95,8 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                 $fieldDefinition = $fieldDefinitions[$name];
                 if (ArrayTextType::class === $fieldDefinition->getClass()) {
                     $value = $this->parseValueForArrayType($fieldDefinition, $value);
+                } elseif (is_a($fieldDefinition->getClass(), AbstractEntityLookupType::class, true)) {
+                    $value = $this->findRelatedEntity($fieldDefinition, $value);
                 }
             }
 
@@ -179,6 +194,29 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return $value
             ? explode($this->getSeparator($fieldDefinition), $value)
             : [];
+    }
+
+    /**
+     * @throws MatrixRecordRelatedEntityNotFoundException
+     */
+    private function findRelatedEntity(FormFieldDefinition $fieldDefinition, string|int|float|bool|null $value): ?object
+    {
+        if (null === $value || '' === $value) {
+            return null;
+        }
+
+        $options = $fieldDefinition->getOptions();
+        /** @var string $class */
+        $class = $options['class'];
+        /** @var string $lookupField */
+        $lookupField = $options['lookup_field'] ?? RelatedEntityFinder::DEFAULT_LOOKUP_FIELD;
+
+        $entity = $this->relatedEntityFinder->find($class, $lookupField, $value);
+        if (!$entity) {
+            throw new MatrixRecordRelatedEntityNotFoundException();
+        }
+
+        return $entity;
     }
 
     /**
