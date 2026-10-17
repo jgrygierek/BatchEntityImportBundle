@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Form\Type;
 use Generator;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
@@ -19,7 +20,10 @@ use UnexpectedValueException;
 
 class ArrayTextTypeTest extends TypeTestCase
 {
-    private TranslatorInterface $translator;
+    /**
+     * @var MockObject&TranslatorInterface
+     */
+    private MockObject $translator;
 
     protected function setUp(): void
     {
@@ -67,7 +71,7 @@ class ArrayTextTypeTest extends TypeTestCase
     public function testTransform(string $separator, array $data, string $expected): void
     {
         $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createMock(FormBuilderInterface::class), ['separator' => $separator]);
+        $type->buildForm($this->createStub(FormBuilderInterface::class), ['separator' => $separator]);
 
         $this->assertSame($expected, $type->transform($data));
     }
@@ -115,7 +119,7 @@ class ArrayTextTypeTest extends TypeTestCase
     public function testTransformWithDefaultSeparator(mixed $data, mixed $expected): void
     {
         $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createMock(FormBuilderInterface::class), []);
+        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
 
         $this->assertSame($expected, $type->transform($data));
     }
@@ -147,7 +151,7 @@ class ArrayTextTypeTest extends TypeTestCase
         $this->expectExceptionMessage('Only arrays are allowed');
 
         $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createMock(FormBuilderInterface::class), []);
+        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
 
         $type->transform($value);
     }
@@ -167,7 +171,7 @@ class ArrayTextTypeTest extends TypeTestCase
     public function testReverseTransform(?string $separator, string $data, mixed $expected): void
     {
         $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createMock(FormBuilderInterface::class), ['separator' => $separator]);
+        $type->buildForm($this->createStub(FormBuilderInterface::class), ['separator' => $separator]);
 
         $this->assertSame($expected, $type->reverseTransform($data));
     }
@@ -212,7 +216,7 @@ class ArrayTextTypeTest extends TypeTestCase
     public function testReverseTransformWithDefaultSeparator(string $data, mixed $expected): void
     {
         $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createMock(FormBuilderInterface::class), []);
+        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
 
         $this->assertSame($expected, $type->reverseTransform($data));
     }
@@ -238,7 +242,7 @@ class ArrayTextTypeTest extends TypeTestCase
         $this->expectExceptionMessage('Only strings are allowed');
 
         $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createMock(FormBuilderInterface::class), []);
+        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
 
         $type->reverseTransform($value);
     }
@@ -255,7 +259,7 @@ class ArrayTextTypeTest extends TypeTestCase
     {
         $type = new ArrayTextType($this->translator);
         $view = new FormView();
-        $form = $this->createMock(FormInterface::class);
+        $form = $this->createStub(FormInterface::class);
 
         $type->buildView($view, $form, ['separator' => ';']);
 

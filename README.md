@@ -4,7 +4,7 @@
 ![Tests](https://github.com/jgrygierek/BatchEntityImportBundle/workflows/Tests/badge.svg)
 ![Code Coverage](https://img.shields.io/codecov/c/github/jgrygierek/BatchEntityImportBundle/master)
 ![PHP Versions](https://img.shields.io/badge/PHP->=8.2-blue)
-![Symfony Versions](https://img.shields.io/badge/Symfony-5.4--7.*-blue)
+![Symfony Versions](https://img.shields.io/badge/Symfony-6.4--8.*-blue)
 [![SymfonyInsight](https://insight.symfony.com/projects/ad63558e-3612-434f-a93d-0fc5fce2dd20/mini.svg)](https://insight.symfony.com/projects/ad63558e-3612-434f-a93d-0fc5fce2dd20)
 
 Importing entities with preview and edit features for Symfony.
@@ -219,7 +219,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -228,17 +228,13 @@ class ImportController extends AbstractController implements ImportConfiguration
     use ImportControllerTrait;
     use ImportConfigurationAutoInjectTrait;
 
-    /**
-     * @Route("/user/import", name="user_import")
-     */
+    #[Route('/user/import', name: 'user_import')]
     public function import(Request $request, ValidatorInterface $validator): Response
     {
         return $this->doImport($request, $validator);
     }
 
-    /**
-     * @Route("/user/import/save", name="user_import_save")
-     */
+    #[Route('/user/import/save', name: 'user_import_save')]
     public function importSave(Request $request, TranslatorInterface $translator): Response
     {
         return $this->doImportSave($request, $translator);
@@ -433,7 +429,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class User
 {
-    #[ORM\Column(type: 'json']
+    #[ORM\Column(type: 'json')]
     private array $roles = [];
 }
 ```

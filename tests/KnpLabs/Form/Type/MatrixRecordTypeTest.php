@@ -34,8 +34,8 @@ class MatrixRecordTypeTest extends WebTestCase
     {
         $data = ['description:pl' => 'Lorem Ipsum'];
         $configuration = new TranslatableEntityConfiguration(
-            $this->createMock(EntityManagerInterface::class),
-            $this->createMock(EventDispatcherInterface::class),
+            $this->createStub(EntityManagerInterface::class),
+            $this->createStub(EventDispatcherInterface::class),
         );
         $matrixRecord = new MatrixRecord($data);
 

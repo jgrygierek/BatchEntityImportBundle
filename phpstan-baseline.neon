@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to an undefined method Symfony\\Component\\Validator\\ValidatorBuilder\:\:enableAnnotationMapping\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: tests/AbstractValidationTestCase.php
-
-		-
 			message: '#^Property JG\\BatchEntityImportBundle\\Tests\\Fixtures\\Entity\\TestEntity\:\:\$testPrivatePropertyNoSetter is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1

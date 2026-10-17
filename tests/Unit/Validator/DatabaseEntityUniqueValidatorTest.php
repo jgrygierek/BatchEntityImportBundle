@@ -31,7 +31,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
 
     public function testNoDuplication(): void
     {
-        $queryMock = $this->createMock(Query::class);
+        $queryMock = $this->createStub(Query::class);
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
         $constraint = new DatabaseEntityUnique(['fields' => ['field_1'], 'entityClassName' => TestEntity::class]);

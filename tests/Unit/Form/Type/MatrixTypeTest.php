@@ -21,7 +21,7 @@ class MatrixTypeTest extends TypeTestCase
     {
         parent::setUp();
 
-        $this->baseConfig = new BaseConfiguration($this->createMock(EntityManagerInterface::class), $this->createMock(EventDispatcherInterface::class));
+        $this->baseConfig = new BaseConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class));
     }
 
     public function testValidForm(): void
