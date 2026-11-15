@@ -7,14 +7,14 @@ namespace JG\BatchEntityImportBundle\Tests\KnpLabs\Controller;
 use Doctrine\ORM\EntityRepository;
 use Generator;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
+use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntityTranslation;
 use JG\BatchEntityImportBundle\Tests\SkippedTestsTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class ImportControllerTraitTest extends WebTestCase
+class ImportControllerTraitTest extends AbstractWebTestCase
 {
     use SkippedTestsTrait;
 
@@ -27,7 +27,7 @@ class ImportControllerTraitTest extends WebTestCase
     {
         $this->markKnpLabsTestAsSkipped();
 
-        $this->client = self::createClient();
+        $this->client = $this->createCustomClient(self::bootKernel());
 
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
         $databaseLoader->reload();

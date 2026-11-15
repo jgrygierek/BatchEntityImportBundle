@@ -2,50 +2,68 @@ name: Tests
 
 on:
     push:
+        branches: [ master ]
     pull_request:
-        types: [ opened, reopened ]
 
 jobs:
     tests:
-        name: Tests
+        name: PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}, ${{ matrix.dependencies }}${{ matrix.knplabs && ', KnpLabs' || '' }}
         runs-on: ubuntu-latest
 
         strategy:
             fail-fast: false
             matrix:
-                php-versions: [ '8.2', '8.5' ]
-                vendors-version: [ '--prefer-lowest', '' ]
-                with-kpnlabs-doctrine-behaviors: [ true, false ]
+                php: [ '8.2', '8.5' ]
+                symfony: [ '6.4.*', '7.4.*', '8.*' ]
+                dependencies: [ lowest, highest ]
+                knplabs: [ false ]
+                exclude:
+                    # Symfony 8 requires PHP 8.4
+                    -   php: '8.2'
+                        symfony: '8.*'
+                include:
+                    # knplabs/doctrine-behaviors is optional, so it is tested only with the oldest and the newest versions
+                    -   php: '8.2'
+                        symfony: '6.4.*'
+                        dependencies: lowest
+                        knplabs: true
+                    -   php: '8.5'
+                        symfony: '8.*'
+                        dependencies: highest
+                        knplabs: true
+
+        env:
+            # used by symfony/flex, without it packages from different versions of Symfony could be mixed
+            SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
         steps:
-            -   name: Prepare github actions
-                uses: actions/checkout@v4
+            -   name: Checkout
+                uses: actions/checkout@v6
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
                 with:
-                    php-version: ${{ matrix.php-versions }}
-                    tools: pecl,composer:v2
+                    php-version: ${{ matrix.php }}
+                    tools: composer:v2, flex
                     coverage: pcov
 
             -   name: Get composer cache directory
                 id: composer-cache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             -   name: Cache composer dependencies
                 uses: actions/cache@v5
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                    restore-keys: ${{ runner.os }}-composer-
+                    key: ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-${{ matrix.dependencies }}-${{ hashFiles('composer.json') }}
+                    restore-keys: ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-
 
-            -   name: Run composer with knplabs/doctrine-behaviors
-                if: matrix.with-kpnlabs-doctrine-behaviors == true
-                run: COMPOSER_MEMORY_LIMIT=-1 composer require knplabs/doctrine-behaviors --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
+            -   name: Require knplabs/doctrine-behaviors
+                if: matrix.knplabs
+                run: composer require --dev --no-update "knplabs/doctrine-behaviors:^2.0.8|^3.0"
 
-            -   name: Run composer without knplabs/doctrine-behaviors
-                if: matrix.with-kpnlabs-doctrine-behaviors == false
-                run: COMPOSER_MEMORY_LIMIT=-1 composer update --no-progress ${{ matrix.vendors-version }} --optimize-autoloader
+            -   name: Install dependencies
+                run: composer update --no-progress --optimize-autoloader ${{ matrix.dependencies == 'lowest' && '--prefer-lowest' || '' }}
 
             -   name: Run tests
                 run: composer tests-cov

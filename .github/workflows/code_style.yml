@@ -2,63 +2,47 @@ name: Code Style
 
 on:
     push:
+        branches: [ master ]
     pull_request:
-        types: [ opened, reopened ]
 
 jobs:
-    php-cs-fixer:
-        name: PHP CS Fixer
+    code-style:
+        name: PHP CS Fixer, PHPStan
         runs-on: ubuntu-latest
 
         steps:
-            -   name: Prepare github actions
+            -   name: Checkout
                 uses: actions/checkout@v6
 
-            -   name: Run PHP CS Fixer
-                uses: docker://oskarstark/php-cs-fixer-ga
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
                 with:
-                    args: --diff --dry-run
-
-    php-stan:
-        name: PHPStan
-        runs-on: ubuntu-latest
-
-        steps:
-            -   name: Prepare github actions
-                uses: actions/checkout@v6
+                    php-version: '8.4'
+                    tools: composer:v2
+                    coverage: none
 
             -   name: Get composer cache directory
                 id: composer-cache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             -   name: Cache composer dependencies
                 uses: actions/cache@v5
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                    restore-keys: ${{ runner.os }}-composer-
+                    key: ${{ runner.os }}-composer-code-style-${{ hashFiles('composer.json') }}
+                    restore-keys: ${{ runner.os }}-composer-code-style-
 
-            -   name: Run composer
-                uses: php-actions/composer@v6
-                with:
-                    php_version: 8.2
-                    php_extensions: gd zip
-                    memory_limit: -1
-                    args: --no-progress --optimize-autoloader
+            # optional package, its classes are used in code, so it is needed for static analysis
+            -   name: Require knplabs/doctrine-behaviors
+                run: composer require --dev --no-update "knplabs/doctrine-behaviors:^2.0.8|^3.0"
 
-            - name: Composer require knplabs/doctrine-behaviors
-              uses: php-actions/composer@v6
-              with:
-                  php_version: 8.2
-                  php_extensions: gd zip
-                  memory_limit: -1
-                  args: --no-progress --optimize-autoloader
-                  command: require knplabs/doctrine-behaviors
+            -   name: Install dependencies
+                run: composer update --no-progress --optimize-autoloader
+
+            # tools are installed by composer, so the same versions are used locally and in CI
+            -   name: Run PHP CS Fixer
+                run: composer php-cs-fixer
 
             -   name: Run PHPStan
-                uses: php-actions/phpstan@v3
-                with:
-                    path: src/ tests/
-                    memory_limit: -1
-                    php_version: 8.2
-                    level: 5
+                if: ${{ !cancelled() }}
+                run: composer phpstan

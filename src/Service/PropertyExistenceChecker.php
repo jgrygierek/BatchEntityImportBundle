@@ -12,7 +12,9 @@ use ReflectionException;
 
 class PropertyExistenceChecker
 {
+    /** @var ReflectionClass<object> */
     private readonly ReflectionClass $reflectionClass;
+    /** @var ReflectionClass<object>|null */
     private ?ReflectionClass $translationReflectionClass = null;
 
     /**

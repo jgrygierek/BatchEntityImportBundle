@@ -7,15 +7,15 @@ namespace JG\BatchEntityImportBundle\Tests\KnpLabs\Form\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
 use JG\BatchEntityImportBundle\Tests\SkippedTestsTrait;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-class MatrixRecordTypeTest extends WebTestCase
+class MatrixRecordTypeTest extends AbstractWebTestCase
 {
     use SkippedTestsTrait;
 

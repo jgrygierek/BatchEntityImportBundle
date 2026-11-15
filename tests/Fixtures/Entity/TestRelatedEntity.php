@@ -10,12 +10,10 @@ use Stringable;
 #[ORM\Entity]
 class TestRelatedEntity extends AbstractEntity implements Stringable
 {
-    #[ORM\Column(type: 'string', unique: true)]
-    private string $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = $name;
+    public function __construct(
+        #[ORM\Column(type: 'string', unique: true)]
+        private string $name
+    ) {
     }
 
     public function getName(): string

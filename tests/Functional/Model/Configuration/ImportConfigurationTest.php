@@ -251,6 +251,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         $existingEntity = new TestEntity();
         $existingEntity->setTestPrivateProperty('existing');
         $existingEntity->testPublicProperty = 'existing_public';
+
         $this->entityManager->persist($existingEntity);
         $this->entityManager->flush();
 
@@ -337,6 +338,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
         $config = new $configurationClass($this->entityManager, $this->eventDispatcher);
         $config->import($matrix);
+
         $this->entityManager->clear();
 
         $repository = $this->entityManager->getRepository(TestEntity::class);

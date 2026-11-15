@@ -23,3 +23,10 @@ parameters:
 			identifier: greaterOrEqual.alwaysTrue
 			count: 1
 			path: tests/TestKernel.php
+
+		-
+			# result depends on installed version of doctrine/orm
+			message: '#^Call to function method_exists\(\) with ''Doctrine\\\\ORM\\\\Configuration'' and ''enableNativeLazyObj…'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: tests/TestKernel.php

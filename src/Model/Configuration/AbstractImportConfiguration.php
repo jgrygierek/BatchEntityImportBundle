@@ -22,6 +22,7 @@ use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
+use Stringable;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
@@ -74,11 +75,11 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             foreach ($matrix->getRecords() as $record) {
                 $this->prepareRecord($record, $headerInfo);
             }
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             // not only exceptions of this bundle, incomplete import can't be left in entity manager in any case
             $this->revertChanges();
 
-            throw $e;
+            throw $throwable;
         }
 
         $this->touchedEntities = [];
@@ -210,9 +211,13 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     {
         foreach ($this->updatedEntities as $entity) {
             $identifierValues = $this->em->getUnitOfWork()->getEntityIdentifier($entity);
+            $identifier = \reset($identifierValues);
 
             $this->eventDispatcher->dispatch(
-                new RecordImportedSuccessfullyEvent($this->getEntityClassName(), (string) \reset($identifierValues)),
+                new RecordImportedSuccessfullyEvent(
+                    $this->getEntityClassName(),
+                    \is_scalar($identifier) || $identifier instanceof Stringable ? (string) $identifier : '',
+                ),
             );
         }
     }

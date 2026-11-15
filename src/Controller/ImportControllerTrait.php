@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Controller;
 
 use JG\BatchEntityImportBundle\Form\Type\MatrixType;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use LogicException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,6 +16,9 @@ trait ImportControllerTrait
 
     abstract protected function getMatrixSaveActionUrl(): string;
 
+    /**
+     * @param array<string, mixed> $parameters
+     */
     protected function prepareView(string $view, array $parameters = []): Response
     {
         return $this->render($view, $parameters);
@@ -22,12 +26,25 @@ trait ImportControllerTrait
 
     protected function getSelectFileTemplateName(): string
     {
-        return $this->getParameter('batch_entity_import.templates.select_file');
+        return $this->getTemplateNameFromConfiguration('select_file');
     }
 
     protected function getMatrixEditTemplateName(): string
     {
-        return $this->getParameter('batch_entity_import.templates.edit_matrix');
+        return $this->getTemplateNameFromConfiguration('edit_matrix');
+    }
+
+    /**
+     * @throws LogicException
+     */
+    private function getTemplateNameFromConfiguration(string $name): string
+    {
+        $template = $this->getParameter('batch_entity_import.templates.' . $name);
+        if (!\is_string($template)) {
+            throw new LogicException(\sprintf('Template "%s" is not configured.', $name));
+        }
+
+        return $template;
     }
 
     protected function createMatrixForm(Matrix $matrix): FormInterface

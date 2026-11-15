@@ -50,8 +50,8 @@ abstract class AbstractEntityLookupType extends AbstractType
     {
         try {
             return $this->relatedEntityFinder->getManager($class, $lookupField);
-        } catch (InvalidArgumentException $e) {
-            throw new InvalidOptionsException($e->getMessage(), 0, $e);
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            throw new InvalidOptionsException($invalidArgumentException->getMessage(), 0, $invalidArgumentException);
         }
     }
 }

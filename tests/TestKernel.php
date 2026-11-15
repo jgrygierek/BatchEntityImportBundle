@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\ORM\Configuration;
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
 use Knp\DoctrineBehaviors\DoctrineBehaviorsBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -59,7 +60,8 @@ class TestKernel extends Kernel
                 'validation' => ['enable_attributes' => true],
             ]);
 
-            if (PHP_VERSION_ID >= 80400) {
+            // native lazy objects are supported since ORM 3.4, older versions still use proxies
+            if (PHP_VERSION_ID >= 80400 && \method_exists(Configuration::class, 'enableNativeLazyObjects')) {
                 $container->extension('doctrine', [
                     'orm' => ['enable_native_lazy_objects' => true],
                 ]);

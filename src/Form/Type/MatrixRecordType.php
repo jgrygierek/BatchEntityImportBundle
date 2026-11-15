@@ -12,6 +12,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\ChoiceList\View\ChoiceView;
 use Symfony\Component\Form\Exception\AlreadySubmittedException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
@@ -106,15 +107,17 @@ class MatrixRecordType extends AbstractType
 
     public function finishView(FormView $view, FormInterface $form, array $options): void
     {
-        /** @var MatrixRecord $entity */
-        $entity = $form->getData();
-        $selectedValue = $entity->entityId;
+        $record = $form->getData();
+        if (!$record instanceof MatrixRecord || null === $record->entityId || !isset($view['entity'])) {
+            return;
+        }
 
-        /** @var object[] $choices */
+        // values of choices are always strings, identifier of entity can be also an integer
+        $selectedValue = (string) $record->entityId;
         $choices = $view['entity']->vars['choices'] ?? [];
-        foreach ($choices as $index => $choice) {
-            if ($choice->value === $selectedValue) {
-                $view['entity']->vars['choices'][$index]->attr['selected'] = 'selected';
+        foreach (is_iterable($choices) ? $choices : [] as $choice) {
+            if ($choice instanceof ChoiceView && $choice->value === $selectedValue) {
+                $choice->attr['selected'] = 'selected';
             }
         }
     }
