@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Unit\DependencyInjection;
 
 use Generator;
-use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectInterface;
 use JG\BatchEntityImportBundle\DependencyInjection\BatchEntityImportExtension;
-use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\DependencyInjection\Reference;
 
 class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
 {
@@ -56,22 +59,28 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         yield 'not a string' => [1250];
     }
 
-    public function testImportConfigurationHasTag(): void
+    public function testControllerWithAttributeGetsConfiguration(): void
     {
-        $autoConfiguredInstances = $this->container->getAutoconfiguredInstanceof();
-        self::assertArrayHasKey(ImportConfigurationInterface::class, $autoConfiguredInstances);
+        $this->container->register(BaseConfiguration::class, BaseConfiguration::class);
+        $this->container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true);
+        $this->container->compile();
 
-        $instance = $autoConfiguredInstances[ImportConfigurationInterface::class];
-        self::assertTrue($instance->hasTag('batch_entity_import.configuration'));
+        $calls = $this->container->getDefinition(ControllerWithAttribute::class)->getMethodCalls();
+        self::assertCount(1, $calls);
+        self::assertSame('setImportConfiguration', $calls[0][0]);
+        self::assertEquals([new Reference(BaseConfiguration::class)], $calls[0][1]);
     }
 
-    public function testControllerHasTag(): void
+    public function testConfigurationFromAttributeIsNotServiceException(): void
     {
-        $autoConfiguredInstances = $this->container->getAutoconfiguredInstanceof();
-        self::assertArrayHasKey(ImportConfigurationAutoInjectInterface::class, $autoConfiguredInstances);
+        // new container is used, because the one from test case has disabled passes which check references
+        $container = new ContainerBuilder();
+        new BatchEntityImportExtension()->load([], $container);
+        $container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true)->setPublic(true);
 
-        $instance = $autoConfiguredInstances[ImportConfigurationAutoInjectInterface::class];
-        self::assertTrue($instance->hasTag('batch_entity_import.controller'));
+        $this->expectException(ServiceNotFoundException::class);
+        $this->expectExceptionMessage(\sprintf('The service "%s" has a dependency on a non-existent service "%s".', ControllerWithAttribute::class, BaseConfiguration::class));
+        $container->compile();
     }
 
     protected function getContainerExtensions(): array

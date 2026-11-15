@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
 
-use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectInterface;
-use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectTrait;
+use JG\BatchEntityImportBundle\Attribute\AsImportController;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\RelationsConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,9 +14,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ControllerWithRelations extends AbstractController implements ImportConfigurationAutoInjectInterface
+#[AsImportController(configuration: RelationsConfiguration::class)]
+class ControllerWithRelations extends AbstractController
 {
-    use ImportConfigurationAutoInjectTrait;
     use ImportControllerTrait;
 
     public function import(Request $request, ValidatorInterface $validator): Response
@@ -38,10 +37,5 @@ class ControllerWithRelations extends AbstractController implements ImportConfig
     protected function getMatrixSaveActionUrl(): string
     {
         return $this->generateUrl('test_controller.relations.import_save');
-    }
-
-    protected function getImportConfigurationClassName(): string
-    {
-        return RelationsConfiguration::class;
     }
 }
