@@ -78,7 +78,10 @@ protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, bo
     return $this->prepareView(
         $this->getMatrixEditTemplateName(),
         [
-            'header_info' => $matrix->getHeaderInfo($configuration->getEntityClassName()),
+            'header_info' => $matrix->getHeaderInfo(
+                $configuration->getEntityClassName(),
+                $configuration instanceof AllowedColumnsConfigurationInterface ? $configuration->getAllowedColumns() : [],
+            ),
             'form' => $form->createView(),
             'importConfiguration' => $configuration,
         ]

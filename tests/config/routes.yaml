@@ -21,3 +21,11 @@ test_controller.relations.import:
 test_controller.relations.import_save:
     controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithRelations::importSave
     path: /jg_batch_entity_import_bundle/import_save_relations
+
+test_controller.allowed_columns.import:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAllowedColumns::import
+    path: /jg_batch_entity_import_bundle/import_allowed_columns
+
+test_controller.allowed_columns.import_save:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAllowedColumns::importSave
+    path: /jg_batch_entity_import_bundle/import_save_allowed_columns

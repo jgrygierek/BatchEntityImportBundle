@@ -16,6 +16,7 @@ use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\AllowedColumnsConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupTextConfiguration;
@@ -244,6 +245,36 @@ class ImportConfigurationTest extends AbstractWebTestCase
                 ],
             ],
         ];
+    }
+
+    public function testOnlyAllowedColumnsAreImported(): void
+    {
+        $matrix = new Matrix(
+            ['test_private_property', 'test_public_property', 'testPrivateProperty2'],
+            [
+                ['test_private_property' => 'value_1', 'test_public_property' => 'public_1', 'testPrivateProperty2' => 'private2_1'],
+                ['test_private_property' => 'value_2', 'test_public_property' => 'public_2', 'testPrivateProperty2' => 'private2_2'],
+            ],
+        );
+
+        $config = new AllowedColumnsConfiguration($this->entityManager, $this->eventDispatcher);
+        $config->import($matrix);
+
+        $this->entityManager->clear();
+
+        $items = $this->entityManager->getRepository(TestEntity::class)->findBy([], ['id' => 'ASC']);
+        self::assertCount(2, $items);
+        foreach ($items as $index => $item) {
+            self::assertSame('value_' . ($index + 1), $item->getTestPrivateProperty());
+            // these columns are not allowed, so properties have default values
+            self::assertSame('', $item->testPublicProperty);
+            self::assertSame('', $item->getTestPrivateProperty2());
+        }
+    }
+
+    public function testAllColumnsAreAllowedByDefault(): void
+    {
+        self::assertSame([], (new BaseConfiguration($this->entityManager, $this->eventDispatcher))->getAllowedColumns());
     }
 
     public function testFailedImportIsNotSavedByLaterFlush(): void

@@ -81,4 +81,37 @@ class MatrixTest extends AbstractValidationTestCase
 
         self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class));
     }
+
+    #[DataProvider('allowedColumnsProvider')]
+    public function testHeaderInfoWithAllowedColumns(array $allowedColumns, array $expected): void
+    {
+        $matrix = new Matrix(array_keys($expected));
+
+        self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class, $allowedColumns));
+    }
+
+    public static function allowedColumnsProvider(): Generator
+    {
+        yield 'empty list, all columns are allowed' => [
+            [],
+            ['test_public_property' => true, 'test_private_property' => true, 'unknown_column_name' => false],
+        ];
+        yield 'only one column is allowed' => [
+            ['test_public_property'],
+            ['test_public_property' => true, 'test_private_property' => false, 'unknown_column_name' => false],
+        ];
+        yield 'column which does not exist in entity can not be allowed' => [
+            ['test_public_property', 'unknown_column_name'],
+            ['test_public_property' => true, 'test_private_property' => false, 'unknown_column_name' => false],
+        ];
+        yield 'other notation of name in the list' => [
+            ['testPublicProperty', 'test-private-property'],
+            ['test_public_property' => true, 'test_private_property' => true],
+        ];
+        // not allowed column can't be imported by using other notation of its name
+        yield 'other notation of name in the file' => [
+            ['test_public_property'],
+            ['testPublicProperty' => true, 'TestPrivateProperty' => false, 'test-private-property' => false, 'test_private_property' => false],
+        ];
+    }
 }

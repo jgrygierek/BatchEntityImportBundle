@@ -28,4 +28,22 @@ class MatrixTest extends AbstractValidationTestCase
 
         self::assertSame($expected, $matrix->getHeaderInfo(TranslatableEntity::class));
     }
+
+    public function testHeaderInfoWithAllowedColumnsForTranslatableEntity(): void
+    {
+        $this->markKnpLabsTestAsSkipped();
+
+        // locale is ignored, so allowed column is allowed for all locales
+        $expected = [
+            'test_public_property' => false,
+            'test_private_property' => true,
+            'test-translation-property:en' => true,
+            'test_translation_property:pl' => true,
+            'test_translation_array:en' => false,
+        ];
+
+        $matrix = new Matrix(array_keys($expected));
+
+        self::assertSame($expected, $matrix->getHeaderInfo(TranslatableEntity::class, ['test_private_property', 'test_translation_property']));
+    }
 }

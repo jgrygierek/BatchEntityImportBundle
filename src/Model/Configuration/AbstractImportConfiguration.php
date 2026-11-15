@@ -28,7 +28,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 use TypeError;
 
-abstract class AbstractImportConfiguration implements ImportConfigurationInterface
+abstract class AbstractImportConfiguration implements ImportConfigurationInterface, AllowedColumnsConfigurationInterface
 {
     /** @var object[] */
     protected array $updatedEntities = [];
@@ -52,6 +52,17 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return [];
     }
 
+    /**
+     * By default all columns are allowed. It is recommended to override this method,
+     * especially when file is prepared by user who should not be able to change every property of entity.
+     *
+     * @return array<string>
+     */
+    public function getAllowedColumns(): array
+    {
+        return [];
+    }
+
     public function getEntityTranslationRelationName(): ?string
     {
         return null;
@@ -70,7 +81,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $this->updatedEntities = [];
         $this->touchedEntities = [];
 
-        $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName());
+        $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName(), $this->getAllowedColumns());
         try {
             foreach ($matrix->getRecords() as $record) {
                 $this->prepareRecord($record, $headerInfo);

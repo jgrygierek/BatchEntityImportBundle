@@ -118,6 +118,27 @@ public function allowOverrideEntity(): bool
 }
 ```
 
+## Allowed columns
+
+By default every column of file is imported, if entity has public property or setter with the same name.
+It means that user who prepares the file can set any of such properties, also these which should not be changed by import (e.g. roles or password of user).
+
+**It is recommended to always define the list of allowed columns**, especially when files are prepared by users who should not be able to change every property of entity.
+To do it, override this method in your import configuration:
+
+```php
+public function getAllowedColumns(): array
+{
+    return ['user_name', 'age', 'email'];
+}
+```
+
+- Columns which are not on the list are treated the same way as unknown columns: they are marked in preview and skipped during import.
+- Names are compared the same way as names of columns with names of properties, so `first_name`, `first-name`, `first name` and `firstName` mean the same column.
+- Locale of translated column is ignored, so `name` allows also `name:en` and `name:pl`.
+- Empty array (default value) means that all columns are allowed. So if you build the list dynamically (e.g. it depends on role of user), make sure that it is never empty.
+- If your configuration does not extend `AbstractImportConfiguration`, it has to implement `AllowedColumnsConfigurationInterface` to use this feature.
+
 ## Set allowed file extensions
 
 By default, allowed file extensions are set to `'csv', 'xls', 'xlsx', 'ods'`.
