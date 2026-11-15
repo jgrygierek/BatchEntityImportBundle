@@ -19,6 +19,40 @@
 - Field definition is now used during import also for translated columns (e.g. definition `roles` for column `roles:en`), the same way as in edit form.
 - Request with number of fields reaching PHP `max_input_vars` limit is rejected with error message, because PHP silently drops fields above this limit. To import bigger files, increase `max_input_vars`. Check can be changed by overriding `isRequestDataTruncated()` method in controller.
 
+## Reading files
+
+- Rows without any value are skipped. Previously empty lines in CSV file were imported as empty records.
+- CSV delimiter is detected only in header line and outside of quoted values, so delimiters used in text of records do not affect the result.
+- Encoding of CSV file is never guessed. File encoded in Unicode (with BOM or with valid UTF-8 content) is read as before. Other files are rejected with error message, because their encoding can't be recognized reliably and wrong guess would silently break imported data. Previously such files were read with invalid characters.
+- If your files use other encoding, set it in bundle configuration:
+
+  ```yaml
+  batch_entity_import:
+      csv_fallback_encoding: CP1250
+  ```
+
+  or override `getCsvFallbackEncoding()` method in single controller:
+
+  ```php
+  protected function getCsvFallbackEncoding(): ?string
+  {
+      return 'CP1250';
+  }
+  ```
+
+- `MatrixFactory::createFromUploadedFile()` throws `FileReadException` when file can't be read (e.g. it is corrupted), instead of exception of PhpSpreadsheet, and `FileEncodingException` when encoding of CSV file is not recognized. Controller shows an error message in such case.
+
+## Header
+
+- Names of columns have to be unique, file with duplicated names is rejected. Previously value of first column was silently lost.
+- Names of columns are trimmed. Name `0` is a valid name now.
+- Name has to start with letter, digit or underscore.
+- Reserved names `entity` and `entity_id` are recognized also when written with spaces, e.g. column `entity id` is used as identifier of entity to update, the same way as `entity_id`.
+
+## Saving data
+
+- Request with invalid structure of data (e.g. modified manually) is rejected with "Data not found" message instead of error 500.
+
 # UPGRADE TO 3.10
 
 ## Import relations

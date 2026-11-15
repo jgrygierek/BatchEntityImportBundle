@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
+use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use const ARRAY_FILTER_USE_KEY;
 
 class Matrix
 {
+    /**
+     * Name of column is used as a name of form field, so it has to start with letter, digit or underscore.
+     * Modifier "D" is needed, because without it name ending with new line would be valid too.
+     */
+    public const COLUMN_NAME_PATTERN = '/^\w[\w -]*(:\w+)?$/D';
     private const RESERVED_ENTITY_COLUMN_NAME = 'entity';
     private const RESERVED_ENTITY_ID_COLUMN_NAME = 'entity_id';
     /**
@@ -19,9 +25,10 @@ class Matrix
     #[Assert\All([
         new Assert\NotBlank(),
         new Assert\Type('string'),
-        new Assert\Regex(pattern: "/^([\w -]+)(:[\w]+)?$/", message: 'validation.matrix.header.name'),
+        new Assert\Regex(pattern: self::COLUMN_NAME_PATTERN, message: 'validation.matrix.header.name'),
     ])]
     #[Assert\NotBlank]
+    #[Assert\Unique(message: 'validation.matrix.header.unique')]
     private readonly array $header;
     /**
      * @var array|MatrixRecord[]
@@ -33,7 +40,7 @@ class Matrix
     private array $records = [];
 
     /**
-     * @param array<string|null> $header
+     * @param array<string|int|null> $header
      * @param array<array<string, scalar|null>> $recordsData
      */
     public function __construct(array $header = [], array $recordsData = [])
@@ -86,16 +93,22 @@ class Matrix
      */
     private function getEntityIdValue(array $data): int|string|null
     {
-        $entityId = $data[self::RESERVED_ENTITY_ID_COLUMN_NAME] ?? null;
+        foreach ($data as $name => $entityId) {
+            // name is compared after normalization, the same way as in isColumnNameValid(), so column removed
+            // from data as reserved one (e.g. "entity id") is always used as identifier, and never silently lost
+            if (self::RESERVED_ENTITY_ID_COLUMN_NAME === ColumnNameHelper::normalize($name)) {
+                // identifier can't be float or bool
+                return \is_int($entityId) || \is_string($entityId) ? $entityId : null;
+            }
+        }
 
-        // identifier can't be float or bool
-        return \is_int($entityId) || \is_string($entityId) ? $entityId : null;
+        return null;
     }
 
     /**
-     * @param array<string|null> $header
+     * @param array<string|int|null> $header
      *
-     * @return string[]
+     * @return array<int, string>
      */
     private function clearHeader(array $header): array
     {
@@ -103,7 +116,7 @@ class Matrix
             array_filter($header, $this->isColumnNameValid(...)),
         );
 
-        return \array_map(static fn (?string $name): string => \str_replace(' ', '_', $name ?: ''), $header);
+        return \array_map(ColumnNameHelper::normalize(...), $header);
     }
 
     /**
@@ -118,6 +131,9 @@ class Matrix
 
     private function isColumnNameValid(string|int|null $name): bool
     {
-        return !empty(trim((string) $name)) && !\in_array($name, [self::RESERVED_ENTITY_COLUMN_NAME, self::RESERVED_ENTITY_ID_COLUMN_NAME], true);
+        // name is compared after normalization, so e.g. "entity id" is reserved too, and "0" is a valid name
+        $name = ColumnNameHelper::normalize($name);
+
+        return '' !== $name && !\in_array($name, [self::RESERVED_ENTITY_COLUMN_NAME, self::RESERVED_ENTITY_ID_COLUMN_NAME], true);
     }
 }

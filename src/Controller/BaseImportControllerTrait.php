@@ -6,6 +6,8 @@ namespace JG\BatchEntityImportBundle\Controller;
 
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
+use JG\BatchEntityImportBundle\Exception\FileEncodingException;
+use JG\BatchEntityImportBundle\Exception\FileReadException;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
@@ -18,6 +20,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Traversable;
@@ -50,10 +53,21 @@ trait BaseImportControllerTrait
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $matrix = MatrixFactory::createFromUploadedFile($fileImport->getFile());
+            $matrix = null;
+            $fileError = 'validation.file.unreadable';
+            try {
+                $matrix = MatrixFactory::createFromUploadedFile($fileImport->getFile(), $this->getCsvFallbackEncoding());
+            } catch (FileEncodingException) {
+                $fileError = 'validation.file.encoding';
+            } catch (FileReadException) {
+            }
 
-            $errors = $validator->validate($matrix);
-            if (0 === $errors->count()) {
+            // validator is used also for unreadable file, so its message is translated the same way as other errors
+            $errors = $matrix instanceof Matrix
+                ? $validator->validate($matrix)
+                : $validator->validate(false, new IsTrue(message: $fileError));
+
+            if ($matrix instanceof Matrix && 0 === $errors->count()) {
                 $form = $this->createMatrixForm($matrix);
 
                 return $this->prepareMatrixEditView($form, $matrix, true);
@@ -107,14 +121,18 @@ trait BaseImportControllerTrait
             return $this->redirectToImport();
         }
 
-        if (!isset($request->request->all('matrix')['records'])) {
+        $matrixData = $request->request->all()['matrix'] ?? null;
+        $records = \is_array($matrixData) ? ($matrixData['records'] ?? null) : null;
+        $matrix = \is_array($records) ? MatrixFactory::createFromPostData($records) : new Matrix();
+
+        // also when data sent in request has invalid structure
+        if (!$matrix->getRecords()) {
             $msg = $translator->trans('error.data.not_found', [], 'BatchEntityImportBundle');
             $this->addFlash('error', $msg);
 
             return $this->redirectToImport();
         }
 
-        $matrix = MatrixFactory::createFromPostData($request->request->all('matrix')['records']);
         $form = $this->createMatrixForm($matrix);
         $form->handleRequest($request);
 
@@ -158,6 +176,18 @@ trait BaseImportControllerTrait
     protected function getMaxInputVars(): int
     {
         return (int) \ini_get('max_input_vars');
+    }
+
+    /**
+     * Encoding used for CSV file which is not encoded in Unicode, e.g. "CP1250" for Central European languages.
+     * Without it such file is rejected, because its encoding can't be recognized reliably.
+     * By default value from bundle configuration is used, override this method to use other encoding in single controller.
+     */
+    protected function getCsvFallbackEncoding(): ?string
+    {
+        $encoding = $this->getParameter('batch_entity_import.csv_fallback_encoding');
+
+        return \is_string($encoding) ? $encoding : null;
     }
 
     protected function getImportConfiguration(): ImportConfigurationInterface

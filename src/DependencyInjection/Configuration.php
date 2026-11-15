@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\DependencyInjection;
 
+use JG\BatchEntityImportBundle\Utils\EncodingHelper;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -18,6 +19,16 @@ class Configuration implements ConfigurationInterface
         /** @var ArrayNodeDefinition $rootNode */
         $rootNode = $treeBuilder->getRootNode();
         $this->addTemplatesConfig($rootNode->children());
+        $rootNode->children()
+            ->scalarNode('csv_fallback_encoding')
+            ->info('Encoding used for CSV files which are not encoded in Unicode, e.g. "CP1250". Without it such files are rejected.')
+            ->defaultNull()
+            ->validate()
+            // checked already when container is built, so typo in name of encoding is found as early as possible
+            ->ifTrue(static fn (mixed $encoding): bool => null !== $encoding && (!\is_string($encoding) || !EncodingHelper::isSupported($encoding)))
+            ->thenInvalid('Encoding %s is not supported.')
+            ->end()
+            ->end();
 
         return $treeBuilder;
     }

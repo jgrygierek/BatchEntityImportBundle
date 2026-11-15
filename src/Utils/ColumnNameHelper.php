@@ -6,6 +6,14 @@ namespace JG\BatchEntityImportBundle\Utils;
 
 class ColumnNameHelper
 {
+    /**
+     * Name of column used in matrix: without surrounding whitespaces and with spaces replaced by underscores.
+     */
+    public static function normalize(string|int|null $value): string
+    {
+        return str_replace(' ', '_', trim((string) $value));
+    }
+
     public static function toPascalCase(string $value): string
     {
         $value = self::removeTranslationSuffix($value);

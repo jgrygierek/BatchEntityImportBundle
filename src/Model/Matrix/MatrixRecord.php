@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Matrix;
 
+use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
+
 class MatrixRecord
 {
     private ?object $entity = null;
@@ -18,8 +20,9 @@ class MatrixRecord
     public function __construct(array $data = [], public readonly int|string|null $entityId = null)
     {
         foreach ($data as $name => $value) {
-            if (!empty(\trim((string) $name))) {
-                $this->data[\str_replace(' ', '_', (string) $name)] = $value;
+            $name = ColumnNameHelper::normalize($name);
+            if ('' !== $name) {
+                $this->data[$name] = $value;
             }
         }
     }
