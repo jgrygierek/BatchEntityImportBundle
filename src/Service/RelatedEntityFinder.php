@@ -81,7 +81,7 @@ class RelatedEntityFinder implements ResetInterface
     private function resolveManager(string $class, string $lookupField): ObjectManager
     {
         // checked before asking registry, which would throw ReflectionException for not existing class
-        if (!\class_exists($class) || !$manager = $this->getManagerForClass($class)) {
+        if (!\class_exists($class) || !($manager = $this->getManagerForClass($class)) instanceof ObjectManager) {
             throw new InvalidArgumentException(\sprintf('Class "%s" is not a managed Doctrine entity.', $class));
         }
 

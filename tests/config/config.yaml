@@ -30,6 +30,9 @@ services:
 
 framework:
     test: true
+    # Enabled explicitly, because by default it depends on the way how symfony/security-csrf was installed
+    # (it is disabled when package is installed only as a dev dependency).
+    csrf_protection: true
     session:
         name: my_custom_php_session_id
         handler_id: ~

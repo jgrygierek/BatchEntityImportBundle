@@ -36,9 +36,9 @@ class MatrixFactory
         try {
             /** @var array<int, array<scalar|null>> $data */
             $data = $reader->load($file->getPathname())->getActiveSheet()->toArray();
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             // corrupted file, or content which does not match the extension
-            throw new FileReadException(previous: $e);
+            throw new FileReadException(previous: $throwable);
         }
 
         // column without header has empty name and is skipped by Matrix
@@ -140,8 +140,8 @@ class MatrixFactory
     {
         try {
             return (string) $file->openFile('rb')->fread(self::CSV_DELIMITER_DETECTION_LENGTH);
-        } catch (RuntimeException $e) {
-            throw new FileReadException(previous: $e);
+        } catch (RuntimeException $runtimeException) {
+            throw new FileReadException(previous: $runtimeException);
         }
     }
 

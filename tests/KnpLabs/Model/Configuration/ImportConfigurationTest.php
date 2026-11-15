@@ -10,13 +10,13 @@ use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
+use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntityTranslation;
 use JG\BatchEntityImportBundle\Tests\SkippedTestsTrait;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class ImportConfigurationTest extends WebTestCase
+class ImportConfigurationTest extends AbstractWebTestCase
 {
     use SkippedTestsTrait;
 
@@ -116,6 +116,7 @@ class ImportConfigurationTest extends WebTestCase
             }
         };
         $config->import($matrix);
+
         $this->entityManager->clear();
 
         /** @var TranslatableEntity $item */
@@ -135,6 +136,7 @@ class ImportConfigurationTest extends WebTestCase
         /** @var TranslatableEntityTranslation $translation */
         $translation = $existingEntity->translate('en', false);
         $translation->setTestTranslationProperty('existing_en');
+
         $existingEntity->mergeNewTranslations();
         $this->entityManager->persist($existingEntity);
         $this->entityManager->flush();

@@ -13,6 +13,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use UnexpectedValueException;
 
+/**
+ * @implements DataTransformerInterface<array<mixed>, string>
+ */
 class ArrayTextType extends AbstractType implements DataTransformerInterface
 {
     public const DEFAULT_SEPARATOR = '|';
@@ -32,7 +35,8 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $this->separator = $options['separator'] ?? self::DEFAULT_SEPARATOR;
+        $separator = $options['separator'] ?? null;
+        $this->separator = \is_string($separator) && '' !== $separator ? $separator : self::DEFAULT_SEPARATOR;
     }
 
     public function transform(mixed $value): string
@@ -41,7 +45,7 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
             throw new UnexpectedValueException('Only arrays are allowed');
         }
 
-        return implode($this->separator, $value);
+        return implode($this->separator, array_map(static fn (mixed $item): string => \is_scalar($item) ? (string) $item : '', $value));
     }
 
     /**

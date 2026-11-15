@@ -16,11 +16,15 @@ use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Form\Exception\LogicException;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Validator\Constraints\IsTrue;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Traversable;
@@ -37,6 +41,9 @@ trait BaseImportControllerTrait
 
     abstract protected function getMatrixEditTemplateName(): string;
 
+    /**
+     * @param array<string, mixed> $parameters
+     */
     abstract protected function prepareView(string $view, array $parameters = []): Response;
 
     abstract protected function createMatrixForm(Matrix $matrix): FormInterface;
@@ -55,8 +62,10 @@ trait BaseImportControllerTrait
         if ($form->isSubmitted() && $form->isValid()) {
             $matrix = null;
             $fileError = 'validation.file.unreadable';
+            $file = $fileImport->getFile();
             try {
-                $matrix = MatrixFactory::createFromUploadedFile($fileImport->getFile(), $this->getCsvFallbackEncoding());
+                // file is always set here, because form is valid
+                $matrix = $file instanceof UploadedFile ? MatrixFactory::createFromUploadedFile($file, $this->getCsvFallbackEncoding()) : null;
             } catch (FileEncodingException) {
                 $fileError = 'validation.file.encoding';
             } catch (FileReadException) {
@@ -199,12 +208,19 @@ trait BaseImportControllerTrait
         return $this->importConfiguration;
     }
 
+    /**
+     * Only first error is shown.
+     *
+     * @param Traversable<mixed> $violations errors of form or violations returned by validator
+     */
     protected function setErrorAsFlash(Traversable $violations): void
     {
-        $errors = iterator_to_array($violations);
-        if ($errors) {
-            $error = reset($errors);
-            $this->addFlash('error', $error->getMessage());
+        foreach ($violations as $error) {
+            if ($error instanceof FormError || $error instanceof ConstraintViolationInterface) {
+                $this->addFlash('error', (string) $error->getMessage());
+            }
+
+            return;
         }
     }
 
@@ -213,9 +229,9 @@ trait BaseImportControllerTrait
         $data = ['records' => array_map(static fn (MatrixRecord $record): array => $record->getData(), $matrix->getRecords())];
 
         $csrfTokenManager = $form->getConfig()->getOption('csrf_token_manager');
-        if ($csrfTokenManager) {
-            $tokenId = $form->getConfig()->getOption('csrf_token_id') ?? $form->getName();
-            $data['_token'] = $csrfTokenManager->getToken($tokenId)->getValue();
+        if ($csrfTokenManager instanceof CsrfTokenManagerInterface) {
+            $tokenId = $form->getConfig()->getOption('csrf_token_id');
+            $data['_token'] = $csrfTokenManager->getToken(\is_string($tokenId) ? $tokenId : $form->getName())->getValue();
         }
 
         $form->submit($data);

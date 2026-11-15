@@ -1,9 +1,8 @@
-includes:
-	- phpstan-baseline.neon
-
 parameters:
-	level: 5
+	level: max
 	paths:
 		- src
-		- tests
+		# traits are analysed only when they are used by some class
+		- tests/Fixtures/Controller
+		- tests/KnpLabs/Fixtures/Controller
 	phpVersion: 80200
