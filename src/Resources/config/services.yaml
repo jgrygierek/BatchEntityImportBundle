@@ -2,7 +2,7 @@ services:
     JG\BatchEntityImportBundle\Twig\TemplateExtension:
         public: true
         arguments: [ '%batch_entity_import.templates%' ]
-        tags: [ twig.extension ]
+        tags: [ twig.attribute_extension, twig.runtime ]
 
     JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator:
         arguments: [ '@doctrine.orm.entity_manager' ]

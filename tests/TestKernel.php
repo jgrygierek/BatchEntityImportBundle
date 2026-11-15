@@ -17,8 +17,6 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-use const PHP_VERSION_ID;
-
 class TestKernel extends Kernel
 {
     use MicroKernelTrait;
@@ -55,17 +53,15 @@ class TestKernel extends Kernel
             $loader->load(__DIR__ . '/KnpLabs/config/config.yaml');
         }
 
-        if (self::MAJOR_VERSION >= 7) {
-            $container->extension('framework', [
-                'validation' => ['enable_attributes' => true],
-            ]);
+        $container->extension('framework', [
+            'validation' => ['enable_attributes' => true],
+        ]);
 
-            // native lazy objects are supported since ORM 3.4, older versions still use proxies
-            if (PHP_VERSION_ID >= 80400 && \method_exists(Configuration::class, 'enableNativeLazyObjects')) {
-                $container->extension('doctrine', [
-                    'orm' => ['enable_native_lazy_objects' => true],
-                ]);
-            }
+        // native lazy objects are supported since ORM 3.4, older versions still use proxies
+        if (\method_exists(Configuration::class, 'enableNativeLazyObjects')) {
+            $container->extension('doctrine', [
+                'orm' => ['enable_native_lazy_objects' => true],
+            ]);
         }
     }
 }

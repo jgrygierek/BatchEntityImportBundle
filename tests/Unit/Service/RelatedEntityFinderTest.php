@@ -67,14 +67,14 @@ class RelatedEntityFinderTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Class "stdClass" is not a managed Doctrine entity.');
 
-        (new RelatedEntityFinder($registryMock))->getManager(stdClass::class, 'id');
+        new RelatedEntityFinder($registryMock)->getManager(stdClass::class, 'id');
     }
 
     public function testNotExistingClassWithSingleManager(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        (new RelatedEntityFinder($this->managerMock))->getManager('App\NotExistingClass', 'id');
+        new RelatedEntityFinder($this->managerMock)->getManager('App\NotExistingClass', 'id');
     }
 
     public function testNotExistingField(): void

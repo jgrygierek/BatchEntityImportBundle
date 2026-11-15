@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 class ImportAllowedColumnsControllerTest extends AbstractWebTestCase
 {
-    private const URL = '/jg_batch_entity_import_bundle/import_allowed_columns';
+    private const string URL = '/jg_batch_entity_import_bundle/import_allowed_columns';
     private KernelBrowser $client;
 
     protected function setUp(): void

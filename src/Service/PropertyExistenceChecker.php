@@ -14,7 +14,7 @@ class PropertyExistenceChecker
 {
     /** @var ReflectionClass<object> */
     private readonly ReflectionClass $reflectionClass;
-    /** @var ReflectionClass<object>|null */
+    /** @var ReflectionClass<covariant object>|null */
     private ?ReflectionClass $translationReflectionClass = null;
 
     /**
@@ -54,7 +54,7 @@ class PropertyExistenceChecker
     }
 
     /**
-     * @param ReflectionClass<object> $entity
+     * @param ReflectionClass<covariant object> $entity
      */
     private function isPropertyWritable(ReflectionClass $entity, string $name): bool
     {

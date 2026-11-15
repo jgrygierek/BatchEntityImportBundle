@@ -1,3 +1,21 @@
+# UPGRADE TO 4.0
+
+## Requirements
+
+- PHP 8.3 is no longer supported. Minimal required version is PHP 8.4.
+- Symfony 6.4 and versions 7.0 - 7.3 are no longer supported. Supported versions are Symfony 7.4 and 8.
+- Doctrine ORM 2 is no longer supported. Minimal required version is `doctrine/orm` 3.3.
+- Doctrine DBAL 2 and 3 are no longer supported. Minimal required version is `doctrine/dbal` 4.0.
+- Minimal versions of other packages:
+  - `doctrine/collections`: 2.2,
+  - `doctrine/persistence`: 3.3.1,
+  - `symfony/event-dispatcher-contracts`, `symfony/service-contracts` and `symfony/translation-contracts`: 3.0.
+- `doctrine/doctrine-bundle` and `symfony/yaml` are now listed in requirements of bundle, because its services depend on them. Both are installed in typical Symfony application, so usually nothing has to be changed in your project.
+
+## Twig
+
+- `TemplateExtension` no longer extends `Twig\Extension\AbstractExtension`, function `batch_entity_import_template` is registered by `#[AsTwigFunction]` attribute. Nothing changes in templates. Method `getFunctions()` was removed.
+
 # UPGRADE TO 3.14
 
 ## PHP

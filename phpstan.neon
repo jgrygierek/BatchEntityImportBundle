@@ -5,4 +5,4 @@ parameters:
 		# traits are analysed only when they are used by some class
 		- tests/Fixtures/Controller
 		- tests/KnpLabs/Fixtures/Controller
-	phpVersion: 80300
+	phpVersion: 80400

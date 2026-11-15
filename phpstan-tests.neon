@@ -5,4 +5,4 @@ parameters:
 	level: 5
 	paths:
 		- tests
-	phpVersion: 80300
+	phpVersion: 80400

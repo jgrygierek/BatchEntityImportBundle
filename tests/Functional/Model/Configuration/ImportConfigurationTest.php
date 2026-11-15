@@ -275,7 +275,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
     public function testAllColumnsAreAllowedByDefault(): void
     {
-        self::assertSame([], (new BaseConfiguration($this->entityManager, $this->eventDispatcher))->getAllowedColumns());
+        self::assertSame([], new BaseConfiguration($this->entityManager, $this->eventDispatcher)->getAllowedColumns());
     }
 
     public function testInvalidDataTypeExceptionContainsPosition(): void

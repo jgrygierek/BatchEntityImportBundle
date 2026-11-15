@@ -98,13 +98,7 @@ class MatrixFactory
      */
     private static function isNotEmptyRow(array $row): bool
     {
-        foreach ($row as $value) {
-            if (null !== $value && '' !== trim((string) $value)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($row, static fn (int|float|string|bool|null $value): bool => null !== $value && '' !== trim((string) $value));
     }
 
     /**
@@ -169,7 +163,7 @@ class MatrixFactory
         /** @var BaseReader $reader */
         $reader = new $readerClass();
         if ($reader instanceof Csv) {
-            $reader->setDelimiter((new CsvDelimiterDetector())->detect(self::getBeginningOfFile($file))->value);
+            $reader->setDelimiter(new CsvDelimiterDetector()->detect(self::getBeginningOfFile($file))->value);
             $reader->setInputEncoding(self::getCsvEncoding($file, $csvFallbackEncoding));
         } elseif ($reader instanceof Xls || $reader instanceof Xlsx) {
             $reader->setIgnoreRowsWithNoCells(true);
