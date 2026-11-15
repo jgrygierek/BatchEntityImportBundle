@@ -1,3 +1,9 @@
+# UPGRADE TO 3.14
+
+## PHP
+
+- PHP 8.2 is no longer supported. Minimal required version is PHP 8.3.
+
 # UPGRADE TO 3.13
 
 ## Allowed columns

@@ -21,7 +21,7 @@
         }
     ],
     "require": {
-        "php": ">=8.2.0",
+        "php": ">=8.3.0",
         "doctrine/collections": "^1.5|^2.0",
         "doctrine/dbal": "^2.13|^3.2|^4.0",
         "doctrine/orm": "^2.9|^3.2",

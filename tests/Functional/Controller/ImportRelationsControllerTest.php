@@ -16,7 +16,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImportRelationsControllerTest extends AbstractWebTestCase
 {
-    private const URL = '/jg_batch_entity_import_bundle/import_relations';
+    private const string URL = '/jg_batch_entity_import_bundle/import_relations';
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
     /** @var TestableEventDispatcher */
