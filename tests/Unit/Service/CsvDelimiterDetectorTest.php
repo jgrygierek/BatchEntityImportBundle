@@ -15,7 +15,7 @@ class CsvDelimiterDetectorTest extends TestCase
     #[DataProvider('contentProvider')]
     public function testDetect(string $content, CsvDelimiterEnum $expectedDelimiter): void
     {
-        self::assertSame($expectedDelimiter, (new CsvDelimiterDetector())->detect($content));
+        self::assertSame($expectedDelimiter, new CsvDelimiterDetector()->detect($content));
     }
 
     public static function contentProvider(): Generator

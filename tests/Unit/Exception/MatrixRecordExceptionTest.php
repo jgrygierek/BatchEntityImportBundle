@@ -33,10 +33,10 @@ class MatrixRecordExceptionTest extends TestCase
 
     public function testDefaultMessagesAreNotChanged(): void
     {
-        self::assertSame('exception.matrix.record.data.invalid_type', (new MatrixRecordInvalidDataTypeException())->getMessage());
-        self::assertSame([], (new MatrixRecordInvalidDataTypeException())->getTranslationParameters());
-        self::assertSame('exception.matrix.record.related_entity.not_found', (new MatrixRecordRelatedEntityNotFoundException())->getMessage());
-        self::assertSame([], (new MatrixRecordRelatedEntityNotFoundException())->getTranslationParameters());
+        self::assertSame('exception.matrix.record.data.invalid_type', new MatrixRecordInvalidDataTypeException()->getMessage());
+        self::assertSame([], new MatrixRecordInvalidDataTypeException()->getTranslationParameters());
+        self::assertSame('exception.matrix.record.related_entity.not_found', new MatrixRecordRelatedEntityNotFoundException()->getMessage());
+        self::assertSame([], new MatrixRecordRelatedEntityNotFoundException()->getTranslationParameters());
     }
 
     public function testRelatedEntityNotFoundWithPosition(): void

@@ -15,7 +15,7 @@ return $config
         '@PSR12' => true,
         '@Symfony' => true,
         '@Symfony:risky' => true,
-        '@PHP8x3Migration' => true,
+        '@PHP8x4Migration' => true,
         '@PHP8x3Migration:risky' => true,
         'array_syntax' => ['syntax' => 'short'],
         'concat_space' => ['spacing' => 'one'],

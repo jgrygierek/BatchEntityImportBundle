@@ -19,12 +19,6 @@ parameters:
 			path: tests/KnpLabs/Fixtures/Entity/TranslatableEntity.php
 
 		-
-			message: '#^Comparison operation "\>\=" between \d+ and 7 is always true\.$#'
-			identifier: greaterOrEqual.alwaysTrue
-			count: 1
-			path: tests/TestKernel.php
-
-		-
 			# result depends on installed version of doctrine/orm
 			message: '#^Call to function method_exists\(\) with ''Doctrine\\\\ORM\\\\Configuration'' and ''enableNativeLazyObj…'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType

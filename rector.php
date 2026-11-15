@@ -6,7 +6,6 @@ use Rector\CodingStyle\Rector\ClassLike\NewlineBetweenClassLikeStmtsRector;
 use Rector\CodingStyle\Rector\Stmt\NewlineAfterStatementRector;
 use Rector\Config\RectorConfig;
 use Rector\Set\ValueObject\SetList;
-use Rector\Symfony\Symfony73\Rector\Class_\GetFiltersAndFunctionsToAsTwigAttributeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\ReturnNeverTypeRector;
 use Rector\ValueObject\PhpVersion;
 
@@ -16,8 +15,8 @@ return RectorConfig::configure()
         __DIR__ . '/tests',
     ])
     ->withComposerBased(twig: true, doctrine: true, phpunit: true, symfony: true)
-    ->withPhpSets(php83: true)
-    ->withPhpVersion(PhpVersion::PHP_83)
+    ->withPhpSets(php84: true)
+    ->withPhpVersion(PhpVersion::PHP_84)
     ->withPreparedSets(
         typeDeclarations: true,
         instanceOf: true,
@@ -34,8 +33,6 @@ return RectorConfig::configure()
         ReturnNeverTypeRector::class,
         NewlineAfterStatementRector::class,
         NewlineBetweenClassLikeStmtsRector::class,
-        // #[AsTwigFunction] requires TwigBundle 7.3+, bundle still supports Symfony 6.4
-        GetFiltersAndFunctionsToAsTwigAttributeRector::class,
     ])
     ->withSymfonyContainerXml(
         __DIR__ . '/var/cache/dev/App_KernelDevDebugContainer.xml',

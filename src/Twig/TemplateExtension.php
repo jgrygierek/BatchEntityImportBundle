@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Twig;
 
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFunction;
+use Twig\Attribute\AsTwigFunction;
 use UnexpectedValueException;
 
-class TemplateExtension extends AbstractExtension
+class TemplateExtension
 {
     /**
      * @param array<string, string> $availableTemplates
@@ -17,13 +16,7 @@ class TemplateExtension extends AbstractExtension
     {
     }
 
-    public function getFunctions(): array
-    {
-        return [
-            new TwigFunction('batch_entity_import_template', $this->getTemplate(...)),
-        ];
-    }
-
+    #[AsTwigFunction(name: 'batch_entity_import_template')]
     public function getTemplate(string $name): string
     {
         if (array_key_exists($name, $this->availableTemplates)) {
