@@ -53,10 +53,6 @@ class TestKernel extends Kernel
             $loader->load(__DIR__ . '/KnpLabs/config/config.yaml');
         }
 
-        $container->extension('framework', [
-            'validation' => ['enable_attributes' => true],
-        ]);
-
         // native lazy objects are supported since ORM 3.4, older versions still use proxies
         if (\method_exists(Configuration::class, 'enableNativeLazyObjects')) {
             $container->extension('doctrine', [

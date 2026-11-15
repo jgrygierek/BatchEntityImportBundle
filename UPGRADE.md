@@ -10,7 +10,13 @@
   - `doctrine/collections`: 2.2,
   - `doctrine/persistence`: 3.3.1,
   - `symfony/event-dispatcher-contracts`, `symfony/service-contracts` and `symfony/translation-contracts`: 3.0.
-- `doctrine/doctrine-bundle` and `symfony/yaml` are now listed in requirements of bundle, because its services depend on them. Both are installed in typical Symfony application, so usually nothing has to be changed in your project.
+- `doctrine/doctrine-bundle` is now listed in requirements of bundle, because its services depend on it. It is installed in typical Symfony application, so usually nothing has to be changed in your project.
+
+## Bundle
+
+- Bundle uses modern directory structure: templates were moved from `src/Resources/views` to `templates`, and translations from `src/Resources/translations` to `translations`. Names of templates (`@BatchEntityImport/...`), translation domains and the way of overriding them in your application are not changed.
+- Classes `DependencyInjection\BatchEntityImportExtension` and `DependencyInjection\Configuration` were removed, configuration and services are defined in `BatchEntityImportBundle` class (which extends `AbstractBundle`). Configuration of bundle (`batch_entity_import`) and names of parameters and services are not changed.
+- File `src/Resources/config/services.yaml` was removed. If you import it in your application, remove the import.
 
 ## Twig
 
