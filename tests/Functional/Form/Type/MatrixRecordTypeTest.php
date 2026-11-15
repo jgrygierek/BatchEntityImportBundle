@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\FieldsTypeConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
@@ -33,7 +34,7 @@ class MatrixRecordTypeTest extends AbstractWebTestCase
     public function testValidFormWithBaseConfig(): void
     {
         $data = $this->getRecordData();
-        $configuration = new BaseConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class));
+        $configuration = new BaseConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class), $this->createStub(RelatedEntityFinder::class));
         $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
@@ -51,7 +52,7 @@ class MatrixRecordTypeTest extends AbstractWebTestCase
     public function testValidFormWithFieldsConfig(): void
     {
         $data = $this->getRecordData();
-        $configuration = new FieldsTypeConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class));
+        $configuration = new FieldsTypeConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class), $this->createStub(RelatedEntityFinder::class));
         $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);

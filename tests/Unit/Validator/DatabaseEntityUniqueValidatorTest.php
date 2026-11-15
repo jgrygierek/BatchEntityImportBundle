@@ -15,7 +15,6 @@ use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Validator\Constraints\Blank;
-use Symfony\Component\Validator\Exception\InvalidOptionsException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 use TypeError;
@@ -36,7 +35,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $queryMock = $this->createStub(Query::class);
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
-        $constraint = new DatabaseEntityUnique(['fields' => ['field_1'], 'entityClassName' => TestEntity::class]);
+        $constraint = new DatabaseEntityUnique(fields: ['field_1'], entityClassName: TestEntity::class);
         $this->validator->validate(
             MatrixFactory::createFromPostData([
                 [
@@ -69,7 +68,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
                 'field_2' => 100,
             ],
         ]);
-        $constraint = new DatabaseEntityUnique(['fields' => ['field_1'], 'entityClassName' => TestEntity::class]);
+        $constraint = new DatabaseEntityUnique(fields: ['field_1'], entityClassName: TestEntity::class);
         $this->validator->validate($matrix, $constraint);
         $violations = $this->context->getViolations();
         $this->assertCount(2, $violations);
@@ -156,48 +155,6 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $this->assertSame(['group_1'], $constraint->groups);
     }
 
-    public function testLegacyOptions(): void
-    {
-        $constraint = new DatabaseEntityUnique([
-            'entityClassName' => TestEntity::class,
-            'fields' => ['field_1'],
-            'message' => 'custom',
-            'groups' => ['group_1'],
-            'payload' => 'payload',
-        ]);
-
-        $this->assertSame(TestEntity::class, $constraint->entityClassName);
-        $this->assertSame(['field_1'], $constraint->fields);
-        $this->assertSame('custom', $constraint->message);
-        $this->assertSame(['group_1'], $constraint->groups);
-        $this->assertSame('payload', $constraint->payload);
-    }
-
-    public function testLegacyOptionsWithSingleStrings(): void
-    {
-        $constraint = new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'groups' => 'group_1']);
-
-        $this->assertSame(['group_1'], $constraint->groups);
-    }
-
-    public function testInvalidTypeOfLegacyStringOptionException(): void
-    {
-        $this->expectExceptionObject(new InvalidOptionsException(\sprintf('The option "message" of constraint "%s" should be a string.', DatabaseEntityUnique::class), ['message']));
-        new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'message' => 123]);
-    }
-
-    public function testInvalidTypeOfLegacyListOptionException(): void
-    {
-        $this->expectExceptionObject(new InvalidOptionsException(\sprintf('The option "groups" of constraint "%s" should be a string or an array of strings.', DatabaseEntityUnique::class), ['groups']));
-        new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'groups' => [123]]);
-    }
-
-    public function testUnknownLegacyOptionException(): void
-    {
-        $this->expectException(InvalidOptionsException::class);
-        new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'unknown' => 1]);
-    }
-
     public function testInvalidFieldNameException(): void
     {
         $this->expectExceptionObject(new InvalidArgumentException('Option "fields" contains invalid data. Allowed fields: field_1, field_2'));
@@ -207,26 +164,26 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
                 'field_2' => 100,
             ],
         ]);
-        $constraint = new DatabaseEntityUnique(['fields' => ['field_3'], 'entityClassName' => 'test']);
+        $constraint = new DatabaseEntityUnique(fields: ['field_3'], entityClassName: 'test');
         $this->validator->validate($matrix, $constraint);
     }
 
     public function testMissingEntityClassNameOptionException(): void
     {
         $this->expectExceptionObject(new InvalidArgumentException('Option "entityClassName" should not be empty.'));
-        new DatabaseEntityUnique(['fields' => ['abcd'], 'entityClassName' => '']);
+        new DatabaseEntityUnique(fields: ['abcd'], entityClassName: '');
     }
 
     public function testMissingFieldsOptionException(): void
     {
         $this->expectExceptionObject(new InvalidArgumentException('Option "fields" should not be empty.'));
-        new DatabaseEntityUnique(['fields' => [], 'entityClassName' => 'abcd']);
+        new DatabaseEntityUnique(fields: [], entityClassName: 'abcd');
     }
 
     public function testValidatedValueException(): void
     {
         $this->expectException(TypeError::class);
-        $this->validator->validate('qwerty', new DatabaseEntityUnique(['fields' => ['abcd'], 'entityClassName' => TranslatableEntity::class]));
+        $this->validator->validate('qwerty', new DatabaseEntityUnique(fields: ['abcd'], entityClassName: TranslatableEntity::class));
     }
 
     public function testValidatorConstraintException(): void

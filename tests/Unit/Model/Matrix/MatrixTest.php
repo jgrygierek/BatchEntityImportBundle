@@ -79,7 +79,7 @@ class MatrixTest extends AbstractValidationTestCase
 
         $matrix = new Matrix(array_keys($expected));
 
-        self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class));
+        self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class, []));
     }
 
     #[DataProvider('allowedColumnsProvider')]

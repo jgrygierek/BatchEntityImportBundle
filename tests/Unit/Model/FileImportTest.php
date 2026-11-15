@@ -66,6 +66,15 @@ class FileImportTest extends AbstractValidationTestCase
         self::assertSame('An empty file is not allowed.', $errors[0]->getMessage());
     }
 
+    public function testMissingFileError(): void
+    {
+        $errors = $this->getErrors(new FileImport(['csv', 'xls', 'xlsx', 'ods']));
+
+        // only one error, extension is not validated without file
+        self::assertCount(1, $errors);
+        self::assertSame('This value should not be null.', $errors[0]->getMessage());
+    }
+
     #[DataProvider('invalidExtensionsProvider')]
     public function testInvalidExtensionError(string $extension, array $allowedExtensions): void
     {

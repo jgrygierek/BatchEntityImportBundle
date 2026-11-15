@@ -27,19 +27,19 @@ class BaseConfiguration extends AbstractImportConfiguration
     public function getMatrixConstraints(): array
     {
         return [
-            new DatabaseEntityUnique([
-                'entityClassName' => $this->getEntityClassName(),
-                'fields' => [
+            new DatabaseEntityUnique(
+                entityClassName: $this->getEntityClassName(),
+                fields: [
                     'test_private_property',
                     'test_public_property',
                 ],
-            ]),
-            new DatabaseEntityUnique([
-                'entityClassName' => $this->getEntityClassName(),
-                'fields' => [
+            ),
+            new DatabaseEntityUnique(
+                entityClassName: $this->getEntityClassName(),
+                fields: [
                     'test-private-property2',
                 ],
-            ]),
+            ),
         ];
     }
 }

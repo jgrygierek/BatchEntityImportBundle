@@ -13,29 +13,11 @@ use Throwable;
 class MatrixRecordRelatedEntityNotFoundException extends MatrixException
 {
     /**
-     * @param array<string, string|int> $translationParameters
+     * @param int $rowNumber number of record, starting from 1, as in the preview
      */
-    public function __construct(
-        string $message = 'exception.matrix.record.related_entity.not_found',
-        array $translationParameters = [],
-        ?Throwable $previous = null,
-    ) {
-        parent::__construct($message, 0, $previous);
-        $this->translationParameters = $translationParameters;
-    }
-
-    /**
-     * @param int|null $rowNumber number of record, starting from 1, as in the preview; without it message has no position
-     */
-    public static function forField(?int $rowNumber, string $columnName): self
+    public function __construct(int $rowNumber, string $columnName, ?Throwable $previous = null)
     {
-        if (null === $rowNumber) {
-            return new self();
-        }
-
-        return new self(
-            'exception.matrix.record.related_entity.not_found_in_field',
-            ['%row%' => $rowNumber, '%column%' => $columnName],
-        );
+        parent::__construct('exception.matrix.record.related_entity.not_found_in_field', 0, $previous);
+        $this->translationParameters = ['%row%' => $rowNumber, '%column%' => $columnName];
     }
 }

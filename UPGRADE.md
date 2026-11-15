@@ -16,6 +16,78 @@
 
 - `TemplateExtension` no longer extends `Twig\Extension\AbstractExtension`, function `batch_entity_import_template` is registered by `#[AsTwigFunction]` attribute. Nothing changes in templates. Method `getFunctions()` was removed.
 
+## Import configuration
+
+- Method `getAllowedColumns()` was moved to `ImportConfigurationInterface`, and `AllowedColumnsConfigurationInterface` was removed. If your configuration extends `AbstractImportConfiguration`, only remove the interface from `implements`, if you added it there. If your configuration implements `ImportConfigurationInterface` directly, add the method (empty array means that all columns are allowed):
+
+  ```php
+  public function getAllowedColumns(): array
+  {
+      return [];
+  }
+  ```
+
+- Argument `RelatedEntityFinder $relatedEntityFinder` of `AbstractImportConfiguration` constructor is required. If your configuration does not override constructor, nothing has to be changed. Otherwise pass the finder to parent constructor:
+
+  ```php
+  // before
+  public function __construct(EntityManagerInterface $em, EventDispatcherInterface $eventDispatcher, TestService $service)
+  {
+      parent::__construct($em, $eventDispatcher);
+  }
+
+  // after
+  public function __construct(
+      EntityManagerInterface $em,
+      EventDispatcherInterface $eventDispatcher,
+      RelatedEntityFinder $relatedEntityFinder,
+      TestService $service,
+  ) {
+      parent::__construct($em, $eventDispatcher, $relatedEntityFinder);
+  }
+  ```
+
+- Method `AbstractImportConfiguration::prepareRecord()` has new required argument `int $rowNumber` (number of record, starting from 1, used in error messages). If you override this method or call it in overridden `import()`, add the argument:
+
+  ```php
+  // before
+  protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
+
+  // after
+  protected function prepareRecord(MatrixRecord $record, array $headerInfo, int $rowNumber): void
+  ```
+
+- Argument `array $allowedColumns` of `Matrix::getHeaderInfo()` is required. If you override `prepareMatrixEditView()` in your controller, pass allowed columns to it:
+
+  ```php
+  $matrix->getHeaderInfo($configuration->getEntityClassName(), $configuration->getAllowedColumns())
+  ```
+
+## Validation constraints
+
+- `MatrixRecordUnique` and `DatabaseEntityUnique` constraints no longer accept array of options, use named arguments:
+
+  ```php
+  // before
+  new MatrixRecordUnique(['fields' => ['field_name']]),
+  new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
+
+  // after
+  new MatrixRecordUnique(fields: ['field_name']),
+  new DatabaseEntityUnique(entityClassName: $this->getEntityClassName(), fields: ['field_name']),
+  ```
+
+- Order of constructor arguments was changed, so they should be always passed by name:
+  - `MatrixRecordUnique(array $fields, ?string $message = null, ?array $groups = null, mixed $payload = null)`,
+  - `DatabaseEntityUnique(string $entityClassName, array $fields, ?string $message = null, ?array $groups = null, mixed $payload = null)`.
+
+## Exceptions
+
+- `MatrixRecordInvalidDataTypeException` and `MatrixRecordRelatedEntityNotFoundException` always contain number of row and name of column. Their constructors were changed to `__construct(int $rowNumber, string $columnName, ?Throwable $previous = null)`, and static method `forField()` was removed.
+- Translation keys `exception.matrix.record.data.invalid_type` and `exception.matrix.record.related_entity.not_found` were removed. Only keys with position are used:
+  - `exception.matrix.record.data.invalid_type_in_field`,
+  - `exception.matrix.record.related_entity.not_found_in_field`.
+
 # UPGRADE TO 3.14
 
 ## PHP

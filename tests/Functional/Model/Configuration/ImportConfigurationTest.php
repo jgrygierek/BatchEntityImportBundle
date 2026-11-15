@@ -15,6 +15,7 @@ use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\AllowedColumnsConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
@@ -69,7 +70,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
         $matrix = new Matrix($header, $records);
 
-        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
         $config->import($matrix);
 
         self::assertCount(2, $repository->findAll());
@@ -214,7 +215,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
         $matrix = new Matrix(['test_private_property'], $data);
 
-        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
 
         $throwable = null;
         try {
@@ -258,7 +259,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ],
         );
 
-        $config = new AllowedColumnsConfiguration($this->entityManager, $this->eventDispatcher);
+        $config = new AllowedColumnsConfiguration($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
         $config->import($matrix);
 
         $this->entityManager->clear();
@@ -275,7 +276,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
     public function testAllColumnsAreAllowedByDefault(): void
     {
-        self::assertSame([], new BaseConfiguration($this->entityManager, $this->eventDispatcher)->getAllowedColumns());
+        self::assertSame([], new BaseConfiguration($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager))->getAllowedColumns());
     }
 
     public function testInvalidDataTypeExceptionContainsPosition(): void
@@ -290,7 +291,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ],
         );
 
-        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
         try {
             $config->import($matrix);
             self::fail('Exception should be thrown.');
@@ -322,7 +323,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         );
         $matrix->getRecords()[0]->setEntity($existingEntity);
 
-        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
         try {
             $config->import($matrix);
             self::fail('Exception should be thrown.');
@@ -349,7 +350,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
             [['test_private_property' => 'value_1'], ['test_private_property' => 'value_2']],
         );
 
-        $config = new class($this->entityManager, $this->eventDispatcher) extends BaseConfiguration {
+        $config = new class($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager)) extends BaseConfiguration {
             protected function getNewEntity(MatrixRecord $record): object
             {
                 if ('value_2' === $record->getData()['test_private_property']) {
@@ -392,7 +393,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ],
         );
 
-        $config = new $configurationClass($this->entityManager, $this->eventDispatcher);
+        $config = new $configurationClass($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
         $config->import($matrix);
 
         $this->entityManager->clear();
@@ -426,7 +427,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ],
         );
 
-        $config = new $configurationClass($this->entityManager, $this->eventDispatcher);
+        $config = new $configurationClass($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
 
         try {
             $config->import($matrix);
@@ -449,7 +450,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         $this->entityManager->persist(new TestRelatedEntity('first'));
         $this->entityManager->flush();
 
-        $config = new EntityLookupConfiguration($this->entityManager, $this->eventDispatcher);
+        $config = new EntityLookupConfiguration($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager));
 
         $config->import(new Matrix(
             ['test_private_property', 'test_related_entity'],
@@ -484,7 +485,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         $this->entityManager->persist(new TestRelatedEntity('second'));
         $this->entityManager->flush();
 
-        $config = new class($this->entityManager, $this->eventDispatcher) extends AbstractImportConfiguration {
+        $config = new class($this->entityManager, $this->eventDispatcher, new RelatedEntityFinder($this->entityManager)) extends AbstractImportConfiguration {
             public function getEntityClassName(): string
             {
                 return TestEntity::class;

@@ -9,6 +9,7 @@ use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
@@ -109,7 +110,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ],
         );
 
-        $config = new class($this->entityManager, self::$kernel->getContainer()->get('event_dispatcher')) extends TranslatableEntityConfiguration {
+        $config = new class($this->entityManager, self::$kernel->getContainer()->get('event_dispatcher'), new RelatedEntityFinder($this->entityManager)) extends TranslatableEntityConfiguration {
             public function getFieldsDefinitions(): array
             {
                 return ['test_translation_array' => new FormFieldDefinition(ArrayTextType::class)];

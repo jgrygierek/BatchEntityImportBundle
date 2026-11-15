@@ -26,7 +26,7 @@ class MatrixTest extends AbstractValidationTestCase
 
         $matrix = new Matrix(array_keys($expected));
 
-        self::assertSame($expected, $matrix->getHeaderInfo(TranslatableEntity::class));
+        self::assertSame($expected, $matrix->getHeaderInfo(TranslatableEntity::class, []));
     }
 
     public function testHeaderInfoWithAllowedColumnsForTranslatableEntity(): void

@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\KnpLabs\Form\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
@@ -36,6 +37,7 @@ class MatrixRecordTypeTest extends AbstractWebTestCase
         $configuration = new TranslatableEntityConfiguration(
             $this->createStub(EntityManagerInterface::class),
             $this->createStub(EventDispatcherInterface::class),
+            $this->createStub(RelatedEntityFinder::class),
         );
         $matrixRecord = new MatrixRecord($data);
 

@@ -79,7 +79,7 @@ class Matrix
      *
      * @return array<string, bool>
      */
-    public function getHeaderInfo(string $className, array $allowedColumns = []): array
+    public function getHeaderInfo(string $className, array $allowedColumns): array
     {
         $info = [];
         $checker = new PropertyExistenceChecker($className);

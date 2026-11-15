@@ -28,27 +28,18 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 use TypeError;
 
-abstract class AbstractImportConfiguration implements ImportConfigurationInterface, AllowedColumnsConfigurationInterface
+abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
     /** @var object[] */
     protected array $updatedEntities = [];
     /** @var array<int, object> entities touched during import, indexed by object id */
     private array $touchedEntities = [];
-    /**
-     * Number of record which is currently imported, starting from 1, used in error messages.
-     */
-    private ?int $currentRowNumber = null;
-    private readonly RelatedEntityFinder $relatedEntityFinder;
 
-    /**
-     * @param RelatedEntityFinder|null $relatedEntityFinder optional for backward compatibility, if not passed, finder based on $em is used
-     */
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly EventDispatcherInterface $eventDispatcher,
-        ?RelatedEntityFinder $relatedEntityFinder = null,
+        private readonly RelatedEntityFinder $relatedEntityFinder,
     ) {
-        $this->relatedEntityFinder = $relatedEntityFinder ?? new RelatedEntityFinder($em);
     }
 
     public function getFieldsDefinitions(): array
@@ -59,8 +50,6 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     /**
      * By default all columns are allowed. It is recommended to override this method,
      * especially when file is prepared by user who should not be able to change every property of entity.
-     *
-     * @return array<string>
      */
     public function getAllowedColumns(): array
     {
@@ -88,16 +77,13 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName(), $this->getAllowedColumns());
         try {
             foreach (array_values($matrix->getRecords()) as $index => $record) {
-                $this->currentRowNumber = $index + 1;
-                $this->prepareRecord($record, $headerInfo);
+                $this->prepareRecord($record, $headerInfo, $index + 1);
             }
         } catch (Throwable $throwable) {
             // not only exceptions of this bundle, incomplete import can't be left in entity manager in any case
             $this->revertChanges();
 
             throw $throwable;
-        } finally {
-            $this->currentRowNumber = null;
         }
 
         $this->touchedEntities = [];
@@ -106,8 +92,9 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
     /**
      * @param array<string, bool> $headerInfo
+     * @param int $rowNumber number of record, starting from 1, as in the preview, used in error messages
      */
-    protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
+    protected function prepareRecord(MatrixRecord $record, array $headerInfo, int $rowNumber): void
     {
         $entity = $this->getEntity($record);
         $this->touchedEntities[spl_object_id($entity)] = $entity;
@@ -130,7 +117,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                 if (ArrayTextType::class === $fieldDefinition->getClass()) {
                     $value = $this->parseValueForArrayType($fieldDefinition, $value);
                 } elseif (is_a($fieldDefinition->getClass(), AbstractEntityLookupType::class, true)) {
-                    $value = $this->findRelatedEntity($fieldDefinition, $value, $name);
+                    $value = $this->findRelatedEntity($fieldDefinition, $value, $name, $rowNumber);
                 }
             }
 
@@ -155,7 +142,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                     }
                 }
             } catch (TypeError $error) {
-                throw MatrixRecordInvalidDataTypeException::forField($this->currentRowNumber, $name, $error);
+                throw new MatrixRecordInvalidDataTypeException($rowNumber, $name, $error);
             }
         }
 
@@ -282,7 +269,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     /**
      * @throws MatrixRecordRelatedEntityNotFoundException
      */
-    private function findRelatedEntity(FormFieldDefinition $fieldDefinition, string|int|float|bool|null $value, string $columnName): ?object
+    private function findRelatedEntity(FormFieldDefinition $fieldDefinition, string|int|float|bool|null $value, string $columnName, int $rowNumber): ?object
     {
         if (null === $value || '' === $value) {
             return null;
@@ -296,7 +283,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         $entity = $this->relatedEntityFinder->find($class, $lookupField, $value);
         if (!$entity) {
-            throw MatrixRecordRelatedEntityNotFoundException::forField($this->currentRowNumber, $columnName);
+            throw new MatrixRecordRelatedEntityNotFoundException($rowNumber, $columnName);
         }
 
         return $entity;

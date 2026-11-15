@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Form\Type\MatrixType;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
@@ -21,7 +22,7 @@ class MatrixTypeTest extends TypeTestCase
     {
         parent::setUp();
 
-        $this->baseConfig = new BaseConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class));
+        $this->baseConfig = new BaseConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class), $this->createStub(RelatedEntityFinder::class));
     }
 
     public function testValidForm(): void
