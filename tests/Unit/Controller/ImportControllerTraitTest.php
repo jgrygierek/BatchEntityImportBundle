@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Unit\Controller;
 
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
+use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -30,6 +31,24 @@ class ImportControllerTraitTest extends TestCase
         $controller->selectFileTemplateName();
     }
 
+    public function testConfigurationSetByContainerIsUsed(): void
+    {
+        $configuration = $this->createStub(ImportConfigurationInterface::class);
+        $controller = $this->createController([]);
+        $controller->setImportConfiguration($configuration);
+
+        self::assertSame($configuration, $controller->importConfiguration());
+    }
+
+    public function testMissingConfigurationException(): void
+    {
+        $controller = $this->createController([]);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Import configuration is not set. Add #[AsImportController] attribute to');
+        $controller->importConfiguration();
+    }
+
     /**
      * @param array<string, mixed> $parameters
      */
@@ -43,6 +62,11 @@ class ImportControllerTraitTest extends TestCase
              */
             public function __construct(private readonly array $parameters)
             {
+            }
+
+            public function importConfiguration(): ImportConfigurationInterface
+            {
+                return $this->getImportConfiguration();
             }
 
             public function selectFileTemplateName(): string
@@ -61,11 +85,6 @@ class ImportControllerTraitTest extends TestCase
             }
 
             protected function getMatrixSaveActionUrl(): string
-            {
-                return '';
-            }
-
-            protected function getImportConfigurationClassName(): string
             {
                 return '';
             }

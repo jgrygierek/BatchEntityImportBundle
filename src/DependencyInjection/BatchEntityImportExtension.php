@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\DependencyInjection;
 
 use Exception;
-use JG\BatchEntityImportBundle\Controller\ImportConfigurationAutoInjectInterface;
-use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -25,23 +23,7 @@ class BatchEntityImportExtension extends Extension
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
 
-        $this->registerNewTagForConfiguration($container);
-        $this->registerNewTagForController($container);
         $this->setParameters($configs, $container);
-    }
-
-    private function registerNewTagForConfiguration(ContainerBuilder $container): void
-    {
-        $container
-            ->registerForAutoconfiguration(ImportConfigurationInterface::class)
-            ->addTag('batch_entity_import.configuration');
-    }
-
-    private function registerNewTagForController(ContainerBuilder $container): void
-    {
-        $container
-            ->registerForAutoconfiguration(ImportConfigurationAutoInjectInterface::class)
-            ->addTag('batch_entity_import.controller');
     }
 
     /**

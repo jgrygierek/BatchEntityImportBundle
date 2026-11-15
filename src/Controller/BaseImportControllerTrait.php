@@ -15,7 +15,6 @@ use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
@@ -34,7 +33,13 @@ trait BaseImportControllerTrait
 {
     protected ?ImportConfigurationInterface $importConfiguration = null;
 
-    abstract protected function getImportConfigurationClassName(): string;
+    /**
+     * Called by container for controller with #[AsImportController] attribute.
+     */
+    public function setImportConfiguration(ImportConfigurationInterface $importConfiguration): void
+    {
+        $this->importConfiguration = $importConfiguration;
+    }
 
     abstract protected function redirectToImport(): RedirectResponse;
 
@@ -201,10 +206,13 @@ trait BaseImportControllerTrait
         return \is_string($encoding) ? $encoding : null;
     }
 
+    /**
+     * @throws \LogicException
+     */
     protected function getImportConfiguration(): ImportConfigurationInterface
     {
-        if (!$this->importConfiguration) {
-            throw new ServiceNotFoundException($this->getImportConfigurationClassName());
+        if (!$this->importConfiguration instanceof ImportConfigurationInterface) {
+            throw new \LogicException(\sprintf('Import configuration is not set. Add #[AsImportController] attribute to "%s" and make sure that it is registered as autoconfigured service.', static::class));
         }
 
         return $this->importConfiguration;

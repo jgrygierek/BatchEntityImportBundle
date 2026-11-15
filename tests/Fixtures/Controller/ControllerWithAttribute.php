@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Fixtures\Controller;
 
+use JG\BatchEntityImportBundle\Attribute\AsImportController;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfigurationWithoutService;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class ControllerWithoutConfigurationService extends AbstractController
+#[AsImportController(configuration: BaseConfiguration::class)]
+class ControllerWithAttribute extends AbstractController
 {
     use ImportControllerTrait;
 
@@ -29,16 +31,11 @@ class ControllerWithoutConfigurationService extends AbstractController
 
     protected function redirectToImport(): RedirectResponse
     {
-        return $this->redirectToRoute('test_controller.no_service.import');
+        return $this->redirectToRoute('test_controller.with_attribute.import');
     }
 
     protected function getMatrixSaveActionUrl(): string
     {
-        return $this->generateUrl('test_controller.no_service.import_save');
-    }
-
-    protected function getImportConfigurationClassName(): string
-    {
-        return BaseConfigurationWithoutService::class;
+        return $this->generateUrl('test_controller.with_attribute.import_save');
     }
 }

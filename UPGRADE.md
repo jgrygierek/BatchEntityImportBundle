@@ -63,6 +63,41 @@
   $matrix->getHeaderInfo($configuration->getEntityClassName(), $configuration->getAllowedColumns())
   ```
 
+## Controller
+
+- Import configuration is passed to controller by new `#[AsImportController]` attribute. `ImportConfigurationAutoInjectInterface`, `ImportConfigurationAutoInjectTrait` and method `getImportConfigurationClassName()` were removed:
+
+  ```php
+  // before
+  class ImportController extends AbstractController implements ImportConfigurationAutoInjectInterface
+  {
+      use ImportControllerTrait;
+      use ImportConfigurationAutoInjectTrait;
+
+      protected function getImportConfigurationClassName(): string
+      {
+          return UserImportConfiguration::class;
+      }
+  }
+
+  // after
+  use JG\BatchEntityImportBundle\Attribute\AsImportController;
+
+  #[AsImportController(configuration: UserImportConfiguration::class)]
+  class ImportController extends AbstractController
+  {
+      use ImportControllerTrait;
+  }
+  ```
+
+- Controller has to be registered as autoconfigured service (default in Symfony), the same as before. The attribute has to be added to class of controller itself, it is not inherited from parent class.
+- Configuration is checked when container is built. If class used in the attribute is not registered as a service, container can not be built. Previously `ServiceNotFoundException` was thrown when controller was used.
+- Controller gets now the same instance of configuration as other services. Previously separate instances of all configurations were created for each controller.
+- Controller without the attribute throws `LogicException` when configuration is used, instead of `ServiceNotFoundException`.
+- Controller has new public method `setImportConfiguration(ImportConfigurationInterface $importConfiguration)`, added by `ImportControllerTrait`. If your controller already has method with this name, rename it. If your controller is not autoconfigured, call this method in definition of service.
+- Tags `batch_entity_import.configuration` and `batch_entity_import.controller` are no longer added to import configurations and controllers, and `AutoConfigureControllerCompilerPass` was removed.
+- Configuration can not be selected in runtime by `getImportConfigurationClassName()` anymore. If one controller was used for many imports, create separate controller for each configuration.
+
 ## Validation constraints
 
 - `MatrixRecordUnique` and `DatabaseEntityUnique` constraints no longer accept array of options, use named arguments:

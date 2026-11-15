@@ -8,12 +8,16 @@ use Doctrine\ORM\EntityRepository;
 use Generator;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithoutAttribute;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
+use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 
 class ImportControllerTraitTest extends AbstractWebTestCase
@@ -303,11 +307,21 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $this->checkDispatchedEvents(0);
     }
 
-    public function testImportConfigurationServiceNotFound(): void
+    public function testControllerUsesSharedConfigurationService(): void
+    {
+        $controller = self::getContainer()->get(ControllerWithAttribute::class);
+        $configuration = new ReflectionMethod($controller, 'getImportConfiguration')->invoke($controller);
+
+        self::assertInstanceOf(BaseConfiguration::class, $configuration);
+        self::assertSame(self::getContainer()->get(BaseConfiguration::class), $configuration);
+    }
+
+    public function testControllerWithoutAttributeException(): void
     {
         $this->client->catchExceptions(false);
-        $this->expectException(ServiceNotFoundException::class);
-        $this->client->request('GET', '/jg_batch_entity_import_bundle/import_no_service');
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(\sprintf('Import configuration is not set. Add #[AsImportController] attribute to "%s"', ControllerWithoutAttribute::class));
+        $this->client->request('GET', '/jg_batch_entity_import_bundle/import_without_attribute');
         $this->client->submitForm('btn-submit', ['file_import[file]' => __DIR__ . '/../../Fixtures/Resources/test.csv']);
 
         $this->checkDispatchedEvents(0);
