@@ -28,7 +28,7 @@ Install package via composer:
 composer require jgrygierek/batch-entity-import-bundle
 ```
 
-Add entry to `bundles.php` file:
+If your application uses Symfony Flex, bundle is registered automatically. Otherwise add entry to `config/bundles.php` file:
 
 ```
 JG\BatchEntityImportBundle\BatchEntityImportBundle::class => ['all' => true],

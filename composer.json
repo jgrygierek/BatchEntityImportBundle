@@ -43,7 +43,6 @@
         "symfony/translation-contracts": "^3.0",
         "symfony/twig-bundle": "^7.4|^8.0",
         "symfony/validator": "^7.4|^8.0",
-        "symfony/yaml": "^7.4|^8.0",
         "twig/twig": "^3.26"
     },
     "require-dev": {
@@ -61,7 +60,8 @@
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^7.4|^8.0",
         "symfony/dom-crawler": "^7.4|^8.0",
-        "symfony/security-bundle": "^7.4|^8.0"
+        "symfony/security-bundle": "^7.4|^8.0",
+        "symfony/yaml": "^7.4|^8.0"
     },
     "suggest": {
         "knplabs/doctrine-behaviors": "Use it for translatable records stored in database"

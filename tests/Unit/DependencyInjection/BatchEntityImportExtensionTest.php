@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Unit\DependencyInjection;
 
 use Generator;
-use JG\BatchEntityImportBundle\DependencyInjection\BatchEntityImportExtension;
+use JG\BatchEntityImportBundle\BatchEntityImportBundle;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
@@ -21,6 +21,7 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
     {
         parent::setUp();
 
+        $this->setKernelParameters($this->container);
         $this->load();
     }
 
@@ -75,7 +76,8 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
     {
         // new container is used, because the one from test case has disabled passes which check references
         $container = new ContainerBuilder();
-        new BatchEntityImportExtension()->load([], $container);
+        $this->setKernelParameters($container);
+        new BatchEntityImportBundle()->getContainerExtension()?->load([], $container);
         $container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true)->setPublic(true);
 
         $this->expectException(ServiceNotFoundException::class);
@@ -83,8 +85,17 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $container->compile();
     }
 
+    /**
+     * Parameters which are always set by kernel, extension of bundle requires them on Symfony 7.4.
+     */
+    private function setKernelParameters(ContainerBuilder $container): void
+    {
+        $container->setParameter('kernel.environment', 'test');
+        $container->setParameter('kernel.build_dir', sys_get_temp_dir());
+    }
+
     protected function getContainerExtensions(): array
     {
-        return [new BatchEntityImportExtension()];
+        return [new BatchEntityImportBundle()->getContainerExtension()];
     }
 }
