@@ -22,6 +22,18 @@
                 <source>validation.matrix.record.unique</source>
                 <target>This record should be unique for fields: %fields%.</target>
             </trans-unit>
+            <trans-unit id="validation.file.unreadable">
+                <source>validation.file.unreadable</source>
+                <target>File can not be read. It is corrupted or its content does not match the extension.</target>
+            </trans-unit>
+            <trans-unit id="validation.matrix.header.unique">
+                <source>validation.matrix.header.unique</source>
+                <target>Names of columns in header should be unique.</target>
+            </trans-unit>
+            <trans-unit id="validation.file.encoding">
+                <source>validation.file.encoding</source>
+                <target>Encoding of file is not recognized. Save the file as &quot;CSV UTF-8&quot; or use other format, e.g. xlsx.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

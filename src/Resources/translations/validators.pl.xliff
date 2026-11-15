@@ -22,6 +22,18 @@
                 <source>validation.matrix.record.unique</source>
                 <target>Ten rekord powinien być unikalny dla pól: %fields%.</target>
             </trans-unit>
+            <trans-unit id="validation.file.unreadable">
+                <source>validation.file.unreadable</source>
+                <target>Nie można odczytać pliku. Plik jest uszkodzony lub jego zawartość nie pasuje do rozszerzenia.</target>
+            </trans-unit>
+            <trans-unit id="validation.matrix.header.unique">
+                <source>validation.matrix.header.unique</source>
+                <target>Nazwy kolumn w nagłówku powinny być unikalne.</target>
+            </trans-unit>
+            <trans-unit id="validation.file.encoding">
+                <source>validation.file.encoding</source>
+                <target>Nie rozpoznano kodowania pliku. Zapisz plik jako &quot;CSV UTF-8&quot; lub użyj innego formatu, np. xlsx.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

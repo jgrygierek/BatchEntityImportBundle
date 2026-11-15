@@ -225,6 +225,84 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $this->checkDispatchedEvents(0);
     }
 
+    public function testUnreadableFileShowsError(): void
+    {
+        $path = sys_get_temp_dir() . '/batch_entity_import_unreadable.xlsx';
+        file_put_contents($path, 'this is not a spreadsheet');
+
+        try {
+            $this->submitSelectFileForm($path);
+        } finally {
+            unlink($path);
+        }
+
+        self::assertStringContainsString('File can not be read.', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+    }
+
+    public function testCsvWithUnknownEncodingShowsError(): void
+    {
+        $path = sys_get_temp_dir() . '/batch_entity_import_unknown_encoding.csv';
+        file_put_contents($path, (string) iconv('UTF-8', 'CP1250', "test_private_property,test_public_property\nŻaneta,Łódź\n"));
+
+        try {
+            $this->submitSelectFileForm($path);
+        } finally {
+            unlink($path);
+        }
+
+        self::assertStringContainsString('Encoding of file is not recognized.', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+    }
+
+    public function testFileWithDuplicatedHeaderShowsError(): void
+    {
+        $path = sys_get_temp_dir() . '/batch_entity_import_duplicated_header.csv';
+        file_put_contents($path, "test_private_property,test_private_property\na,b\n");
+
+        try {
+            $this->submitSelectFileForm($path);
+        } finally {
+            unlink($path);
+        }
+
+        self::assertStringContainsString('Names of columns in header should be unique.', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+    }
+
+    #[DataProvider('invalidPostDataProvider')]
+    public function testInvalidPostDataIsNotImported(array $parameters): void
+    {
+        $this->client->request('POST', '/jg_batch_entity_import_bundle/import_save', $parameters);
+
+        self::assertTrue($this->client->getResponse()->isRedirect(self::URL));
+        $this->client->followRedirect();
+        self::assertStringContainsString('Data not found', $this->client->getResponse()->getContent());
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        $this->checkDispatchedEvents(0);
+    }
+
+    public static function invalidPostDataProvider(): Generator
+    {
+        yield 'no data' => [[]];
+        yield 'matrix is not an array' => [['matrix' => 'abcd']];
+        yield 'records are not an array' => [['matrix' => ['records' => 'abcd']]];
+        yield 'record is not an array' => [['matrix' => ['records' => ['abcd']]]];
+        yield 'value is not scalar' => [['matrix' => ['records' => [['test_private_property' => ['a']]]]]];
+        yield 'invalid name of column' => [['matrix' => ['records' => [['test.private' => 'a']]]]];
+    }
+
+    public function testRecordsWithoutFirstIndexDoNotCauseError(): void
+    {
+        $this->client->request('POST', '/jg_batch_entity_import_bundle/import_save', [
+            'matrix' => ['records' => [5 => ['test_private_property' => 'a', 'test_public_property' => 'b', 'test-private-property2' => 'c']]],
+        ]);
+
+        self::assertTrue($this->client->getResponse()->isSuccessful());
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        $this->checkDispatchedEvents(0);
+    }
+
     public function testImportConfigurationServiceNotFound(): void
     {
         $this->client->catchExceptions(false);

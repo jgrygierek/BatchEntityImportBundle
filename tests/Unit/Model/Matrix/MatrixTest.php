@@ -27,6 +27,9 @@ class MatrixTest extends AbstractValidationTestCase
         yield [['', 'column_name'], [['column_name' => '']]];
         yield [['column-name'], [['column-name' => '']]];
         yield [['column name'], [['column name' => '']]];
+        yield [[' column_name '], [[' column_name ' => '']]];
+        yield [['0'], [['0' => '']]];
+        yield [['column_name', 'entity id', 'entity'], [['column_name' => '', 'entity id' => '', 'entity' => '']]];
     }
 
     #[DataProvider('getInvalidDataProvider')]
@@ -43,6 +46,9 @@ class MatrixTest extends AbstractValidationTestCase
         yield [['wrong@column!name'], [['column_name' => '']]];
         yield [['column_name'], []];
         yield [['column_name'], [[' ' => '']]];
+        yield 'duplicated names' => [['column_name', 'column_name'], [['column_name' => '']]];
+        yield 'duplicated names after normalization' => [['column name', 'column_name'], [['column_name' => '']]];
+        yield 'name can not be used as a name of form field' => [['-column_name'], [['-column_name' => '']]];
     }
 
     public function testRemoveColumnsWithEmptyHeader(): void

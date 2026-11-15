@@ -31,6 +31,7 @@ Importing entities with preview and edit features for Symfony.
   * [Set allowed file extensions](#set-allowed-file-extensions)
   * [Optimizing queries](#optimizing-queries)
 * [Creating controller](#creating-controller)
+  * [Encoding of CSV files](#encoding-of-csv-files)
 * [Events](#events)
 * [Translations](#translations)
 * [Overriding templates](#overriding-templates)
@@ -254,6 +255,27 @@ class ImportController extends AbstractController implements ImportConfiguration
     {
        return UserImportConfiguration::class;
     }
+}
+```
+
+### Encoding of CSV files
+
+Encoding of CSV file is never guessed. File encoded in Unicode (with BOM or with valid UTF-8 content) is always read correctly.
+Other files are rejected with error message, because their encoding can't be recognized reliably and wrong guess would silently break imported data.
+
+If your files use other encoding (for example `CP1250` for Central European languages), set it in bundle configuration:
+
+```yaml
+batch_entity_import:
+    csv_fallback_encoding: CP1250
+```
+
+or override this method in single controller:
+
+```php
+protected function getCsvFallbackEncoding(): ?string
+{
+    return 'CP1250';
 }
 ```
 

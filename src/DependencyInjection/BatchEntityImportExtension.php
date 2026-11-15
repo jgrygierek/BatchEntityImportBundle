@@ -53,6 +53,9 @@ class BatchEntityImportExtension extends Extension
         $configuration = new Configuration();
         $config = $processor->processConfiguration($configuration, $configs);
 
+        $csvFallbackEncoding = $config['csv_fallback_encoding'] ?? null;
+        $container->setParameter('batch_entity_import.csv_fallback_encoding', \is_string($csvFallbackEncoding) ? $csvFallbackEncoding : null);
+
         /** @var array<string,string> $templates */
         $templates = $config['templates'];
         $container->setParameter('batch_entity_import.templates', $templates);

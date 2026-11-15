@@ -18,6 +18,14 @@
                 <source>exception.database.save</source>
                 <target>Can't save data to database. Probably missing validation.</target>
             </trans-unit>
+            <trans-unit id="exception.file.encoding">
+                <source>exception.file.encoding</source>
+                <target>Encoding of file is not recognized.</target>
+            </trans-unit>
+            <trans-unit id="exception.file.read">
+                <source>exception.file.read</source>
+                <target>File can not be read.</target>
+            </trans-unit>
             <trans-unit id="exception.matrix.record.data.invalid_type">
                 <source>exception.matrix.record.data.invalid_type</source>
                 <target>Invalid type of data. Probably missing validation.</target>
