@@ -10,7 +10,7 @@ use Throwable;
 
 class EncodingHelper
 {
-    private const SAMPLE = 'a';
+    private const string SAMPLE = 'a';
 
     /**
      * Checks if content in given encoding can be converted to UTF-8.

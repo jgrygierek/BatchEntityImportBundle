@@ -18,9 +18,9 @@ class ImportControllerTraitTest extends AbstractWebTestCase
 {
     use SkippedTestsTrait;
 
-    private const DEFAULT_RECORDS_NUMBER = 20;
-    private const NEW_RECORDS_NUMBER = 30;
-    private const URL = '/jg_batch_entity_import_bundle/translatable/import';
+    private const int DEFAULT_RECORDS_NUMBER = 20;
+    private const int NEW_RECORDS_NUMBER = 30;
+    private const string URL = '/jg_batch_entity_import_bundle/translatable/import';
     protected KernelBrowser $client;
 
     protected function setUp(): void

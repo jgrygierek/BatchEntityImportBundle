@@ -13,21 +13,21 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [ '8.2', '8.5' ]
+                php: [ '8.3', '8.6' ]
                 symfony: [ '6.4.*', '7.4.*', '8.*' ]
                 dependencies: [ lowest, highest ]
                 knplabs: [ false ]
                 exclude:
                     # Symfony 8 requires PHP 8.4
-                    -   php: '8.2'
+                    -   php: '8.3'
                         symfony: '8.*'
                 include:
                     # knplabs/doctrine-behaviors is optional, so it is tested only with the oldest and the newest versions
-                    -   php: '8.2'
+                    -   php: '8.3'
                         symfony: '6.4.*'
                         dependencies: lowest
                         knplabs: true
-                    -   php: '8.5'
+                    -   php: '8.6'
                         symfony: '8.*'
                         dependencies: highest
                         knplabs: true

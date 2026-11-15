@@ -16,8 +16,8 @@ return RectorConfig::configure()
         __DIR__ . '/tests',
     ])
     ->withComposerBased(twig: true, doctrine: true, phpunit: true, symfony: true)
-    ->withPhpSets(php82: true)
-    ->withPhpVersion(PhpVersion::PHP_82)
+    ->withPhpSets(php83: true)
+    ->withPhpVersion(PhpVersion::PHP_83)
     ->withPreparedSets(
         typeDeclarations: true,
         instanceOf: true,

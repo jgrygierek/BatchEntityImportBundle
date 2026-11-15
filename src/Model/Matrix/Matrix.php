@@ -17,8 +17,8 @@ class Matrix
      * Modifier "D" is needed, because without it name ending with new line would be valid too.
      */
     public const COLUMN_NAME_PATTERN = '/^\w[\w -]*(:\w+)?$/D';
-    private const RESERVED_ENTITY_COLUMN_NAME = 'entity';
-    private const RESERVED_ENTITY_ID_COLUMN_NAME = 'entity_id';
+    private const string RESERVED_ENTITY_COLUMN_NAME = 'entity';
+    private const string RESERVED_ENTITY_ID_COLUMN_NAME = 'entity_id';
     /**
      * @var array<int, string>
      */

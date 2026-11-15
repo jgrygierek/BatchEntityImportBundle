@@ -19,7 +19,7 @@ use Throwable;
 
 class MatrixFactory
 {
-    private const CSV_DELIMITER_DETECTION_LENGTH = 65536;
+    private const int CSV_DELIMITER_DETECTION_LENGTH = 65536;
 
     /**
      * @param string|null $csvFallbackEncoding encoding used for CSV file which is not encoded in Unicode,
