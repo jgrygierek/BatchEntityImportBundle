@@ -28,6 +28,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Throwable;
+use TypeError;
 
 class ImportConfigurationTest extends AbstractWebTestCase
 {
@@ -277,6 +278,30 @@ class ImportConfigurationTest extends AbstractWebTestCase
         self::assertSame([], (new BaseConfiguration($this->entityManager, $this->eventDispatcher))->getAllowedColumns());
     }
 
+    public function testInvalidDataTypeExceptionContainsPosition(): void
+    {
+        $matrix = new Matrix(
+            ['test_private_property', 'test_public_property'],
+            [
+                ['test_private_property' => 'first', 'test_public_property' => 'first_public'],
+                ['test_private_property' => 'second', 'test_public_property' => 'second_public'],
+                // null can't be set to string property
+                ['test_private_property' => 'third', 'test_public_property' => null],
+            ],
+        );
+
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
+        try {
+            $config->import($matrix);
+            self::fail('Exception should be thrown.');
+        } catch (MatrixRecordInvalidDataTypeException $matrixRecordInvalidDataTypeException) {
+        }
+
+        self::assertSame('exception.matrix.record.data.invalid_type_in_field', $matrixRecordInvalidDataTypeException->getMessage());
+        self::assertSame(['%row%' => 3, '%column%' => 'test_public_property'], $matrixRecordInvalidDataTypeException->getTranslationParameters());
+        self::assertInstanceOf(TypeError::class, $matrixRecordInvalidDataTypeException->getPrevious());
+    }
+
     public function testFailedImportIsNotSavedByLaterFlush(): void
     {
         $existingEntity = new TestEntity();
@@ -396,14 +421,21 @@ class ImportConfigurationTest extends AbstractWebTestCase
         $matrix = new Matrix(
             ['test_private_property', 'test_related_entity'],
             [
-                ['test_private_property' => 'value_1', 'test_related_entity' => 'unknown'],
+                ['test_private_property' => 'value_1', 'test_related_entity' => 'first'],
+                ['test_private_property' => 'value_2', 'test_related_entity' => 'unknown'],
             ],
         );
 
         $config = new $configurationClass($this->entityManager, $this->eventDispatcher);
 
-        $this->expectException(MatrixRecordRelatedEntityNotFoundException::class);
-        $config->import($matrix);
+        try {
+            $config->import($matrix);
+            self::fail('Exception should be thrown.');
+        } catch (MatrixRecordRelatedEntityNotFoundException $matrixRecordRelatedEntityNotFoundException) {
+        }
+
+        self::assertSame('exception.matrix.record.related_entity.not_found_in_field', $matrixRecordRelatedEntityNotFoundException->getMessage());
+        self::assertSame(['%row%' => 2, '%column%' => 'test_related_entity'], $matrixRecordRelatedEntityNotFoundException->getTranslationParameters());
     }
 
     public static function entityLookupConfigurationProvider(): Generator
