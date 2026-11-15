@@ -98,9 +98,13 @@ public function getMatrixConstraints(): array
 If you want to pass some additional services to your configuration, just override constructor.
 
 ```php
-public function __construct(EntityManagerInterface $em, EventDispatcherInterface $eventDispatcher, TestService $service)
-{
-    parent::__construct($em, $eventDispatcher);
+public function __construct(
+    EntityManagerInterface $em,
+    EventDispatcherInterface $eventDispatcher,
+    RelatedEntityFinder $relatedEntityFinder,
+    TestService $service,
+) {
+    parent::__construct($em, $eventDispatcher, $relatedEntityFinder);
 
     $this->testService = $service;
 }
@@ -137,7 +141,6 @@ public function getAllowedColumns(): array
 - Names are compared the same way as names of columns with names of properties, so `first_name`, `first-name`, `first name` and `firstName` mean the same column.
 - Locale of translated column is ignored, so `name` allows also `name:en` and `name:pl`.
 - Empty array (default value) means that all columns are allowed. So if you build the list dynamically (e.g. it depends on role of user), make sure that it is never empty.
-- If your configuration does not extend `AbstractImportConfiguration`, it has to implement `AllowedColumnsConfigurationInterface` to use this feature.
 
 ## Set allowed file extensions
 

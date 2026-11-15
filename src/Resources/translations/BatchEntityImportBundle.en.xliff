@@ -26,17 +26,9 @@
                 <source>exception.file.read</source>
                 <target>File can not be read.</target>
             </trans-unit>
-            <trans-unit id="exception.matrix.record.data.invalid_type">
-                <source>exception.matrix.record.data.invalid_type</source>
-                <target>Invalid type of data. Probably missing validation.</target>
-            </trans-unit>
             <trans-unit id="exception.matrix.record.data.invalid_type_in_field">
                 <source>exception.matrix.record.data.invalid_type_in_field</source>
                 <target>Invalid type of data in row %row%, column "%column%". Probably missing validation.</target>
-            </trans-unit>
-            <trans-unit id="exception.matrix.record.related_entity.not_found">
-                <source>exception.matrix.record.related_entity.not_found</source>
-                <target>Related entity not found. Probably missing validation.</target>
             </trans-unit>
             <trans-unit id="exception.matrix.record.related_entity.not_found_in_field">
                 <source>exception.matrix.record.related_entity.not_found_in_field</source>

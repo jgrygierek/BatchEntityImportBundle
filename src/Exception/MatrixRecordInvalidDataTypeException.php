@@ -13,30 +13,11 @@ use Throwable;
 class MatrixRecordInvalidDataTypeException extends MatrixException
 {
     /**
-     * @param array<string, string|int> $translationParameters
+     * @param int $rowNumber number of record, starting from 1, as in the preview
      */
-    public function __construct(
-        string $message = 'exception.matrix.record.data.invalid_type',
-        array $translationParameters = [],
-        ?Throwable $previous = null,
-    ) {
-        parent::__construct($message, 0, $previous);
-        $this->translationParameters = $translationParameters;
-    }
-
-    /**
-     * @param int|null $rowNumber number of record, starting from 1, as in the preview; without it message has no position
-     */
-    public static function forField(?int $rowNumber, string $columnName, ?Throwable $previous = null): self
+    public function __construct(int $rowNumber, string $columnName, ?Throwable $previous = null)
     {
-        if (null === $rowNumber) {
-            return new self(previous: $previous);
-        }
-
-        return new self(
-            'exception.matrix.record.data.invalid_type_in_field',
-            ['%row%' => $rowNumber, '%column%' => $columnName],
-            $previous,
-        );
+        parent::__construct('exception.matrix.record.data.invalid_type_in_field', 0, $previous);
+        $this->translationParameters = ['%row%' => $rowNumber, '%column%' => $columnName];
     }
 }
