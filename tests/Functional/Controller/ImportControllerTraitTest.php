@@ -202,6 +202,29 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $this->checkDispatchedEvents(0);
     }
 
+    public function testTruncatedDataIsNotImported(): void
+    {
+        $limit = (int) ini_get('max_input_vars');
+        if ($limit <= 0) {
+            self::markTestSkipped('Limit "max_input_vars" is disabled.');
+        }
+
+        // number of fields is equal to the limit, so it is not possible to tell if PHP dropped the rest of them
+        $records = [];
+        for ($i = 0; $i < (int) ceil($limit / 2); ++$i) {
+            $records[] = ['test_private_property' => 'private_' . $i, 'test_public_property' => 'public_' . $i];
+        }
+
+        $this->client->request('POST', '/jg_batch_entity_import_bundle/import_save', ['matrix' => ['records' => $records]]);
+
+        self::assertTrue($this->client->getResponse()->isRedirect(self::URL));
+        $this->client->followRedirect();
+        self::assertStringContainsString('Too much data.', $this->client->getResponse()->getContent());
+        self::assertStringContainsString((string) $limit, $this->client->getResponse()->getContent());
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        $this->checkDispatchedEvents(0);
+    }
+
     public function testImportConfigurationServiceNotFound(): void
     {
         $this->client->catchExceptions(false);

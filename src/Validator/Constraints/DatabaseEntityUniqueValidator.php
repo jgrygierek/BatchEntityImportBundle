@@ -14,9 +14,6 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class DatabaseEntityUniqueValidator extends AbstractValidator
 {
-    private array $duplicatedRecords = [];
-    private array $correctRecords = [];
-
     public function __construct(private readonly EntityManagerInterface $entityManager)
     {
     }
@@ -27,28 +24,23 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
      */
     public function validate($value, $constraint): void
     {
-        $this->duplicatedRecords = [];
         $this->validateArguments($value, $constraint);
         $this->prepareContext();
 
+        // Results are cached only for single validation. Validator is a shared service,
+        // so results kept longer would be reused for other constraints, fields and requests.
+        $duplicationResults = [];
+
         foreach ($value->getRecords() as $index => $record) {
             $matrixDataToCompare = $this->getMatrixRecordDataToCompare($record, $constraint->fields);
-            if ($this->isCorrectRecord($matrixDataToCompare)) {
-                continue;
-            }
-
-            if ($this->isDuplicate($matrixDataToCompare)) {
-                $this->addErrorToMatrixRecord($record, $constraint, $index, $constraint->fields);
-
-                continue;
-            }
-
             $criteria = $this->buildCriteria($record, $matrixDataToCompare);
-            if ($this->isRecordDuplicatedInDatabase($this->entityManager, $constraint->entityClassName, $criteria)) {
+            // criteria contain identifier of overridden entity, so the same values
+            // are checked separately for new record and for record which overrides entity
+            $cacheKey = $this->getCriteriaHash($criteria);
+
+            $duplicationResults[$cacheKey] ??= $this->isRecordDuplicatedInDatabase($this->entityManager, $constraint->entityClassName, $criteria);
+            if ($duplicationResults[$cacheKey]) {
                 $this->addErrorToMatrixRecord($record, $constraint, $index, $constraint->fields);
-                $this->addDuplicate($matrixDataToCompare);
-            } else {
-                $this->markAsCorrectRecord($matrixDataToCompare);
             }
         }
     }
@@ -80,35 +72,18 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
     }
 
     /**
-     * @param array<string, scalar|null> $matrixDataToCompare
+     * @param array<string, array<int, array{0: string, 1: scalar|null}>> $criteria
      */
-    private function isDuplicate(array $matrixDataToCompare): bool
+    private function getCriteriaHash(array $criteria): string
     {
-        return array_key_exists($this->getHash($matrixDataToCompare), $this->duplicatedRecords);
-    }
+        $data = [];
+        foreach ($criteria as $fieldName => $conditions) {
+            foreach ($conditions as [$operator, $value]) {
+                $data[] = [$fieldName, $operator, (string) $value];
+            }
+        }
 
-    /**
-     * @param array<string, scalar|null> $matrixDataToCompare
-     */
-    private function isCorrectRecord(array $matrixDataToCompare): bool
-    {
-        return array_key_exists($this->getHash($matrixDataToCompare), $this->correctRecords);
-    }
-
-    /**
-     * @param array<string, scalar|null> $matrixDataToCompare
-     */
-    private function addDuplicate(array $matrixDataToCompare): void
-    {
-        $this->duplicatedRecords[$this->getHash($matrixDataToCompare)] = true;
-    }
-
-    /**
-     * @param array<string, scalar|null> $matrixDataToCompare
-     */
-    private function markAsCorrectRecord(array $matrixDataToCompare): void
-    {
-        $this->correctRecords[$this->getHash($matrixDataToCompare)] = true;
+        return md5(serialize($data));
     }
 
     /**

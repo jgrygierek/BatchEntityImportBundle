@@ -6,6 +6,10 @@
                 <source>error.data.not_found</source>
                 <target>Data not found</target>
             </trans-unit>
+            <trans-unit id="error.data.truncated">
+                <source>error.data.truncated</source>
+                <target>Too much data. Number of sent fields reached the limit of %limit% (PHP &quot;max_input_vars&quot; setting), so part of the data would be lost. Import smaller file or increase the limit.</target>
+            </trans-unit>
             <trans-unit id="exception.database.data.not_unique">
                 <source>exception.database.data.not_unique</source>
                 <target>Can't save data to database. Data is not unique.</target>

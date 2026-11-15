@@ -100,6 +100,13 @@ trait BaseImportControllerTrait
      */
     protected function doImportSave(Request $request, TranslatorInterface $translator): Response
     {
+        if ($this->isRequestDataTruncated($request)) {
+            $msg = $translator->trans('error.data.truncated', ['%limit%' => $this->getMaxInputVars()], 'BatchEntityImportBundle');
+            $this->addFlash('error', $msg);
+
+            return $this->redirectToImport();
+        }
+
         if (!isset($request->request->all('matrix')['records'])) {
             $msg = $translator->trans('error.data.not_found', [], 'BatchEntityImportBundle');
             $this->addFlash('error', $msg);
@@ -127,6 +134,30 @@ trait BaseImportControllerTrait
         $this->setErrorAsFlash($form->getErrors());
 
         return $this->prepareMatrixEditView($form, $matrix);
+    }
+
+    /**
+     * PHP silently drops all fields above "max_input_vars" limit, so part of records would be imported
+     * and the rest would be lost without any error. When number of received fields reaches the limit,
+     * it is not possible to tell if something was dropped, so such request is rejected.
+     */
+    protected function isRequestDataTruncated(Request $request): bool
+    {
+        $fieldsNumber = 0;
+        $data = $request->request->all();
+        array_walk_recursive($data, static function () use (&$fieldsNumber): void {
+            ++$fieldsNumber;
+        });
+
+        // limit can't be disabled in PHP, value lower than 1 means that it could not be read
+        $limit = $this->getMaxInputVars();
+
+        return $limit > 0 && $fieldsNumber >= $limit;
+    }
+
+    protected function getMaxInputVars(): int
+    {
+        return (int) \ini_get('max_input_vars');
     }
 
     protected function getImportConfiguration(): ImportConfigurationInterface

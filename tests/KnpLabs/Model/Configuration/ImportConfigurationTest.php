@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\KnpLabs\Model\Configuration;
 
 use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
+use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
@@ -91,5 +94,81 @@ class ImportConfigurationTest extends WebTestCase
         $translationPl = $item->translate('pl');
         self::assertSame('value_8', $translationPl->getTestTranslationProperty());
         self::assertSame('public_value_2', $item->testPublicProperty);
+    }
+
+    public function testFieldDefinitionIsUsedForTranslatedColumn(): void
+    {
+        $matrix = new Matrix(
+            ['test_private_property', 'test_translation_array:en', 'test_translation_array:pl'],
+            [
+                [
+                    'test_private_property' => 'value_1',
+                    'test_translation_array:en' => 'a|b',
+                    'test_translation_array:pl' => '',
+                ],
+            ],
+        );
+
+        $config = new class($this->entityManager, self::$kernel->getContainer()->get('event_dispatcher')) extends TranslatableEntityConfiguration {
+            public function getFieldsDefinitions(): array
+            {
+                return ['test_translation_array' => new FormFieldDefinition(ArrayTextType::class)];
+            }
+        };
+        $config->import($matrix);
+        $this->entityManager->clear();
+
+        /** @var TranslatableEntity $item */
+        $item = $this->entityManager->getRepository(TranslatableEntity::class)->findOneBy([]);
+        /** @var TranslatableEntityTranslation $translationEn */
+        $translationEn = $item->translate('en', false);
+        self::assertSame(['a', 'b'], $translationEn->getTestTranslationArray());
+        /** @var TranslatableEntityTranslation $translationPl */
+        $translationPl = $item->translate('pl', false);
+        self::assertSame([], $translationPl->getTestTranslationArray());
+    }
+
+    public function testFailedImportIsNotSavedByLaterFlush(): void
+    {
+        $existingEntity = new TranslatableEntity();
+        $existingEntity->setTestPrivateProperty('existing');
+        /** @var TranslatableEntityTranslation $translation */
+        $translation = $existingEntity->translate('en', false);
+        $translation->setTestTranslationProperty('existing_en');
+        $existingEntity->mergeNewTranslations();
+        $this->entityManager->persist($existingEntity);
+        $this->entityManager->flush();
+
+        $header = ['test_private_property', 'test_public_property', 'test_translation_property:en', 'test_translation_property:pl'];
+        $matrix = new Matrix(
+            $header,
+            [
+                array_combine($header, ['changed', 'public', 'changed_en', 'new_pl']),
+                array_combine($header, ['new', 'public', 'new_en', 'new_pl']),
+                // null can't be set to string property
+                array_combine($header, ['invalid', null, 'invalid_en', 'invalid_pl']),
+            ],
+        );
+        $matrix->getRecords()[0]->setEntity($existingEntity);
+
+        $config = self::$kernel->getContainer()->get(TranslatableEntityConfiguration::class);
+        try {
+            $config->import($matrix);
+            self::fail('Exception should be thrown.');
+        } catch (MatrixRecordInvalidDataTypeException) {
+        }
+
+        // e.g. flush called by some listener later in the same request
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $items = $this->entityManager->getRepository(TranslatableEntity::class)->findAll();
+        self::assertCount(1, $items);
+        self::assertSame('existing', $items[0]->getTestPrivateProperty());
+        self::assertCount(1, $items[0]->getTranslations());
+        /** @var TranslatableEntityTranslation $translationEn */
+        $translationEn = $items[0]->translate('en', false);
+        self::assertSame('existing_en', $translationEn->getTestTranslationProperty());
+        self::assertCount(1, $this->entityManager->getRepository(TranslatableEntityTranslation::class)->findAll());
     }
 }

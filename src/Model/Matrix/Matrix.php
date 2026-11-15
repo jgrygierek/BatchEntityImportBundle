@@ -34,7 +34,7 @@ class Matrix
 
     /**
      * @param array<string|null> $header
-     * @param array<array<string, string|int>> $recordsData
+     * @param array<array<string, scalar|null>> $recordsData
      */
     public function __construct(array $header = [], array $recordsData = [])
     {
@@ -82,11 +82,14 @@ class Matrix
     }
 
     /**
-     * @param array<string, string|int> $data
+     * @param array<string, scalar|null> $data
      */
     private function getEntityIdValue(array $data): int|string|null
     {
-        return $data[self::RESERVED_ENTITY_ID_COLUMN_NAME] ?? null;
+        $entityId = $data[self::RESERVED_ENTITY_ID_COLUMN_NAME] ?? null;
+
+        // identifier can't be float or bool
+        return \is_int($entityId) || \is_string($entityId) ? $entityId : null;
     }
 
     /**
@@ -104,9 +107,9 @@ class Matrix
     }
 
     /**
-     * @param array<string, string|int> $data
+     * @param array<string, scalar|null> $data
      *
-     * @return array<string, string|int>
+     * @return array<string, scalar|null>
      */
     private function clearRecordData(array $data): array
     {

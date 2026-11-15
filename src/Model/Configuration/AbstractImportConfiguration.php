@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,12 +24,15 @@ use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
 use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Throwable;
 use TypeError;
 
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
     /** @var object[] */
     protected array $updatedEntities = [];
+    /** @var array<int, object> entities touched during import, indexed by object id */
+    private array $touchedEntities = [];
     private readonly RelatedEntityFinder $relatedEntityFinder;
 
     /**
@@ -63,12 +67,21 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     public function import(Matrix $matrix): void
     {
         $this->updatedEntities = [];
+        $this->touchedEntities = [];
 
         $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName());
-        foreach ($matrix->getRecords() as $record) {
-            $this->prepareRecord($record, $headerInfo);
+        try {
+            foreach ($matrix->getRecords() as $record) {
+                $this->prepareRecord($record, $headerInfo);
+            }
+        } catch (Throwable $e) {
+            // not only exceptions of this bundle, incomplete import can't be left in entity manager in any case
+            $this->revertChanges();
+
+            throw $e;
         }
 
+        $this->touchedEntities = [];
         $this->save();
     }
 
@@ -78,6 +91,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
     {
         $entity = $this->getEntity($record);
+        $this->touchedEntities[spl_object_id($entity)] = $entity;
         $data = $record->getData();
         $fieldDefinitions = $this->getFieldsDefinitions();
 
@@ -91,8 +105,9 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             $propertyName = ColumnNameHelper::toCamelCase($name);
             $setterName = ColumnNameHelper::getSetterName($name);
 
-            if (isset($fieldDefinitions[$name])) {
-                $fieldDefinition = $fieldDefinitions[$name];
+            // the same key as in MatrixRecordType, so definition is used also for translated columns, e.g. "name:en"
+            $fieldDefinition = $fieldDefinitions[$name] ?? $fieldDefinitions[ColumnNameHelper::removeTranslationSuffix($name)] ?? null;
+            if ($fieldDefinition) {
                 if (ArrayTextType::class === $fieldDefinition->getClass()) {
                     $value = $this->parseValueForArrayType($fieldDefinition, $value);
                 } elseif (is_a($fieldDefinition->getClass(), AbstractEntityLookupType::class, true)) {
@@ -132,6 +147,51 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         }
 
         $this->updatedEntities[] = $entity;
+    }
+
+    /**
+     * When import fails in the middle, records prepared so far are already persisted or modified.
+     * Without reverting them, any later flush in the same request would save incomplete import.
+     */
+    protected function revertChanges(): void
+    {
+        $unitOfWork = $this->em->getUnitOfWork();
+        $entities = $this->touchedEntities;
+        foreach ($this->updatedEntities as $entity) {
+            $entities[spl_object_id($entity)] = $entity;
+        }
+
+        foreach ($entities as $entity) {
+            if (\interface_exists(TranslatableInterface::class) && $entity instanceof TranslatableInterface) {
+                $this->revertTranslations($entity->getNewTranslations(), $entity->getTranslations());
+            }
+
+            if ($unitOfWork->isScheduledForInsert($entity)) {
+                $this->em->detach($entity);
+            } elseif ($this->em->contains($entity)) {
+                $this->em->refresh($entity);
+            }
+        }
+
+        $this->updatedEntities = [];
+        $this->touchedEntities = [];
+    }
+
+    /**
+     * Arguments are not typed, because KnpLabs package is optional, so its types are not always known.
+     */
+    private function revertTranslations(mixed $newTranslations, mixed $translations): void
+    {
+        if ($newTranslations instanceof Collection) {
+            $newTranslations->clear();
+        }
+
+        $unitOfWork = $this->em->getUnitOfWork();
+        foreach (is_iterable($translations) ? $translations : [] as $translation) {
+            if (\is_object($translation) && $this->em->contains($translation) && !$unitOfWork->isScheduledForInsert($translation)) {
+                $this->em->refresh($translation);
+            }
+        }
     }
 
     protected function save(): void

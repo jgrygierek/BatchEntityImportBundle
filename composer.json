@@ -30,7 +30,7 @@
         "symfony/form": "^6.4|^7.0|^8.0",
         "symfony/framework-bundle": "^6.4|^7.0|^8.0",
         "symfony/property-access": "^6.4|^7.0|^8.0",
-        "symfony/translation": "^6.4|^7.0|^8.0",
+        "symfony/translation": "^6.4.3|^7.0.3|^8.0",
         "symfony/twig-bundle": "^6.4|^7.0|^8.0",
         "symfony/validator": "^6.4|^7.0|^8.0",
         "twig/twig": "^3.26"
