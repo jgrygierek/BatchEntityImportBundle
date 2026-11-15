@@ -14,6 +14,7 @@ use JG\BatchEntityImportBundle\Form\Type\EntityLookupType;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupConfiguration;
@@ -23,6 +24,7 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestRelatedEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use RuntimeException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 
@@ -244,6 +246,75 @@ class ImportConfigurationTest extends AbstractWebTestCase
         ];
     }
 
+    public function testFailedImportIsNotSavedByLaterFlush(): void
+    {
+        $existingEntity = new TestEntity();
+        $existingEntity->setTestPrivateProperty('existing');
+        $existingEntity->testPublicProperty = 'existing_public';
+        $this->entityManager->persist($existingEntity);
+        $this->entityManager->flush();
+
+        $matrix = new Matrix(
+            ['test_private_property', 'test_public_property'],
+            [
+                ['test_private_property' => 'changed', 'test_public_property' => 'changed_public'],
+                ['test_private_property' => 'new', 'test_public_property' => 'new_public'],
+                // null can't be set to string property
+                ['test_private_property' => 'invalid', 'test_public_property' => null],
+            ],
+        );
+        $matrix->getRecords()[0]->setEntity($existingEntity);
+
+        $config = new BaseConfiguration($this->entityManager, $this->eventDispatcher);
+        try {
+            $config->import($matrix);
+            self::fail('Exception should be thrown.');
+        } catch (MatrixRecordInvalidDataTypeException) {
+        }
+
+        self::assertSame('existing', $existingEntity->getTestPrivateProperty());
+        self::assertSame('existing_public', $existingEntity->testPublicProperty);
+
+        // e.g. flush called by some listener later in the same request
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $items = $this->entityManager->getRepository(TestEntity::class)->findAll();
+        self::assertCount(1, $items);
+        self::assertSame('existing', $items[0]->getTestPrivateProperty());
+        self::assertSame('existing_public', $items[0]->testPublicProperty);
+    }
+
+    public function testImportFailedWithOtherExceptionIsNotSavedByLaterFlush(): void
+    {
+        $matrix = new Matrix(
+            ['test_private_property'],
+            [['test_private_property' => 'value_1'], ['test_private_property' => 'value_2']],
+        );
+
+        $config = new class($this->entityManager, $this->eventDispatcher) extends BaseConfiguration {
+            protected function getNewEntity(MatrixRecord $record): object
+            {
+                if ('value_2' === $record->getData()['test_private_property']) {
+                    throw new RuntimeException('Not an exception of this bundle.');
+                }
+
+                return parent::getNewEntity($record);
+            }
+        };
+
+        try {
+            $config->import($matrix);
+            self::fail('Exception should be thrown.');
+        } catch (RuntimeException) {
+        }
+
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        self::assertCount(0, $this->entityManager->getRepository(TestEntity::class)->findAll());
+    }
+
     /**
      * @param class-string<AbstractImportConfiguration> $configurationClass
      */
@@ -367,7 +438,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ['test_private_property' => 'value_1', 'test_related_entity' => 2.0],
             ['test_private_property' => 'value_2', 'test_related_entity' => 1],
         ];
-        $config->import(new Matrix(['test_private_property', 'test_related_entity'], $records)); // @phpstan-ignore argument.type
+        $config->import(new Matrix(['test_private_property', 'test_related_entity'], $records));
         $this->entityManager->clear();
 
         $repository = $this->entityManager->getRepository(TestEntity::class);

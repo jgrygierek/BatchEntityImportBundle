@@ -17,6 +17,8 @@ class TranslatableEntityTranslation extends AbstractEntity implements Translatio
 
     #[ORM\Column(type: 'string')]
     private string $testTranslationProperty = '';
+    #[ORM\Column(type: 'json', nullable: true)]
+    private array $testTranslationArray = [];
 
     public function __toString(): string
     {
@@ -26,6 +28,16 @@ class TranslatableEntityTranslation extends AbstractEntity implements Translatio
     public function getTestTranslationProperty(): string
     {
         return $this->testTranslationProperty;
+    }
+
+    public function getTestTranslationArray(): array
+    {
+        return $this->testTranslationArray;
+    }
+
+    public function setTestTranslationArray(array $testTranslationArray): void
+    {
+        $this->testTranslationArray = $testTranslationArray;
     }
 
     public function setTestTranslationProperty(string $testTranslationProperty): void

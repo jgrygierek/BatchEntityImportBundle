@@ -6,6 +6,10 @@
                 <source>error.data.not_found</source>
                 <target>Brak danych</target>
             </trans-unit>
+            <trans-unit id="error.data.truncated">
+                <source>error.data.truncated</source>
+                <target>Zbyt dużo danych. Liczba przesłanych pól osiągnęła limit %limit% (ustawienie PHP &quot;max_input_vars&quot;), więc część danych zostałaby utracona. Zaimportuj mniejszy plik lub zwiększ limit.</target>
+            </trans-unit>
             <trans-unit id="exception.database.data.not_unique">
                 <source>exception.database.data.not_unique</source>
                 <target>Nie można zapisać danych do bazy. Podane dane nie są unikalne.</target>

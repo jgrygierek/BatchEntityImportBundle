@@ -1,3 +1,24 @@
+# UPGRADE TO 3.12
+
+## Validation constraints
+
+- `MatrixRecordUnique` and `DatabaseEntityUnique` constraints can be configured with named arguments. It is recommended way now:
+
+  ```php
+  new MatrixRecordUnique(fields: ['field_name']),
+  new DatabaseEntityUnique(entityClassName: $this->getEntityClassName(), fields: ['field_name'], message: 'custom message'),
+  ```
+
+- Array of options passed as first argument is still supported. Options `message`, `groups` and `payload` passed this way were ignored on Symfony 8, now they work again.
+- Methods `getDefaultOption()` and `getRequiredOptions()` were removed from both constraints. Unknown option throws `InvalidOptionsException`.
+- `DatabaseEntityUnique` no longer keeps results between validations and checks record overriding an entity separately from a new record with the same values.
+
+## Import
+
+- When import fails before saving (e.g. `MatrixRecordInvalidDataTypeException`), changes made to entities so far are reverted: new entities are detached and overridden entities are refreshed from database. If you want to change this behaviour, override `AbstractImportConfiguration::revertChanges()`.
+- Field definition is now used during import also for translated columns (e.g. definition `roles` for column `roles:en`), the same way as in edit form.
+- Request with number of fields reaching PHP `max_input_vars` limit is rejected with error message, because PHP silently drops fields above this limit. To import bigger files, increase `max_input_vars`. Check can be changed by overriding `isRequestDataTruncated()` method in controller.
+
 # UPGRADE TO 3.10
 
 ## Import relations

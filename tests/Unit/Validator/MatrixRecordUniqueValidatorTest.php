@@ -11,6 +11,7 @@ use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUniqueValidator;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Validator\Constraints\Blank;
+use Symfony\Component\Validator\Exception\InvalidOptionsException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 use TypeError;
@@ -159,6 +160,71 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
                 ],
             ],
         ];
+    }
+
+    public function testValuesWithSeparatorAreNotMixed(): void
+    {
+        $matrix = MatrixFactory::createFromPostData([
+            ['field_1' => 'a--b', 'field_2' => 'c'],
+            ['field_1' => 'a', 'field_2' => 'b--c'],
+        ]);
+        $this->validator->validate($matrix, new MatrixRecordUnique(fields: ['field_1', 'field_2']));
+        $this->assertNoViolation();
+    }
+
+    public function testValuesWithInvalidUtf8AreDistinguished(): void
+    {
+        // e.g. CSV file in Windows-1250 encoding: "\xA3" is "Ł" and "\xAF" is "Ż"
+        $matrix = MatrixFactory::createFromPostData([
+            ['field_1' => "\xA3ak"],
+            ['field_1' => "\xAFak"],
+        ]);
+        $this->validator->validate($matrix, new MatrixRecordUnique(fields: ['field_1']));
+        $this->assertNoViolation();
+    }
+
+    public function testNamedArguments(): void
+    {
+        $constraint = new MatrixRecordUnique(fields: ['field_1'], message: 'custom', groups: ['group_1']);
+
+        $this->assertSame(['field_1'], $constraint->fields);
+        $this->assertSame('custom', $constraint->message);
+        $this->assertSame(['group_1'], $constraint->groups);
+    }
+
+    public function testLegacyOptions(): void
+    {
+        $constraint = new MatrixRecordUnique(['fields' => ['field_1'], 'message' => 'custom', 'groups' => ['group_1'], 'payload' => 'payload']);
+
+        $this->assertSame(['field_1'], $constraint->fields);
+        $this->assertSame('custom', $constraint->message);
+        $this->assertSame(['group_1'], $constraint->groups);
+        $this->assertSame('payload', $constraint->payload);
+    }
+
+    public function testLegacyOptionsWithSingleStrings(): void
+    {
+        $constraint = new MatrixRecordUnique(['fields' => ['field_1'], 'groups' => 'group_1']);
+
+        $this->assertSame(['group_1'], $constraint->groups);
+    }
+
+    public function testInvalidTypeOfLegacyStringOptionException(): void
+    {
+        $this->expectExceptionObject(new InvalidOptionsException(\sprintf('The option "message" of constraint "%s" should be a string.', MatrixRecordUnique::class), ['message']));
+        new MatrixRecordUnique(['fields' => ['field_1'], 'message' => 123]);
+    }
+
+    public function testInvalidTypeOfLegacyListOptionException(): void
+    {
+        $this->expectExceptionObject(new InvalidOptionsException(\sprintf('The option "groups" of constraint "%s" should be a string or an array of strings.', MatrixRecordUnique::class), ['groups']));
+        new MatrixRecordUnique(['fields' => ['field_1'], 'groups' => [123]]);
+    }
+
+    public function testUnknownLegacyOptionException(): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+        new MatrixRecordUnique(['fields' => ['field_1'], 'unknown' => 1]);
     }
 
     public function testInvalidFieldNameException(): void

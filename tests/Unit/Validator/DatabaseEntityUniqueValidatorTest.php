@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Validator;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\UnitOfWork;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
@@ -14,6 +15,7 @@ use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Validator\Constraints\Blank;
+use Symfony\Component\Validator\Exception\InvalidOptionsException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 use TypeError;
@@ -72,6 +74,128 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $violations = $this->context->getViolations();
         $this->assertCount(2, $violations);
         $this->assertSame($matrix->getRecords()[0], $violations->get(0)->getInvalidValue());
+    }
+
+    public function testResultsAreNotSharedBetweenValidations(): void
+    {
+        $queryMock = $this->createMock(Query::class);
+        $queryMock->expects($this->exactly(2))->method('getArrayResult')->willReturnOnConsecutiveCalls([], ['']);
+        $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
+
+        $matrix = MatrixFactory::createFromPostData([['field_1' => 'abc', 'field_2' => 'abc']]);
+
+        $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
+        $this->assertCount(0, $this->context->getViolations());
+
+        // the same value, but other field - result of first validation can't be reused
+        $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_2']));
+        $this->assertCount(1, $this->context->getViolations());
+    }
+
+    public function testTheSameValuesAreQueriedOnce(): void
+    {
+        $queryMock = $this->createMock(Query::class);
+        $queryMock->expects($this->once())->method('getArrayResult')->willReturn([]);
+        $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
+
+        $matrix = MatrixFactory::createFromPostData([['field_1' => 'abc'], ['field_1' => 'abc']]);
+
+        $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
+        $this->assertNoViolation();
+    }
+
+    public function testValuesWithInvalidUtf8AreQueriedSeparately(): void
+    {
+        $queryMock = $this->createMock(Query::class);
+        $queryMock->expects($this->exactly(2))->method('getArrayResult')->willReturnOnConsecutiveCalls([], ['']);
+        $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
+
+        // e.g. CSV file in Windows-1250 encoding: "\xA3" is "Ł" and "\xAF" is "Ż"
+        $matrix = MatrixFactory::createFromPostData([['field_1' => "\xA3ak"], ['field_1' => "\xAFak"]]);
+
+        $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
+        $this->assertCount(1, $this->context->getViolations());
+    }
+
+    public function testOverriddenEntityIsCheckedSeparatelyFromNewRecord(): void
+    {
+        $overriddenEntity = new TestEntity();
+        $unitOfWorkMock = $this->createMock(UnitOfWork::class);
+        $unitOfWorkMock->method('getEntityIdentifier')->with($overriddenEntity)->willReturn(['id' => 5]);
+        $this->entityManagerMock->method('getUnitOfWork')->willReturn($unitOfWorkMock);
+
+        // record which overrides entity is not duplicated, but new record with the same value is
+        $queryMock = $this->createMock(Query::class);
+        $queryMock->expects($this->exactly(2))->method('getArrayResult')->willReturnOnConsecutiveCalls([], ['']);
+        $dqls = [];
+        $this->entityManagerMock->method('createQuery')->willReturnCallback(static function (string $dql) use (&$dqls, $queryMock): Query {
+            $dqls[] = $dql;
+
+            return $queryMock;
+        });
+
+        $matrix = MatrixFactory::createFromPostData([['field_1' => 'abc'], ['field_1' => 'abc']]);
+        $matrix->getRecords()[0]->setEntity($overriddenEntity);
+
+        $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
+
+        $violations = $this->context->getViolations();
+        $this->assertCount(1, $violations);
+        $this->assertSame($matrix->getRecords()[1], $violations->get(0)->getInvalidValue());
+        $this->assertStringContainsString('c.id != :param_1', $dqls[0]);
+        $this->assertStringNotContainsString('c.id', $dqls[1]);
+    }
+
+    public function testNamedArguments(): void
+    {
+        $constraint = new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1'], message: 'custom', groups: ['group_1']);
+
+        $this->assertSame(TestEntity::class, $constraint->entityClassName);
+        $this->assertSame(['field_1'], $constraint->fields);
+        $this->assertSame('custom', $constraint->message);
+        $this->assertSame(['group_1'], $constraint->groups);
+    }
+
+    public function testLegacyOptions(): void
+    {
+        $constraint = new DatabaseEntityUnique([
+            'entityClassName' => TestEntity::class,
+            'fields' => ['field_1'],
+            'message' => 'custom',
+            'groups' => ['group_1'],
+            'payload' => 'payload',
+        ]);
+
+        $this->assertSame(TestEntity::class, $constraint->entityClassName);
+        $this->assertSame(['field_1'], $constraint->fields);
+        $this->assertSame('custom', $constraint->message);
+        $this->assertSame(['group_1'], $constraint->groups);
+        $this->assertSame('payload', $constraint->payload);
+    }
+
+    public function testLegacyOptionsWithSingleStrings(): void
+    {
+        $constraint = new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'groups' => 'group_1']);
+
+        $this->assertSame(['group_1'], $constraint->groups);
+    }
+
+    public function testInvalidTypeOfLegacyStringOptionException(): void
+    {
+        $this->expectExceptionObject(new InvalidOptionsException(\sprintf('The option "message" of constraint "%s" should be a string.', DatabaseEntityUnique::class), ['message']));
+        new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'message' => 123]);
+    }
+
+    public function testInvalidTypeOfLegacyListOptionException(): void
+    {
+        $this->expectExceptionObject(new InvalidOptionsException(\sprintf('The option "groups" of constraint "%s" should be a string or an array of strings.', DatabaseEntityUnique::class), ['groups']));
+        new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'groups' => [123]]);
+    }
+
+    public function testUnknownLegacyOptionException(): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+        new DatabaseEntityUnique(['entityClassName' => TestEntity::class, 'fields' => ['field_1'], 'unknown' => 1]);
     }
 
     public function testInvalidFieldNameException(): void

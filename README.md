@@ -121,7 +121,7 @@ public function getFieldsDefinitions(): array
                 'attr' => [
                     'rows' => 2,
                 ],
-                'constraints' => [new Length(['max' => 255])],
+                'constraints' => [new Length(max: 255)],
             ]
         ),
     ];
@@ -144,8 +144,8 @@ use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
 public function getMatrixConstraints(): array
 {
     return [
-        new MatrixRecordUnique(['fields' => ['field_name']]),
-        new DatabaseEntityUnique(['entityClassName' => $this->getEntityClassName(), 'fields' => ['field_name']]),
+        new MatrixRecordUnique(fields: ['field_name']),
+        new DatabaseEntityUnique(entityClassName: $this->getEntityClassName(), fields: ['field_name']),
     ];
 }
 ```

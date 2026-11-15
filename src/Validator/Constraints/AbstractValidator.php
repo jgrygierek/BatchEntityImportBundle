@@ -41,6 +41,8 @@ abstract class AbstractValidator extends ConstraintValidator
      */
     protected function getHash(array $data): string
     {
-        return md5(implode('--', $data));
+        // Values are serialized separately, so e.g. ['a--b', 'c'] and ['a', 'b--c'] are not treated as the same data.
+        // Serialization is binary safe, so values with invalid UTF-8 (e.g. file in other encoding) are still distinguished.
+        return md5(serialize(array_map(strval(...), array_values($data))));
     }
 }
