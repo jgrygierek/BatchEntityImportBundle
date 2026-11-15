@@ -36,7 +36,7 @@ JG\BatchEntityImportBundle\BatchEntityImportBundle::class => ['all' => true],
 
 ## Documentation
 
-* [Configuration class](docs/configuration.md) - entity to import, types of fields, validation, allowed file extensions.
+* [Configuration class](docs/configuration.md) - entity to import, types of fields, validation, allowed columns and file extensions.
 * [Controller](docs/controller.md) - controller with import actions, events dispatched after import.
 * [Import files](docs/files.md) - rules for header and rows, CSV delimiter and encoding, size limit, translatable columns, full example of file.
 * [Overriding templates](docs/templates.md) - global and controller-specific templates, main layout, additional data.

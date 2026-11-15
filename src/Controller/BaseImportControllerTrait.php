@@ -9,6 +9,7 @@ use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
 use JG\BatchEntityImportBundle\Exception\FileEncodingException;
 use JG\BatchEntityImportBundle\Exception\FileReadException;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
+use JG\BatchEntityImportBundle\Model\Configuration\AllowedColumnsConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\FileImport;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
@@ -111,7 +112,10 @@ trait BaseImportControllerTrait
         return $this->prepareView(
             $this->getMatrixEditTemplateName(),
             [
-                'header_info' => $matrix->getHeaderInfo($configuration->getEntityClassName()),
+                'header_info' => $matrix->getHeaderInfo(
+                    $configuration->getEntityClassName(),
+                    $configuration instanceof AllowedColumnsConfigurationInterface ? $configuration->getAllowedColumns() : [],
+                ),
                 'form' => $form->createView(),
                 'importConfiguration' => $configuration,
             ]

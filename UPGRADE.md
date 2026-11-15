@@ -1,3 +1,20 @@
+# UPGRADE TO 3.13
+
+## Allowed columns
+
+- List of columns which can be imported can be defined in import configuration. By default nothing changes and all columns are allowed, but it is recommended to define the list, because without it user who prepares the file can set every property of entity which has a setter or is public.
+
+  ```php
+  public function getAllowedColumns(): array
+  {
+      return ['user_name', 'age', 'email'];
+  }
+  ```
+
+- Columns which are not on the list are marked in preview and skipped during import, the same way as unknown columns.
+- Method is defined in new `AllowedColumnsConfigurationInterface`, which is implemented by `AbstractImportConfiguration`. If your configuration implements only `ImportConfigurationInterface`, nothing changes until you implement the new interface too.
+- `Matrix::getHeaderInfo()` has new optional argument `array $allowedColumns = []`. If you override `prepareMatrixEditView()` in your controller, pass allowed columns to it, otherwise not allowed columns will not be marked in preview (they are skipped during import anyway).
+
 # UPGRADE TO 3.12
 
 ## Validation constraints
@@ -52,6 +69,12 @@
 ## Saving data
 
 - Request with invalid structure of data (e.g. modified manually) is rejected with "Data not found" message instead of error 500.
+- Entity selected in `entity_id` column is preselected in preview also when its identifier is passed as integer (e.g. when matrix is created in your code). Previously only identifiers passed as strings were preselected.
+
+## Dependencies
+
+- Packages used directly by bundle are now listed in its requirements: `doctrine/collections`, `doctrine/dbal`, `doctrine/persistence`, `symfony/event-dispatcher-contracts`, `symfony/http-foundation`, `symfony/http-kernel`, `symfony/options-resolver`, `symfony/service-contracts` and `symfony/translation-contracts`. All of them were already installed as dependencies of other required packages, and their allowed versions are not narrowed, so nothing has to be changed in your project.
+- Minimal version of `symfony/translation` is `6.4.3` for Symfony 6.4 and `7.0.3` for Symfony 7.
 
 # UPGRADE TO 3.10
 
