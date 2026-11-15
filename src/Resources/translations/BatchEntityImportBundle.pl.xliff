@@ -30,9 +30,17 @@
                 <source>exception.matrix.record.data.invalid_type</source>
                 <target>Nieprawidłowy format danych. Prawdopodobnie brakuje walidacji lub pole posiada zły typ.</target>
             </trans-unit>
+            <trans-unit id="exception.matrix.record.data.invalid_type_in_field">
+                <source>exception.matrix.record.data.invalid_type_in_field</source>
+                <target>Nieprawidłowy format danych w wierszu %row%, w kolumnie „%column%”. Prawdopodobnie brakuje walidacji lub pole posiada zły typ.</target>
+            </trans-unit>
             <trans-unit id="exception.matrix.record.related_entity.not_found">
                 <source>exception.matrix.record.related_entity.not_found</source>
                 <target>Nie znaleziono powiązanego rekordu. Prawdopodobnie brakuje walidacji.</target>
+            </trans-unit>
+            <trans-unit id="exception.matrix.record.related_entity.not_found_in_field">
+                <source>exception.matrix.record.related_entity.not_found_in_field</source>
+                <target>Nie znaleziono powiązanego rekordu dla wartości w wierszu %row%, w kolumnie „%column%”. Prawdopodobnie brakuje walidacji.</target>
             </trans-unit>
             <trans-unit id="form.button.import">
                 <source>form.button.import</source>

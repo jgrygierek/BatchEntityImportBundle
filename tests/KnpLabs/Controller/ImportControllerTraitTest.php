@@ -129,7 +129,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $uploadedFile = __DIR__ . '/../Fixtures/Resources/test_invalid_field_type.csv';
         $this->submitSelectFileForm($uploadedFile);
         $this->client->submitForm('btn-submit');
-        self::assertStringContainsString('Invalid type of data. Probably missing validation.', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('Invalid type of data in row 1, column &quot;test-translation-property:en&quot;. Probably missing validation.', $this->client->getResponse()->getContent());
     }
 
     private function submitSelectFileForm(string $uploadedFile): void

@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
 use JG\BatchEntityImportBundle\Exception\FileEncodingException;
 use JG\BatchEntityImportBundle\Exception\FileReadException;
+use JG\BatchEntityImportBundle\Exception\MatrixException;
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
 use JG\BatchEntityImportBundle\Model\Configuration\AllowedColumnsConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
@@ -157,7 +158,8 @@ trait BaseImportControllerTrait
 
                 return $this->redirectToImport();
             } catch (BatchEntityImportExceptionInterface $e) {
-                $msg = $translator->trans($e->getMessage(), [], 'BatchEntityImportBundle');
+                $parameters = $e instanceof MatrixException ? $e->getTranslationParameters() : [];
+                $msg = $translator->trans($e->getMessage(), $parameters, 'BatchEntityImportBundle');
                 $this->addFlash('error', $msg);
             }
         }

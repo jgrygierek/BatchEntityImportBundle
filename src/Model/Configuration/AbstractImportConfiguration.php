@@ -34,6 +34,10 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     protected array $updatedEntities = [];
     /** @var array<int, object> entities touched during import, indexed by object id */
     private array $touchedEntities = [];
+    /**
+     * Number of record which is currently imported, starting from 1, used in error messages.
+     */
+    private ?int $currentRowNumber = null;
     private readonly RelatedEntityFinder $relatedEntityFinder;
 
     /**
@@ -83,7 +87,8 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         $headerInfo = $matrix->getHeaderInfo($this->getEntityClassName(), $this->getAllowedColumns());
         try {
-            foreach ($matrix->getRecords() as $record) {
+            foreach (array_values($matrix->getRecords()) as $index => $record) {
+                $this->currentRowNumber = $index + 1;
                 $this->prepareRecord($record, $headerInfo);
             }
         } catch (Throwable $throwable) {
@@ -91,6 +96,8 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             $this->revertChanges();
 
             throw $throwable;
+        } finally {
+            $this->currentRowNumber = null;
         }
 
         $this->touchedEntities = [];
@@ -123,7 +130,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                 if (ArrayTextType::class === $fieldDefinition->getClass()) {
                     $value = $this->parseValueForArrayType($fieldDefinition, $value);
                 } elseif (is_a($fieldDefinition->getClass(), AbstractEntityLookupType::class, true)) {
-                    $value = $this->findRelatedEntity($fieldDefinition, $value);
+                    $value = $this->findRelatedEntity($fieldDefinition, $value, $name);
                 }
             }
 
@@ -147,8 +154,8 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
                         $entity->$propertyName = $value;
                     }
                 }
-            } catch (TypeError) {
-                throw new MatrixRecordInvalidDataTypeException();
+            } catch (TypeError $error) {
+                throw MatrixRecordInvalidDataTypeException::forField($this->currentRowNumber, $name, $error);
             }
         }
 
@@ -275,7 +282,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     /**
      * @throws MatrixRecordRelatedEntityNotFoundException
      */
-    private function findRelatedEntity(FormFieldDefinition $fieldDefinition, string|int|float|bool|null $value): ?object
+    private function findRelatedEntity(FormFieldDefinition $fieldDefinition, string|int|float|bool|null $value, string $columnName): ?object
     {
         if (null === $value || '' === $value) {
             return null;
@@ -289,7 +296,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         $entity = $this->relatedEntityFinder->find($class, $lookupField, $value);
         if (!$entity) {
-            throw new MatrixRecordRelatedEntityNotFoundException();
+            throw MatrixRecordRelatedEntityNotFoundException::forField($this->currentRowNumber, $columnName);
         }
 
         return $entity;

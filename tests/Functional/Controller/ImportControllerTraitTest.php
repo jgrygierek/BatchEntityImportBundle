@@ -197,7 +197,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $this->submitSelectFileForm($uploadedFile);
 
         $this->client->submitForm('btn-submit');
-        self::assertStringContainsString('Invalid type of data. Probably missing validation.', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('Invalid type of data in row 1, column &quot;test_public_property&quot;. Probably missing validation.', $this->client->getResponse()->getContent());
 
         $this->checkDispatchedEvents(0);
     }

@@ -11,4 +11,18 @@ use Exception;
  */
 class MatrixException extends Exception implements BatchEntityImportExceptionInterface
 {
+    /**
+     * @var array<string, string|int>
+     */
+    protected array $translationParameters = [];
+
+    /**
+     * Message of exception is a translation key, these parameters are used to translate it.
+     *
+     * @return array<string, string|int>
+     */
+    public function getTranslationParameters(): array
+    {
+        return $this->translationParameters;
+    }
 }

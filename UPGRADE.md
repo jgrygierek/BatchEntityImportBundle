@@ -15,6 +15,17 @@
 - Method is defined in new `AllowedColumnsConfigurationInterface`, which is implemented by `AbstractImportConfiguration`. If your configuration implements only `ImportConfigurationInterface`, nothing changes until you implement the new interface too.
 - `Matrix::getHeaderInfo()` has new optional argument `array $allowedColumns = []`. If you override `prepareMatrixEditView()` in your controller, pass allowed columns to it, otherwise not allowed columns will not be marked in preview (they are skipped during import anyway).
 
+## Position of invalid data in error messages
+
+- When value can't be set to entity (`MatrixRecordInvalidDataTypeException`) or related entity is not found (`MatrixRecordRelatedEntityNotFoundException`), error message contains number of row and name of column. Rows are numbered from 1 in the same order as in preview, header is not counted.
+- These messages use new translation keys with `%row%` and `%column%` parameters:
+  - `exception.matrix.record.data.invalid_type_in_field`,
+  - `exception.matrix.record.related_entity.not_found_in_field`.
+
+  If you override translations of `exception.matrix.record.data.invalid_type` or `exception.matrix.record.related_entity.not_found`, override new keys too. Old keys are still used by exceptions created without position.
+- `MatrixException::getTranslationParameters()` returns parameters for translation of exception message. If you catch exceptions of this bundle in your own code and translate their messages, pass these parameters to translator.
+- Number of row is known only during `AbstractImportConfiguration::import()`. If you override this method and call `prepareRecord()` on your own, messages have no position.
+
 # UPGRADE TO 3.12
 
 ## Validation constraints
