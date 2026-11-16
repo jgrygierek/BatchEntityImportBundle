@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Controller;
 
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -40,6 +41,22 @@ class ImportControllerTraitTest extends TestCase
         self::assertSame($configuration, $controller->importConfiguration());
     }
 
+    public function testMatrixFactorySetByContainerIsUsed(): void
+    {
+        $matrixFactory = new MatrixFactory();
+        $controller = $this->createController([]);
+        $controller->setMatrixFactory($matrixFactory);
+
+        self::assertSame($matrixFactory, $controller->matrixFactory());
+    }
+
+    public function testDefaultMatrixFactoryIsCreatedOnce(): void
+    {
+        $controller = $this->createController([]);
+
+        self::assertSame($controller->matrixFactory(), $controller->matrixFactory());
+    }
+
     public function testMissingConfigurationException(): void
     {
         $controller = $this->createController([]);
@@ -67,6 +84,11 @@ class ImportControllerTraitTest extends TestCase
             public function importConfiguration(): ImportConfigurationInterface
             {
                 return $this->getImportConfiguration();
+            }
+
+            public function matrixFactory(): MatrixFactory
+            {
+                return $this->getMatrixFactory();
             }
 
             public function selectFileTemplateName(): string

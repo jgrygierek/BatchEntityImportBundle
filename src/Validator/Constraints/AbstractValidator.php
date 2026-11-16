@@ -9,6 +9,9 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Validator\ConstraintValidator;
 
+/**
+ * @internal
+ */
 abstract class AbstractValidator extends ConstraintValidator
 {
     protected function validateArguments(Matrix $value, MatrixRecordUnique|DatabaseEntityUnique $constraint): void

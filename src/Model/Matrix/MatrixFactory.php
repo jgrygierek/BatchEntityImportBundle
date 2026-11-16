@@ -21,6 +21,10 @@ class MatrixFactory
 {
     private const int CSV_DELIMITER_DETECTION_LENGTH = 65536;
 
+    public function __construct(private readonly CsvDelimiterDetector $csvDelimiterDetector = new CsvDelimiterDetector())
+    {
+    }
+
     /**
      * @param string|null $csvFallbackEncoding encoding used for CSV file which is not encoded in Unicode,
      *                                         without it such file is rejected
@@ -29,9 +33,9 @@ class MatrixFactory
      * @throws FileEncodingException when encoding of CSV file is not recognized and fallback encoding is not passed
      * @throws FileReadException when file can't be read
      */
-    public static function createFromUploadedFile(UploadedFile $file, ?string $csvFallbackEncoding = null): Matrix
+    public function createFromUploadedFile(UploadedFile $file, ?string $csvFallbackEncoding = null): Matrix
     {
-        $reader = self::getReader($file, $csvFallbackEncoding);
+        $reader = $this->getReader($file, $csvFallbackEncoding);
 
         try {
             /** @var array<int, array<scalar|null>> $data */
@@ -56,7 +60,7 @@ class MatrixFactory
      *
      * @param array<mixed> $data
      */
-    public static function createFromPostData(array $data): Matrix
+    public function createFromPostData(array $data): Matrix
     {
         $header = null;
         $rows = [];
@@ -152,7 +156,7 @@ class MatrixFactory
      * @throws FileEncodingException
      * @throws FileReadException
      */
-    private static function getReader(UploadedFile $file, ?string $csvFallbackEncoding): BaseReader
+    private function getReader(UploadedFile $file, ?string $csvFallbackEncoding): BaseReader
     {
         $extension = ucfirst(strtolower($file->getClientOriginalExtension()));
         $readerClass = 'PhpOffice\PhpSpreadsheet\Reader\\' . $extension;
@@ -163,7 +167,7 @@ class MatrixFactory
         /** @var BaseReader $reader */
         $reader = new $readerClass();
         if ($reader instanceof Csv) {
-            $reader->setDelimiter(new CsvDelimiterDetector()->detect(self::getBeginningOfFile($file))->value);
+            $reader->setDelimiter($this->csvDelimiterDetector->detect(self::getBeginningOfFile($file))->value);
             $reader->setInputEncoding(self::getCsvEncoding($file, $csvFallbackEncoding));
         } elseif ($reader instanceof Xls || $reader instanceof Xlsx) {
             $reader->setIgnoreRowsWithNoCells(true);

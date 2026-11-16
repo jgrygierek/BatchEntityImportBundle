@@ -32,6 +32,7 @@ use Traversable;
 trait BaseImportControllerTrait
 {
     protected ?ImportConfigurationInterface $importConfiguration = null;
+    protected ?MatrixFactory $matrixFactory = null;
 
     /**
      * Called by container for controller with #[AsImportController] attribute.
@@ -39,6 +40,14 @@ trait BaseImportControllerTrait
     public function setImportConfiguration(ImportConfigurationInterface $importConfiguration): void
     {
         $this->importConfiguration = $importConfiguration;
+    }
+
+    /**
+     * Called by container for controller with #[AsImportController] attribute.
+     */
+    public function setMatrixFactory(MatrixFactory $matrixFactory): void
+    {
+        $this->matrixFactory = $matrixFactory;
     }
 
     abstract protected function redirectToImport(): RedirectResponse;
@@ -71,7 +80,7 @@ trait BaseImportControllerTrait
             $file = $fileImport->getFile();
             try {
                 // file is always set here, because form is valid
-                $matrix = $file instanceof UploadedFile ? MatrixFactory::createFromUploadedFile($file, $this->getCsvFallbackEncoding()) : null;
+                $matrix = $file instanceof UploadedFile ? $this->getMatrixFactory()->createFromUploadedFile($file, $this->getCsvFallbackEncoding()) : null;
             } catch (FileEncodingException) {
                 $fileError = 'validation.file.encoding';
             } catch (FileReadException) {
@@ -138,7 +147,7 @@ trait BaseImportControllerTrait
 
         $matrixData = $request->request->all()['matrix'] ?? null;
         $records = \is_array($matrixData) ? ($matrixData['records'] ?? null) : null;
-        $matrix = \is_array($records) ? MatrixFactory::createFromPostData($records) : new Matrix();
+        $matrix = \is_array($records) ? $this->getMatrixFactory()->createFromPostData($records) : new Matrix();
 
         // also when data sent in request has invalid structure
         if (!$matrix->getRecords()) {
@@ -204,6 +213,15 @@ trait BaseImportControllerTrait
         $encoding = $this->getParameter('batch_entity_import.csv_fallback_encoding');
 
         return \is_string($encoding) ? $encoding : null;
+    }
+
+    /**
+     * Factory service is used, so it can be replaced in application (e.g. decorated).
+     * Default factory is created for controller which is not configured by #[AsImportController] attribute.
+     */
+    protected function getMatrixFactory(): MatrixFactory
+    {
+        return $this->matrixFactory ??= new MatrixFactory();
     }
 
     /**

@@ -25,7 +25,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
     #[DataProvider('dataProvider')]
     public function testNoDuplication(array $fields, array $data): void
     {
-        $matrix = MatrixFactory::createFromPostData($data);
+        $matrix = new MatrixFactory()->createFromPostData($data);
         $constraint = new MatrixRecordUnique(fields: $fields);
         $this->validator->validate($matrix, $constraint);
         $this->assertNoViolation();
@@ -89,7 +89,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
     #[DataProvider('duplicatedDataProvider')]
     public function testDuplications(array $fields, array $expectedDuplicatedRecords, array $data): void
     {
-        $matrix = MatrixFactory::createFromPostData($data);
+        $matrix = new MatrixFactory()->createFromPostData($data);
         $constraint = new MatrixRecordUnique(fields: $fields);
         $this->validator->validate($matrix, $constraint);
         $violations = $this->context->getViolations();
@@ -163,7 +163,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
 
     public function testValuesWithSeparatorAreNotMixed(): void
     {
-        $matrix = MatrixFactory::createFromPostData([
+        $matrix = new MatrixFactory()->createFromPostData([
             ['field_1' => 'a--b', 'field_2' => 'c'],
             ['field_1' => 'a', 'field_2' => 'b--c'],
         ]);
@@ -174,7 +174,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
     public function testValuesWithInvalidUtf8AreDistinguished(): void
     {
         // e.g. CSV file in Windows-1250 encoding: "\xA3" is "Ł" and "\xAF" is "Ż"
-        $matrix = MatrixFactory::createFromPostData([
+        $matrix = new MatrixFactory()->createFromPostData([
             ['field_1' => "\xA3ak"],
             ['field_1' => "\xAFak"],
         ]);
@@ -194,7 +194,7 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
     public function testInvalidFieldNameException(): void
     {
         $this->expectExceptionObject(new InvalidArgumentException('Option "fields" contains invalid data. Allowed fields: field_1, field_2'));
-        $matrix = MatrixFactory::createFromPostData([
+        $matrix = new MatrixFactory()->createFromPostData([
             [
                 'field_1' => 0,
                 'field_2' => 100,
@@ -220,6 +220,6 @@ class MatrixRecordUniqueValidatorTest extends ConstraintValidatorTestCase
     {
         $constraint = new Blank();
         $this->expectExceptionObject(new UnexpectedTypeException($constraint, MatrixRecordUnique::class));
-        $this->validator->validate(MatrixFactory::createFromPostData([]), $constraint);
+        $this->validator->validate(new MatrixFactory()->createFromPostData([]), $constraint);
     }
 }

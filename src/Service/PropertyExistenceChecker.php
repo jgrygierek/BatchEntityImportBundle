@@ -5,17 +5,19 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Service;
 
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
-use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
-use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
+use JG\BatchEntityImportBundle\Utils\EntityTranslationHelper;
 use ReflectionClass;
 use ReflectionException;
 
-class PropertyExistenceChecker
+/**
+ * @internal
+ */
+final readonly class PropertyExistenceChecker
 {
     /** @var ReflectionClass<object> */
-    private readonly ReflectionClass $reflectionClass;
-    /** @var ReflectionClass<covariant object>|null */
-    private ?ReflectionClass $translationReflectionClass = null;
+    private ReflectionClass $reflectionClass;
+    /** @var ReflectionClass<object>|null */
+    private ?ReflectionClass $translationReflectionClass;
 
     /**
      * @param class-string $entityClass
@@ -25,17 +27,8 @@ class PropertyExistenceChecker
     public function __construct(string $entityClass)
     {
         $this->reflectionClass = new ReflectionClass($entityClass);
-        if (
-            \interface_exists(TranslationInterface::class)
-            && \interface_exists(TranslatableInterface::class)
-            && is_subclass_of($entityClass, TranslatableInterface::class)
-        ) {
-            /** @var TranslatableInterface $instance */
-            $instance = $this->reflectionClass->newInstanceWithoutConstructor();
-            /** @var TranslationInterface $translationInstance */
-            $translationInstance = $instance->translate();
-            $this->translationReflectionClass = new ReflectionClass($translationInstance::class);
-        }
+        $translationClass = EntityTranslationHelper::getTranslationClass($entityClass);
+        $this->translationReflectionClass = null !== $translationClass ? new ReflectionClass($translationClass) : null;
     }
 
     public function propertyExists(string $name): bool

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Utils;
 
-class ColumnNameHelper
+/**
+ * @internal
+ */
+final class ColumnNameHelper
 {
     /**
      * Name of column used in matrix: without surrounding whitespaces and with spaces replaced by underscores.

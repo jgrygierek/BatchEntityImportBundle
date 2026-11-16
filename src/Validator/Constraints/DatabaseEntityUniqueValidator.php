@@ -6,15 +6,17 @@ namespace JG\BatchEntityImportBundle\Validator\Constraints;
 
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-class DatabaseEntityUniqueValidator extends AbstractValidator
+final class DatabaseEntityUniqueValidator extends AbstractValidator
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
+    public function __construct(private readonly ManagerRegistry $managerRegistry)
     {
     }
 
@@ -30,19 +32,36 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
         // Results are cached only for single validation. Validator is a shared service,
         // so results kept longer would be reused for other constraints, fields and requests.
         $duplicationResults = [];
+        $entityManager = $this->getEntityManager($constraint->entityClassName);
 
         foreach ($value->getRecords() as $index => $record) {
             $matrixDataToCompare = $this->getMatrixRecordDataToCompare($record, $constraint->fields);
-            $criteria = $this->buildCriteria($record, $matrixDataToCompare);
+            $criteria = $this->buildCriteria($entityManager, $record, $matrixDataToCompare);
             // criteria contain identifier of overridden entity, so the same values
             // are checked separately for new record and for record which overrides entity
             $cacheKey = $this->getCriteriaHash($criteria);
 
-            $duplicationResults[$cacheKey] ??= $this->isRecordDuplicatedInDatabase($this->entityManager, $constraint->entityClassName, $criteria);
+            $duplicationResults[$cacheKey] ??= $this->isRecordDuplicatedInDatabase($entityManager, $constraint->entityClassName, $criteria);
             if ($duplicationResults[$cacheKey]) {
                 $this->addErrorToMatrixRecord($record, $constraint, $index, $constraint->fields);
             }
         }
+    }
+
+    /**
+     * Manager is taken from registry, so entities managed by other manager than the default one are supported too.
+     *
+     * @throws InvalidArgumentException
+     */
+    private function getEntityManager(string $class): EntityManagerInterface
+    {
+        // checked before asking registry, which would throw ReflectionException for not existing class
+        $manager = \class_exists($class) ? $this->managerRegistry->getManagerForClass($class) : null;
+        if (!$manager instanceof EntityManagerInterface) {
+            throw new InvalidArgumentException(\sprintf('Class "%s" is not a managed Doctrine entity.', $class));
+        }
+
+        return $manager;
     }
 
     protected function validateArguments(Matrix $value, Constraint $constraint): void
@@ -91,7 +110,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
      *
      * @return array<string, array<int, array{0: string, 1: scalar|null}>>
      */
-    private function buildCriteria(MatrixRecord $matrixRecord, array $matrixDataToCompare): array
+    private function buildCriteria(EntityManagerInterface $entityManager, MatrixRecord $matrixRecord, array $matrixDataToCompare): array
     {
         $criteria = [];
         foreach ($matrixDataToCompare as $fieldName => $value) {
@@ -102,7 +121,7 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
 
         return null === $entityToOverride
             ? $criteria
-            : $this->addCriteriaToOmitEntity($criteria, $entityToOverride);
+            : $this->addCriteriaToOmitEntity($entityManager, $criteria, $entityToOverride);
     }
 
     /**
@@ -110,10 +129,10 @@ class DatabaseEntityUniqueValidator extends AbstractValidator
      *
      * @return array<string, array<int, array{0: string, 1: scalar|null}>>
      */
-    private function addCriteriaToOmitEntity(array $criteria, object $entityToOverride): array
+    private function addCriteriaToOmitEntity(EntityManagerInterface $entityManager, array $criteria, object $entityToOverride): array
     {
         /** @var array<string, scalar> $primaryKeyData */
-        $primaryKeyData = $this->entityManager->getUnitOfWork()->getEntityIdentifier($entityToOverride);
+        $primaryKeyData = $entityManager->getUnitOfWork()->getEntityIdentifier($entityToOverride);
 
         foreach ($primaryKeyData as $primaryKeyName => $primaryValue) {
             $criteria[$primaryKeyName][] = ['!=', $primaryValue];

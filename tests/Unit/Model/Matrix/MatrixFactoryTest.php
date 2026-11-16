@@ -30,7 +30,7 @@ class MatrixFactoryTest extends TestCase
     public function testCreateFromRealUploadedFileSuccess(string $file, array $expectedHeader, int $expectedRecordNumber): void
     {
         $uploadedFile = new UploadedFile($file, $file);
-        $matrix = MatrixFactory::createFromUploadedFile($uploadedFile);
+        $matrix = new MatrixFactory()->createFromUploadedFile($uploadedFile);
 
         $this->assertSame($expectedHeader, $matrix->getHeader());
         $this->assertCount($expectedRecordNumber, $matrix->getRecords());
@@ -65,7 +65,7 @@ class MatrixFactoryTest extends TestCase
     {
         foreach ($this->contentProvider() as $data) {
             $file = $this->createFile($fileExtension, $delimiter, \array_merge([$data['header']], $data['records']));
-            $matrix = MatrixFactory::createFromUploadedFile($file);
+            $matrix = new MatrixFactory()->createFromUploadedFile($file);
 
             self::assertCount(count($data['expectedHeader']), $matrix->getHeader());
             self::assertCount(count($data['expectedRecords']), $matrix->getRecords());
@@ -135,13 +135,13 @@ class MatrixFactoryTest extends TestCase
         $this->expectExceptionMessage('Reader for extension Txt is not supported by PhpOffice.');
 
         $file = new UploadedFile(__DIR__ . '/../../../Fixtures/Resources/test_wrong_extension.txt', 'test_wrong_extension.txt');
-        MatrixFactory::createFromUploadedFile($file);
+        new MatrixFactory()->createFromUploadedFile($file);
     }
 
     #[DataProvider('postContentProvider')]
     public function testCreateFromPostDataSuccess(array $data, bool $isHeader, int $recordsNumber): void
     {
-        $matrix = MatrixFactory::createFromPostData($data);
+        $matrix = new MatrixFactory()->createFromPostData($data);
         self::assertEquals($isHeader, !empty($matrix->getHeader()));
         self::assertCount($recordsNumber, $matrix->getRecords());
     }
@@ -162,7 +162,7 @@ class MatrixFactoryTest extends TestCase
 
     public function testEmptyRowsAreSkipped(): void
     {
-        $matrix = MatrixFactory::createFromUploadedFile($this->createCsvFile("name,age\nJan,5\n\n,\n  ,\nEwa,0\n"));
+        $matrix = new MatrixFactory()->createFromUploadedFile($this->createCsvFile("name,age\nJan,5\n\n,\n  ,\nEwa,0\n"));
 
         self::assertSame(
             [['name' => 'Jan', 'age' => '5'], ['name' => 'Ewa', 'age' => '0']],
@@ -172,7 +172,7 @@ class MatrixFactoryTest extends TestCase
 
     public function testDelimiterUsedInRecordsDoesNotChangeDetectedDelimiter(): void
     {
-        $matrix = MatrixFactory::createFromUploadedFile($this->createCsvFile("name;description\nJan;\"a, b, c, d\"\nEwa;\"e, f, g\"\n"));
+        $matrix = new MatrixFactory()->createFromUploadedFile($this->createCsvFile("name;description\nJan;\"a, b, c, d\"\nEwa;\"e, f, g\"\n"));
 
         self::assertSame(['name', 'description'], $matrix->getHeader());
         self::assertSame(['name' => 'Jan', 'description' => 'a, b, c, d'], $matrix->getRecords()[0]->getData());
@@ -183,8 +183,8 @@ class MatrixFactoryTest extends TestCase
     {
         $file = $this->createCsvFile($content);
         $matrix = null === $fallbackEncoding
-            ? MatrixFactory::createFromUploadedFile($file)
-            : MatrixFactory::createFromUploadedFile($file, $fallbackEncoding);
+            ? new MatrixFactory()->createFromUploadedFile($file)
+            : new MatrixFactory()->createFromUploadedFile($file, $fallbackEncoding);
 
         self::assertSame($expectedName, $matrix->getRecords()[0]->getData()['name']);
     }
@@ -208,7 +208,7 @@ class MatrixFactoryTest extends TestCase
         $content = iconv('UTF-8', $encoding, "name;text\nabc;" . $text . "\n");
         self::assertIsString($content);
 
-        $matrix = MatrixFactory::createFromUploadedFile($this->createCsvFile($content), $encoding);
+        $matrix = new MatrixFactory()->createFromUploadedFile($this->createCsvFile($content), $encoding);
 
         self::assertSame(['name' => 'abc', 'text' => $text], $matrix->getRecords()[0]->getData());
     }
@@ -233,7 +233,7 @@ class MatrixFactoryTest extends TestCase
     #[DataProvider('unicodeTextProvider')]
     public function testUnicodeCsvIsNotAffectedByFallbackEncoding(string $text): void
     {
-        $matrix = MatrixFactory::createFromUploadedFile($this->createCsvFile("name;text\nabc;" . $text . "\n"), 'CP1250');
+        $matrix = new MatrixFactory()->createFromUploadedFile($this->createCsvFile("name;text\nabc;" . $text . "\n"), 'CP1250');
 
         self::assertSame($text, $matrix->getRecords()[0]->getData()['text']);
     }
@@ -251,13 +251,13 @@ class MatrixFactoryTest extends TestCase
         $file = $this->createCsvFile((string) iconv('UTF-8', 'CP1250', "name;city\nŻaneta;Łódź\n"));
 
         $this->expectException(FileEncodingException::class);
-        MatrixFactory::createFromUploadedFile($file);
+        new MatrixFactory()->createFromUploadedFile($file);
     }
 
     public function testUnsupportedFallbackEncoding(): void
     {
         $this->expectExceptionObject(new InvalidArgumentException('CSV fallback encoding "CP125O" is not supported.'));
-        MatrixFactory::createFromUploadedFile($this->createCsvFile("name\nJan\n"), 'CP125O');
+        new MatrixFactory()->createFromUploadedFile($this->createCsvFile("name\nJan\n"), 'CP125O');
     }
 
     public function testEmptyFallbackEncodingIsTreatedAsNotPassed(): void
@@ -265,13 +265,13 @@ class MatrixFactoryTest extends TestCase
         $file = $this->createCsvFile((string) iconv('UTF-8', 'CP1250', "name;city\nŻaneta;Łódź\n"));
 
         $this->expectException(FileEncodingException::class);
-        MatrixFactory::createFromUploadedFile($file, '');
+        new MatrixFactory()->createFromUploadedFile($file, '');
     }
 
     #[DataProvider('entityIdHeaderProvider')]
     public function testEntityIdColumn(string $header, array $expectedIds): void
     {
-        $matrix = MatrixFactory::createFromUploadedFile($this->createCsvFile($header . ",name\n2,a\n,b\n10,c\n"));
+        $matrix = new MatrixFactory()->createFromUploadedFile($this->createCsvFile($header . ",name\n2,a\n,b\n10,c\n"));
 
         self::assertSame(['name'], $matrix->getHeader());
         self::assertSame($expectedIds, array_map(static fn (MatrixRecord $record): int|string|null => $record->entityId, $matrix->getRecords()));
@@ -286,7 +286,7 @@ class MatrixFactoryTest extends TestCase
 
     public function testHeaderNamesAreNormalized(): void
     {
-        $matrix = MatrixFactory::createFromUploadedFile($this->createCsvFile("0, first name ,entity id\na,b,5\n"));
+        $matrix = new MatrixFactory()->createFromUploadedFile($this->createCsvFile("0, first name ,entity id\na,b,5\n"));
 
         self::assertSame(['0', 'first_name'], $matrix->getHeader());
         self::assertSame(['0' => 'a', 'first_name' => 'b'], $matrix->getRecords()[0]->getData());
@@ -295,7 +295,7 @@ class MatrixFactoryTest extends TestCase
     public function testNotExistingCsvFile(): void
     {
         $this->expectException(FileReadException::class);
-        MatrixFactory::createFromUploadedFile(new UploadedFile(sys_get_temp_dir() . '/batch_entity_import_not_existing.csv', 'file.csv', null, \UPLOAD_ERR_NO_FILE, true));
+        new MatrixFactory()->createFromUploadedFile(new UploadedFile(sys_get_temp_dir() . '/batch_entity_import_not_existing.csv', 'file.csv', null, \UPLOAD_ERR_NO_FILE, true));
     }
 
     #[DataProvider('unreadableFileProvider')]
@@ -306,7 +306,7 @@ class MatrixFactoryTest extends TestCase
         $this->temporaryFiles[] = $path;
 
         $this->expectException(FileReadException::class);
-        MatrixFactory::createFromUploadedFile(new UploadedFile($path, 'file.' . $extension, null, null, true));
+        new MatrixFactory()->createFromUploadedFile(new UploadedFile($path, 'file.' . $extension, null, null, true));
     }
 
     public static function unreadableFileProvider(): Generator

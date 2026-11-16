@@ -7,12 +7,12 @@ namespace JG\BatchEntityImportBundle\Twig;
 use Twig\Attribute\AsTwigFunction;
 use UnexpectedValueException;
 
-class TemplateExtension
+final readonly class TemplateExtension
 {
     /**
      * @param array<string, string> $availableTemplates
      */
-    public function __construct(private readonly array $availableTemplates = [])
+    public function __construct(private array $availableTemplates = [])
     {
     }
 

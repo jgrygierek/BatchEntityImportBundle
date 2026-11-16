@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,8 +19,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
-use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
-use Knp\DoctrineBehaviors\Contract\Entity\TranslationInterface;
+use JG\BatchEntityImportBundle\Utils\EntityTranslationHelper;
 use Stringable;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -122,24 +120,12 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             }
 
             try {
-                if (
-                    \interface_exists(TranslationInterface::class)
-                    && \interface_exists(TranslatableInterface::class)
-                    && $entity instanceof TranslatableInterface && $locale
-                ) {
-                    /** @var TranslationInterface $translatedEntity */
-                    $translatedEntity = $entity->translate($locale, false);
-                    if (method_exists($translatedEntity, $setterName)) {
-                        $translatedEntity->$setterName($value);
-                    } else {
-                        $translatedEntity->$propertyName = $value;
-                    }
-                } elseif (!$locale) {
-                    if (method_exists($entity, $setterName)) {
-                        $entity->$setterName($value);
-                    } else {
-                        $entity->$propertyName = $value;
-                    }
+                // translated column is skipped, when entity is not translatable
+                $target = $locale ? EntityTranslationHelper::getTranslation($entity, $locale) : $entity;
+                if ($target && method_exists($target, $setterName)) {
+                    $target->$setterName($value);
+                } elseif ($target) {
+                    $target->$propertyName = $value;
                 }
             } catch (TypeError $error) {
                 throw new MatrixRecordInvalidDataTypeException($rowNumber, $name, $error);
@@ -148,9 +134,7 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         $this->em->persist($entity);
 
-        if (\interface_exists(TranslatableInterface::class) && $entity instanceof TranslatableInterface) {
-            $entity->mergeNewTranslations();
-        }
+        EntityTranslationHelper::mergeNewTranslations($entity);
 
         $this->updatedEntities[] = $entity;
     }
@@ -168,8 +152,10 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         }
 
         foreach ($entities as $entity) {
-            if (\interface_exists(TranslatableInterface::class) && $entity instanceof TranslatableInterface) {
-                $this->revertTranslations($entity->getNewTranslations(), $entity->getTranslations());
+            foreach (EntityTranslationHelper::clearNewTranslations($entity) as $translation) {
+                if ($this->em->contains($translation) && !$unitOfWork->isScheduledForInsert($translation)) {
+                    $this->em->refresh($translation);
+                }
             }
 
             if ($unitOfWork->isScheduledForInsert($entity)) {
@@ -181,23 +167,6 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
 
         $this->updatedEntities = [];
         $this->touchedEntities = [];
-    }
-
-    /**
-     * Arguments are not typed, because KnpLabs package is optional, so its types are not always known.
-     */
-    private function revertTranslations(mixed $newTranslations, mixed $translations): void
-    {
-        if ($newTranslations instanceof Collection) {
-            $newTranslations->clear();
-        }
-
-        $unitOfWork = $this->em->getUnitOfWork();
-        foreach (is_iterable($translations) ? $translations : [] as $translation) {
-            if (\is_object($translation) && $this->em->contains($translation) && !$unitOfWork->isScheduledForInsert($translation)) {
-                $this->em->refresh($translation);
-            }
-        }
     }
 
     protected function save(): void
