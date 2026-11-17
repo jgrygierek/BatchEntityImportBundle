@@ -8,7 +8,10 @@ use ErrorException;
 use PhpOffice\PhpSpreadsheet\Shared\StringHelper;
 use Throwable;
 
-class EncodingHelper
+/**
+ * @internal
+ */
+final class EncodingHelper
 {
     private const string SAMPLE = 'a';
 

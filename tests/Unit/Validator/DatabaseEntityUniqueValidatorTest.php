@@ -7,12 +7,15 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Validator;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\UnitOfWork;
+use Doctrine\Persistence\ManagerRegistry;
+use Generator;
 use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Entity\TranslatableEntity;
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Validator\Constraints\Blank;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -26,8 +29,12 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
     protected function createValidator(): DatabaseEntityUniqueValidator
     {
         $this->entityManagerMock = $this->createMock(EntityManager::class);
+        $managerRegistry = $this->createStub(ManagerRegistry::class);
+        $managerRegistry->method('getManagerForClass')->willReturnCallback(
+            fn (string $class): ?EntityManager => TestEntity::class === $class ? $this->entityManagerMock : null,
+        );
 
-        return new DatabaseEntityUniqueValidator($this->entityManagerMock);
+        return new DatabaseEntityUniqueValidator($managerRegistry);
     }
 
     public function testNoDuplication(): void
@@ -37,7 +44,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
 
         $constraint = new DatabaseEntityUnique(fields: ['field_1'], entityClassName: TestEntity::class);
         $this->validator->validate(
-            MatrixFactory::createFromPostData([
+            new MatrixFactory()->createFromPostData([
                 [
                     'field_1' => 1,
                     'field_2' => 100,
@@ -58,7 +65,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $queryMock->method('getArrayResult')->willReturn(['']);
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
-        $matrix = MatrixFactory::createFromPostData([
+        $matrix = new MatrixFactory()->createFromPostData([
             [
                 'field_1' => 0,
                 'field_2' => 100,
@@ -81,7 +88,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $queryMock->expects($this->exactly(2))->method('getArrayResult')->willReturnOnConsecutiveCalls([], ['']);
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
-        $matrix = MatrixFactory::createFromPostData([['field_1' => 'abc', 'field_2' => 'abc']]);
+        $matrix = new MatrixFactory()->createFromPostData([['field_1' => 'abc', 'field_2' => 'abc']]);
 
         $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
         $this->assertCount(0, $this->context->getViolations());
@@ -97,7 +104,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $queryMock->expects($this->once())->method('getArrayResult')->willReturn([]);
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
-        $matrix = MatrixFactory::createFromPostData([['field_1' => 'abc'], ['field_1' => 'abc']]);
+        $matrix = new MatrixFactory()->createFromPostData([['field_1' => 'abc'], ['field_1' => 'abc']]);
 
         $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
         $this->assertNoViolation();
@@ -110,7 +117,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         $this->entityManagerMock->method('createQuery')->willReturn($queryMock);
 
         // e.g. CSV file in Windows-1250 encoding: "\xA3" is "Ł" and "\xAF" is "Ż"
-        $matrix = MatrixFactory::createFromPostData([['field_1' => "\xA3ak"], ['field_1' => "\xAFak"]]);
+        $matrix = new MatrixFactory()->createFromPostData([['field_1' => "\xA3ak"], ['field_1' => "\xAFak"]]);
 
         $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
         $this->assertCount(1, $this->context->getViolations());
@@ -133,7 +140,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
             return $queryMock;
         });
 
-        $matrix = MatrixFactory::createFromPostData([['field_1' => 'abc'], ['field_1' => 'abc']]);
+        $matrix = new MatrixFactory()->createFromPostData([['field_1' => 'abc'], ['field_1' => 'abc']]);
         $matrix->getRecords()[0]->setEntity($overriddenEntity);
 
         $this->validator->validate($matrix, new DatabaseEntityUnique(entityClassName: TestEntity::class, fields: ['field_1']));
@@ -158,7 +165,7 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
     public function testInvalidFieldNameException(): void
     {
         $this->expectExceptionObject(new InvalidArgumentException('Option "fields" contains invalid data. Allowed fields: field_1, field_2'));
-        $matrix = MatrixFactory::createFromPostData([
+        $matrix = new MatrixFactory()->createFromPostData([
             [
                 'field_1' => 0,
                 'field_2' => 100,
@@ -166,6 +173,32 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
         ]);
         $constraint = new DatabaseEntityUnique(fields: ['field_3'], entityClassName: 'test');
         $this->validator->validate($matrix, $constraint);
+    }
+
+    public function testManagerOfEntityIsTakenFromRegistry(): void
+    {
+        $queryMock = $this->createStub(Query::class);
+        $this->entityManagerMock->expects($this->once())->method('createQuery')->willReturn($queryMock);
+
+        $matrix = new MatrixFactory()->createFromPostData([['field_1' => 'abc']]);
+        $this->validator->validate($matrix, new DatabaseEntityUnique(fields: ['field_1'], entityClassName: TestEntity::class));
+
+        $this->assertNoViolation();
+    }
+
+    #[DataProvider('notManagedClassProvider')]
+    public function testNotManagedEntityException(string $class): void
+    {
+        $matrix = new MatrixFactory()->createFromPostData([['field_1' => 'abc']]);
+
+        $this->expectExceptionObject(new InvalidArgumentException(\sprintf('Class "%s" is not a managed Doctrine entity.', $class)));
+        $this->validator->validate($matrix, new DatabaseEntityUnique(fields: ['field_1'], entityClassName: $class));
+    }
+
+    public static function notManagedClassProvider(): Generator
+    {
+        yield 'class without manager' => [self::class];
+        yield 'not existing class' => ['App\\Entity\\NotExisting'];
     }
 
     public function testMissingEntityClassNameOptionException(): void
@@ -190,6 +223,6 @@ class DatabaseEntityUniqueValidatorTest extends ConstraintValidatorTestCase
     {
         $constraint = new Blank();
         $this->expectExceptionObject(new UnexpectedTypeException($constraint, DatabaseEntityUnique::class));
-        $this->validator->validate(MatrixFactory::createFromPostData([]), $constraint);
+        $this->validator->validate(new MatrixFactory()->createFromPostData([]), $constraint);
     }
 }

@@ -9,7 +9,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-class MatrixRecordUniqueValidator extends AbstractValidator
+final class MatrixRecordUniqueValidator extends AbstractValidator
 {
     /**
      * @param Matrix $value

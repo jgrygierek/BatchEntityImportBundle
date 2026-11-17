@@ -7,6 +7,8 @@ namespace JG\BatchEntityImportBundle;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Form\Type\EntityLookupTextType;
 use JG\BatchEntityImportBundle\Form\Type\EntityLookupType;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
+use JG\BatchEntityImportBundle\Service\CsvDelimiterDetector;
 use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Twig\TemplateExtension;
 use JG\BatchEntityImportBundle\Utils\EncodingHelper;
@@ -20,7 +22,7 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
-class BatchEntityImportBundle extends AbstractBundle
+final class BatchEntityImportBundle extends AbstractBundle
 {
     private const array DEFAULT_TEMPLATES = [
         'select_file' => '@BatchEntityImport/select_file.html.twig',
@@ -67,6 +69,11 @@ class BatchEntityImportBundle extends AbstractBundle
             ->tag('twig.attribute_extension')
             ->tag('twig.runtime');
 
+        $services->set(CsvDelimiterDetector::class);
+
+        $services->set(MatrixFactory::class)
+            ->args([service(CsvDelimiterDetector::class)]);
+
         $services->set(RelatedEntityFinder::class)
             ->args([service('doctrine')])
             ->tag('kernel.reset', ['method' => 'reset']);
@@ -85,7 +92,7 @@ class BatchEntityImportBundle extends AbstractBundle
             ->tag('form.type');
 
         $services->set(DatabaseEntityUniqueValidator::class)
-            ->args([service('doctrine.orm.entity_manager')])
+            ->args([service('doctrine')])
             ->tag('validator.constraint_validator');
 
         $services->set(RelatedEntityExistsValidator::class)

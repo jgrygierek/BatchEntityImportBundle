@@ -6,8 +6,11 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\DependencyInjection;
 
 use Generator;
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
+use JG\BatchEntityImportBundle\Service\CsvDelimiterDetector;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute;
+use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
@@ -60,16 +63,28 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         yield 'not a string' => [1250];
     }
 
-    public function testControllerWithAttributeGetsConfiguration(): void
+    public function testControllerWithAttributeGetsConfigurationAndMatrixFactory(): void
     {
         $this->container->register(BaseConfiguration::class, BaseConfiguration::class);
         $this->container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true);
         $this->container->compile();
 
         $calls = $this->container->getDefinition(ControllerWithAttribute::class)->getMethodCalls();
-        self::assertCount(1, $calls);
-        self::assertSame('setImportConfiguration', $calls[0][0]);
-        self::assertEquals([new Reference(BaseConfiguration::class)], $calls[0][1]);
+        self::assertEquals([
+            ['setImportConfiguration', [new Reference(BaseConfiguration::class)]],
+            ['setMatrixFactory', [new Reference(MatrixFactory::class)]],
+        ], $calls);
+    }
+
+    public function testMatrixFactoryIsService(): void
+    {
+        $this->assertContainerBuilderHasService(MatrixFactory::class);
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(MatrixFactory::class, 0, new Reference(CsvDelimiterDetector::class));
+    }
+
+    public function testDatabaseEntityUniqueValidatorUsesManagerRegistry(): void
+    {
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(DatabaseEntityUniqueValidator::class, 0, new Reference('doctrine'));
     }
 
     public function testConfigurationFromAttributeIsNotServiceException(): void

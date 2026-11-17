@@ -10,7 +10,7 @@ use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
-class RelatedEntityExistsValidator extends ConstraintValidator
+final class RelatedEntityExistsValidator extends ConstraintValidator
 {
     public function __construct(private readonly RelatedEntityFinder $relatedEntityFinder)
     {

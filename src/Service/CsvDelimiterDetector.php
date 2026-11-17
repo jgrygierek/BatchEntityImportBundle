@@ -6,7 +6,10 @@ namespace JG\BatchEntityImportBundle\Service;
 
 use JG\BatchEntityImportBundle\Enums\CsvDelimiterEnum;
 
-class CsvDelimiterDetector
+/**
+ * @internal
+ */
+final class CsvDelimiterDetector
 {
     /**
      * Delimiter is detected only in header line and only outside of quoted values,
