@@ -188,12 +188,21 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
             $identifier = \reset($identifierValues);
 
             $this->eventDispatcher->dispatch(
-                new RecordImportedSuccessfullyEvent(
-                    $this->getEntityClassName(),
-                    \is_scalar($identifier) || $identifier instanceof Stringable ? (string) $identifier : '',
-                ),
+                new RecordImportedSuccessfullyEvent($this->getEntityClassName(), $this->normalizeIdentifier($identifier)),
             );
         }
+    }
+
+    /**
+     * Integer is passed as it is, other identifiers (e.g. UUID object) are cast to string.
+     */
+    private function normalizeIdentifier(mixed $identifier): string|int
+    {
+        return match (true) {
+            \is_int($identifier) => $identifier,
+            \is_scalar($identifier), $identifier instanceof Stringable => (string) $identifier,
+            default => '',
+        };
     }
 
     protected function getEntity(MatrixRecord $record): object
