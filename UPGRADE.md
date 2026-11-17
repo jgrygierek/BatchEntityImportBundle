@@ -148,6 +148,18 @@
 - `DatabaseEntityUniqueValidator` gets `Doctrine\Persistence\ManagerRegistry` (service `doctrine`) instead of `EntityManagerInterface`. Entity manager is selected by class of entity, so `DatabaseEntityUnique` works also for entities which are not managed by default entity manager. If you create the validator manually (e.g. in tests), pass the registry.
 - `DatabaseEntityUniqueValidator` throws `InvalidArgumentException` when `entityClassName` is not a class managed by Doctrine. Previously exception was thrown by Doctrine during execution of query.
 
+## Events
+
+- Property `RecordImportedSuccessfullyEvent::$id` has type `string|int` instead of `string`. Integer identifier is no longer cast to string, other identifiers (e.g. UUID object) are still cast to string. If your listener compares identifier strictly or passes it to method which accepts only string, cast it:
+
+  ```php
+  // before
+  $id = $event->id;
+
+  // after, when string is required
+  $id = (string) $event->id;
+  ```
+
 ## Final and internal classes
 
 - Classes which are not extension points are final now: `BatchEntityImportBundle`, `TemplateExtension`, `DatabaseEntityUniqueValidator`, `MatrixRecordUniqueValidator`, `RelatedEntityExistsValidator`, `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper` and `EncodingHelper`. If you extend one of them, use composition (e.g. decoration of service) instead.

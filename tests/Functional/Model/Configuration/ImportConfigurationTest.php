@@ -94,11 +94,11 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
         self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[0]);
         self::assertSame(TestEntity::class, $dispatchedEvents[0]->class);
-        self::assertSame('1', $dispatchedEvents[0]->id);
+        self::assertSame(1, $dispatchedEvents[0]->id);
 
         self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[1]);
         self::assertSame(TestEntity::class, $dispatchedEvents[1]->class);
-        self::assertSame('2', $dispatchedEvents[1]->id);
+        self::assertSame(2, $dispatchedEvents[1]->id);
     }
 
     public static function matrixDataProvider(): Generator
@@ -470,7 +470,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         $dispatchedEvents = $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class);
         self::assertCount(1, $dispatchedEvents);
         self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[0]);
-        self::assertSame('2', $dispatchedEvents[0]->id);
+        self::assertSame(2, $dispatchedEvents[0]->id);
 
         $this->entityManager->clear();
         $repository = $this->entityManager->getRepository(TestEntity::class);
