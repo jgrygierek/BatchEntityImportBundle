@@ -19,8 +19,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsImportController(configuration: UserImportConfiguration::class)]
 class ImportController extends AbstractController
@@ -28,15 +26,15 @@ class ImportController extends AbstractController
     use ImportControllerTrait;
 
     #[Route('/user/import', name: 'user_import')]
-    public function import(Request $request, ValidatorInterface $validator): Response
+    public function import(Request $request): Response
     {
-        return $this->doImport($request, $validator);
+        return $this->doImport($request);
     }
 
     #[Route('/user/import/save', name: 'user_import_save')]
-    public function importSave(Request $request, TranslatorInterface $translator): Response
+    public function importSave(Request $request): Response
     {
-        return $this->doImportSave($request, $translator);
+        return $this->doImportSave($request);
     }
 
     protected function redirectToImport(): RedirectResponse

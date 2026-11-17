@@ -9,21 +9,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ControllerWithoutAttribute extends AbstractController
 {
     use ImportControllerTrait;
 
-    public function import(Request $request, ValidatorInterface $validator): Response
+    public function import(Request $request): Response
     {
-        return $this->doImport($request, $validator);
+        return $this->doImport($request);
     }
 
-    public function importSave(Request $request, TranslatorInterface $translator): Response
+    public function importSave(Request $request): Response
     {
-        return $this->doImportSave($request, $translator);
+        return $this->doImportSave($request);
     }
 
     protected function redirectToImport(): RedirectResponse
