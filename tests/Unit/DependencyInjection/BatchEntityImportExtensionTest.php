@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\DependencyInjection;
 
 use Generator;
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
+use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Service\CsvDelimiterDetector;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
@@ -63,7 +64,7 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         yield 'not a string' => [1250];
     }
 
-    public function testControllerWithAttributeGetsConfigurationAndMatrixFactory(): void
+    public function testControllerWithAttributeGetsConfigurationAndHandler(): void
     {
         $this->container->register(BaseConfiguration::class, BaseConfiguration::class);
         $this->container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true);
@@ -72,7 +73,7 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $calls = $this->container->getDefinition(ControllerWithAttribute::class)->getMethodCalls();
         self::assertEquals([
             ['setImportConfiguration', [new Reference(BaseConfiguration::class)]],
-            ['setMatrixFactory', [new Reference(MatrixFactory::class)]],
+            ['setImportHandler', [new Reference(ImportHandler::class)]],
         ], $calls);
     }
 
@@ -80,6 +81,15 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
     {
         $this->assertContainerBuilderHasService(MatrixFactory::class);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(MatrixFactory::class, 0, new Reference(CsvDelimiterDetector::class));
+    }
+
+    public function testImportHandlerIsService(): void
+    {
+        $this->assertContainerBuilderHasService(ImportHandler::class);
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 0, new Reference('form.factory'));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 1, new Reference('validator'));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 2, new Reference('translator'));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 3, new Reference(MatrixFactory::class));
     }
 
     public function testDatabaseEntityUniqueValidatorUsesManagerRegistry(): void
@@ -93,6 +103,10 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $container = new ContainerBuilder();
         $this->setKernelParameters($container);
         new BatchEntityImportBundle()->getContainerExtension()?->load([], $container);
+        // services of FrameworkBundle used by services of bundle
+        foreach (['form.factory', 'validator', 'translator'] as $id) {
+            $container->register($id)->setSynthetic(true);
+        }
         $container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true)->setPublic(true);
 
         $this->expectException(ServiceNotFoundException::class);

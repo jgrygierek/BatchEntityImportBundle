@@ -20,12 +20,31 @@ Importing entities with preview and edit features for Symfony.
 ![Select File](docs/select_file.png)
 ![Edit Matrix](docs/edit_matrix.png)
 
+## Versions
+
+| Version | Status | Last release | PHP | Symfony | Documentation |
+|---|---|---|---|---|---|
+| **4.x** | Actively developed | - | >= 8.4 | 7.4, 8.* | [master](docs) |
+| **3.x** | Not maintained | 3.14.0 | >= 8.3 | 6.4, 7.*, 8.* | [v3.14.0](https://github.com/jgrygierek/BatchEntityImportBundle/tree/v3.14.0/docs) |
+| **2.x** | Not maintained | 2.6.0 | >= 7.4 | 4.4, 5.*, 6.* | [v2.6.0](https://github.com/jgrygierek/BatchEntityImportBundle/tree/v2.6.0#readme) |
+| **1.x** | Not maintained | 1.1.5 | >= 7.4 | 4.4, 5.* | [v1.1.5](https://github.com/jgrygierek/BatchEntityImportBundle/tree/v1.1.5#readme) |
+
+Requirements of PHP and Symfony are given for the last release of each version.
+
+Changes between versions and steps needed to upgrade are described in [UPGRADE.md](UPGRADE.md).
+
 ## Installation
 
 Install package via composer:
 
 ```
 composer require jgrygierek/batch-entity-import-bundle
+```
+
+If your project can't be upgraded to requirements of version 4 yet, install version 3:
+
+```
+composer require jgrygierek/batch-entity-import-bundle:^3.14
 ```
 
 If your application uses Symfony Flex, bundle is registered automatically. Otherwise add entry to `config/bundles.php` file:

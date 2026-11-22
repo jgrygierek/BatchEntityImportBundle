@@ -9,7 +9,7 @@
 - Minimal versions of other packages:
   - `doctrine/collections`: 2.2,
   - `doctrine/persistence`: 3.3.1,
-  - `symfony/event-dispatcher-contracts`, `symfony/service-contracts` and `symfony/translation-contracts`: 3.0.
+  - `symfony/event-dispatcher-contracts`, `symfony/service-contracts` and `symfony/translation-contracts`: 3.5.
 - `doctrine/doctrine-bundle` is now listed in requirements of bundle, because its services depend on it. It is installed in typical Symfony application, so usually nothing has to be changed in your project.
 
 ## Bundle
@@ -101,27 +101,56 @@
 - Controller gets now the same instance of configuration as other services. Previously separate instances of all configurations were created for each controller.
 - Controller without the attribute throws `LogicException` when configuration is used, instead of `ServiceNotFoundException`.
 - Controller has new public method `setImportConfiguration(ImportConfigurationInterface $importConfiguration)`, added by `ImportControllerTrait`. If your controller already has method with this name, rename it. If your controller is not autoconfigured, call this method in definition of service.
-- Controller has also new public method `setMatrixFactory(MatrixFactory $matrixFactory)`, called by container for controller with `#[AsImportController]` attribute. If your controller is not autoconfigured, factory is created by controller itself, so nothing has to be added to definition of service.
+- Controller has also new public method `setImportHandler(ImportHandler $importHandler)`, called by container for controller with `#[AsImportController]` attribute. If your controller is not autoconfigured, call this method in definition of service too (service `JG\BatchEntityImportBundle\Import\ImportHandler`).
 - Tags `batch_entity_import.configuration` and `batch_entity_import.controller` are no longer added to import configurations and controllers, and `AutoConfigureControllerCompilerPass` was removed.
 - Configuration can not be selected in runtime by `getImportConfigurationClassName()` anymore. If one controller was used for many imports, create separate controller for each configuration.
+- Logic of import was moved from controller to new internal `JG\BatchEntityImportBundle\Import\ImportHandler` service. `ImportControllerTrait` only shows its results (renders views, redirects and adds flash messages), so behaviour of controller is not changed.
+- Validator and translator are no longer passed to `doImport()` and `doImportSave()`, remove them from actions of your controller:
+
+  ```php
+  // before
+  public function import(Request $request, ValidatorInterface $validator): Response
+  {
+      return $this->doImport($request, $validator);
+  }
+
+  public function importSave(Request $request, TranslatorInterface $translator): Response
+  {
+      return $this->doImportSave($request, $translator);
+  }
+
+  // after
+  public function import(Request $request): Response
+  {
+      return $this->doImport($request);
+  }
+
+  public function importSave(Request $request): Response
+  {
+      return $this->doImportSave($request);
+  }
+  ```
+
+- `BaseImportControllerTrait` was removed, its methods are in `ImportControllerTrait`. Controller which uses the trait has to extend `AbstractController`.
+- Argument `bool $manualSubmit` of `prepareMatrixEditView()` was removed, form is always submitted by handler already. If you override this method, remove the argument and the call of `manualSubmitMatrixForm()`.
+- Methods `createMatrixForm()`, `manualSubmitMatrixForm()`, `setErrorAsFlash()`, `isRequestDataTruncated()` and `getMaxInputVars()` were removed from `ImportControllerTrait`, their logic is in `ImportHandler`. Constraints of matrix are still taken from `getMatrixConstraints()` of import configuration.
 
 ## Matrix factory
 
-- `MatrixFactory` is a service, and its methods are no longer static. In controller which uses `ImportControllerTrait` use `getMatrixFactory()`, in other places inject the service:
+- `MatrixFactory` is a service, and its methods are no longer static. Inject the service, where you need it:
 
   ```php
   // before
   $matrix = MatrixFactory::createFromUploadedFile($file);
   $matrix = MatrixFactory::createFromPostData($records);
 
-  // after, in controller
-  $matrix = $this->getMatrixFactory()->createFromUploadedFile($file);
-  $matrix = $this->getMatrixFactory()->createFromPostData($records);
-
-  // after, in other service
+  // after
   public function __construct(private readonly MatrixFactory $matrixFactory)
   {
   }
+
+  $matrix = $this->matrixFactory->createFromUploadedFile($file);
+  $matrix = $this->matrixFactory->createFromPostData($records);
   ```
 
 - Factory used by controllers can be replaced in your application by decorating `JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory` service.
@@ -164,7 +193,7 @@
 
 - Classes which are not extension points are final now: `BatchEntityImportBundle`, `TemplateExtension`, `DatabaseEntityUniqueValidator`, `MatrixRecordUniqueValidator`, `RelatedEntityExistsValidator`, `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper` and `EncodingHelper`. If you extend one of them, use composition (e.g. decoration of service) instead.
 - `TemplateExtension` and `PropertyExistenceChecker` are readonly classes.
-- Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper` and `AbstractValidator` are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
+- Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper`, `AbstractValidator` and classes from `JG\BatchEntityImportBundle\Import` namespace (`ImportHandler`, `ImportResult`, `ImportStep`, `ImportMessage`) are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
 - Support of translatable entities (`knplabs/doctrine-behaviors`) was moved to internal `EntityTranslationHelper`. Nothing changes in the way translated columns are imported.
 
 ## Exceptions

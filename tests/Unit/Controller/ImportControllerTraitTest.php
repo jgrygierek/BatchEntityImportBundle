@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Unit\Controller;
 
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
+use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use LogicException;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ImportControllerTraitTest extends TestCase
 {
@@ -41,20 +45,27 @@ class ImportControllerTraitTest extends TestCase
         self::assertSame($configuration, $controller->importConfiguration());
     }
 
-    public function testMatrixFactorySetByContainerIsUsed(): void
+    public function testHandlerSetByContainerIsUsed(): void
     {
-        $matrixFactory = new MatrixFactory();
+        $handler = new ImportHandler(
+            $this->createStub(FormFactoryInterface::class),
+            $this->createStub(ValidatorInterface::class),
+            $this->createStub(TranslatorInterface::class),
+            new MatrixFactory(),
+        );
         $controller = $this->createController([]);
-        $controller->setMatrixFactory($matrixFactory);
+        $controller->setImportHandler($handler);
 
-        self::assertSame($matrixFactory, $controller->matrixFactory());
+        self::assertSame($handler, $controller->importHandler());
     }
 
-    public function testDefaultMatrixFactoryIsCreatedOnce(): void
+    public function testMissingHandlerException(): void
     {
         $controller = $this->createController([]);
 
-        self::assertSame($controller->matrixFactory(), $controller->matrixFactory());
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('Import handler is not set. Add #[AsImportController] attribute to');
+        $controller->importHandler();
     }
 
     public function testMissingConfigurationException(): void
@@ -86,9 +97,9 @@ class ImportControllerTraitTest extends TestCase
                 return $this->getImportConfiguration();
             }
 
-            public function matrixFactory(): MatrixFactory
+            public function importHandler(): ImportHandler
             {
-                return $this->getMatrixFactory();
+                return $this->getImportHandler();
             }
 
             public function selectFileTemplateName(): string

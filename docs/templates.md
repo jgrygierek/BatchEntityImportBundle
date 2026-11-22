@@ -67,12 +67,8 @@ protected function prepareSelectFileView(FormInterface $form): Response
     );
 }
 
-protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix, bool $manualSubmit = false): Response
+protected function prepareMatrixEditView(FormInterface $form, Matrix $matrix): Response
 {
-    if ($manualSubmit) {
-        $this->manualSubmitMatrixForm($form, $matrix);
-    }
-
     $configuration = $this->getImportConfiguration();
 
     return $this->prepareView(
