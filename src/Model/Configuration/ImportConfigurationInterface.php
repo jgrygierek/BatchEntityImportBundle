@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
-use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Validator\Constraint;
 
 interface ImportConfigurationInterface
@@ -68,7 +68,8 @@ interface ImportConfigurationInterface
     public function getAllowedFileExtensions(): array;
 
     /**
-     * Import data from matrix to database.
+     * Creates new entity for record which does not override existing entity.
+     * Values from record are set to entity after it is created.
      */
-    public function import(Matrix $matrix): void;
+    public function getNewEntity(MatrixRecord $record): object;
 }

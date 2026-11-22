@@ -6,9 +6,11 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\DependencyInjection;
 
 use Generator;
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
+use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Service\CsvDelimiterDetector;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute;
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUniqueValidator;
@@ -90,6 +92,15 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 1, new Reference('validator'));
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 2, new Reference('translator'));
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 3, new Reference(MatrixFactory::class));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(ImportHandler::class, 4, new Reference(EntityImporter::class));
+    }
+
+    public function testEntityImporterIsService(): void
+    {
+        $this->assertContainerBuilderHasService(EntityImporter::class);
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(EntityImporter::class, 0, new Reference('doctrine'));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(EntityImporter::class, 1, new Reference('event_dispatcher'));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(EntityImporter::class, 2, new Reference(RelatedEntityFinder::class));
     }
 
     public function testDatabaseEntityUniqueValidatorUsesManagerRegistry(): void
@@ -104,7 +115,7 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $this->setKernelParameters($container);
         new BatchEntityImportBundle()->getContainerExtension()?->load([], $container);
         // services of FrameworkBundle used by services of bundle
-        foreach (['form.factory', 'validator', 'translator'] as $id) {
+        foreach (['form.factory', 'validator', 'translator', 'doctrine', 'event_dispatcher'] as $id) {
             $container->register($id)->setSynthetic(true);
         }
         $container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true)->setPublic(true);

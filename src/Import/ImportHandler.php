@@ -42,6 +42,7 @@ final readonly class ImportHandler
         private ValidatorInterface $validator,
         private TranslatorInterface $translator,
         private MatrixFactory $matrixFactory,
+        private EntityImporter $entityImporter,
     ) {
     }
 
@@ -117,7 +118,7 @@ final readonly class ImportHandler
         $messages = [];
         if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $configuration->import($matrix);
+                $this->entityImporter->import($matrix, $configuration);
 
                 return ImportResult::finished([ImportMessage::success($this->translator->trans('success.import', [], self::TRANSLATION_DOMAIN))]);
             } catch (BatchEntityImportExceptionInterface $e) {

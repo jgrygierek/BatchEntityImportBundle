@@ -64,10 +64,7 @@
         "symfony/yaml": "^7.4|^8.0"
     },
     "suggest": {
-        "knplabs/doctrine-behaviors": "Use it for translatable records stored in database"
-    },
-    "conflict": {
-        "knplabs/doctrine-behaviors": "<2.0.8"
+        "knplabs/doctrine-behaviors": "Version 3 of this package can be used for translatable records stored in database"
     },
     "config": {
         "sort-packages": true

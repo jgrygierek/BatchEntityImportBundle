@@ -118,7 +118,7 @@ class EntityLookupType extends AbstractEntityLookupType implements ResetInterfac
             return;
         }
 
-        // bundle supports only Doctrine ORM, see AbstractImportConfiguration
+        // bundle supports only Doctrine ORM, see EntityImporter
         \assert($manager instanceof EntityManagerInterface);
         $queryBuilder = $manager->createQueryBuilder()
             ->select('e.' . $lookupField . ' AS value')

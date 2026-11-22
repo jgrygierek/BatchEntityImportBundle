@@ -95,18 +95,26 @@ public function getMatrixConstraints(): array
 
 ## Passing services to configuration class
 
-If you want to pass some additional services to your configuration, just override constructor.
+Configuration only describes import, data is saved by the bundle. So configuration has no dependencies,
+and you can pass any services to it by constructor:
 
 ```php
-public function __construct(
-    EntityManagerInterface $em,
-    EventDispatcherInterface $eventDispatcher,
-    RelatedEntityFinder $relatedEntityFinder,
-    TestService $service,
-) {
-    parent::__construct($em, $eventDispatcher, $relatedEntityFinder);
+public function __construct(private readonly TestService $service)
+{
+}
+```
 
-    $this->testService = $service;
+## Creating new entities
+
+By default new entity is created by constructor without arguments. If your entity needs some arguments,
+override this method in your import configuration. Values from record are set to entity after it is created.
+
+```php
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+
+public function getNewEntity(MatrixRecord $record): object
+{
+    return new User($this->service->getDefaultGroup());
 }
 ```
 

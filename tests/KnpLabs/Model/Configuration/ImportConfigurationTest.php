@@ -7,9 +7,9 @@ namespace JG\BatchEntityImportBundle\Tests\KnpLabs\Model\Configuration;
 use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
-use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use JG\BatchEntityImportBundle\Tests\KnpLabs\Fixtures\Configuration\TranslatableEntityConfiguration;
@@ -22,6 +22,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
     use SkippedTestsTrait;
 
     protected ?EntityManagerInterface $entityManager;
+    private EntityImporter $importer;
 
     protected function setUp(): void
     {
@@ -30,6 +31,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         self::bootKernel();
 
         $this->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
+        $this->importer = self::getService(EntityImporter::class);
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
         $databaseLoader->reload();
     }
@@ -66,7 +68,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         );
 
         $config = self::$kernel->getContainer()->get(TranslatableEntityConfiguration::class);
-        $config->import($matrix);
+        $this->importer->import($matrix, $config);
 
         self::assertCount(2, $repository->findAll());
 
@@ -110,13 +112,13 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ],
         );
 
-        $config = new class($this->entityManager, self::$kernel->getContainer()->get('event_dispatcher'), new RelatedEntityFinder($this->entityManager)) extends TranslatableEntityConfiguration {
+        $config = new class extends TranslatableEntityConfiguration {
             public function getFieldsDefinitions(): array
             {
                 return ['test_translation_array' => new FormFieldDefinition(ArrayTextType::class)];
             }
         };
-        $config->import($matrix);
+        $this->importer->import($matrix, $config);
 
         $this->entityManager->clear();
 
@@ -156,7 +158,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
         $config = self::$kernel->getContainer()->get(TranslatableEntityConfiguration::class);
         try {
-            $config->import($matrix);
+            $this->importer->import($matrix, $config);
             self::fail('Exception should be thrown.');
         } catch (MatrixRecordInvalidDataTypeException) {
         }
