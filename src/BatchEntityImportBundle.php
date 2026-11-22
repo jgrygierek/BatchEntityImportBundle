@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Form\Type\EntityLookupTextType;
 use JG\BatchEntityImportBundle\Form\Type\EntityLookupType;
+use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Service\CsvDelimiterDetector;
@@ -75,12 +76,20 @@ final class BatchEntityImportBundle extends AbstractBundle
         $services->set(MatrixFactory::class)
             ->args([service(CsvDelimiterDetector::class)]);
 
+        $services->set(EntityImporter::class)
+            ->args([
+                service('doctrine'),
+                service('event_dispatcher'),
+                service(RelatedEntityFinder::class),
+            ]);
+
         $services->set(ImportHandler::class)
             ->args([
                 service('form.factory'),
                 service('validator'),
                 service('translator'),
                 service(MatrixFactory::class),
+                service(EntityImporter::class),
             ]);
 
         $services->set(RelatedEntityFinder::class)

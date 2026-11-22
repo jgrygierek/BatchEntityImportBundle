@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Functional\Form\Type;
 
-use Doctrine\ORM\EntityManagerInterface;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
-use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\FieldsTypeConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
@@ -18,7 +16,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormFactory;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class MatrixRecordTypeTest extends AbstractWebTestCase
 {
@@ -34,7 +31,7 @@ class MatrixRecordTypeTest extends AbstractWebTestCase
     public function testValidFormWithBaseConfig(): void
     {
         $data = $this->getRecordData();
-        $configuration = new BaseConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class), $this->createStub(RelatedEntityFinder::class));
+        $configuration = new BaseConfiguration();
         $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);
@@ -52,7 +49,7 @@ class MatrixRecordTypeTest extends AbstractWebTestCase
     public function testValidFormWithFieldsConfig(): void
     {
         $data = $this->getRecordData();
-        $configuration = new FieldsTypeConfiguration($this->createStub(EntityManagerInterface::class), $this->createStub(EventDispatcherInterface::class), $this->createStub(RelatedEntityFinder::class));
+        $configuration = new FieldsTypeConfiguration();
         $matrixRecord = new MatrixRecord($data);
 
         $form = $this->factory->create(MatrixRecordType::class, $matrixRecord, ['configuration' => $configuration]);

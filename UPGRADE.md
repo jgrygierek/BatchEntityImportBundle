@@ -10,6 +10,7 @@
   - `doctrine/collections`: 2.2,
   - `doctrine/persistence`: 3.3.1,
   - `symfony/event-dispatcher-contracts`, `symfony/service-contracts` and `symfony/translation-contracts`: 3.5.
+- Optional `knplabs/doctrine-behaviors` (translatable entities) is supported only in version 3, version 2 can't be installed with Symfony 7.4 and Doctrine ORM 3.
 - `doctrine/doctrine-bundle` is now listed in requirements of bundle, because its services depend on it. It is installed in typical Symfony application, so usually nothing has to be changed in your project.
 
 ## Bundle
@@ -33,36 +34,30 @@
   }
   ```
 
-- Argument `RelatedEntityFinder $relatedEntityFinder` of `AbstractImportConfiguration` constructor is required. If your configuration does not override constructor, nothing has to be changed. Otherwise pass the finder to parent constructor:
+- Import configuration only describes import now, data is saved by the bundle (by new internal `JG\BatchEntityImportBundle\Import\EntityImporter` service). Method `import()` was removed from `ImportConfigurationInterface` and `AbstractImportConfiguration`.
+- `AbstractImportConfiguration` has no constructor anymore, so `EntityManagerInterface` and `EventDispatcherInterface` are not passed to it. If your configuration overrides constructor, remove the call of parent constructor and arguments which were passed only to it:
 
   ```php
   // before
-  public function __construct(EntityManagerInterface $em, EventDispatcherInterface $eventDispatcher, TestService $service)
-  {
-      parent::__construct($em, $eventDispatcher);
-  }
-
-  // after
   public function __construct(
       EntityManagerInterface $em,
       EventDispatcherInterface $eventDispatcher,
       RelatedEntityFinder $relatedEntityFinder,
-      TestService $service,
+      private readonly TestService $service,
   ) {
       parent::__construct($em, $eventDispatcher, $relatedEntityFinder);
   }
-  ```
-
-- Method `AbstractImportConfiguration::prepareRecord()` has new required argument `int $rowNumber` (number of record, starting from 1, used in error messages). If you override this method or call it in overridden `import()`, add the argument:
-
-  ```php
-  // before
-  protected function prepareRecord(MatrixRecord $record, array $headerInfo): void
 
   // after
-  protected function prepareRecord(MatrixRecord $record, array $headerInfo, int $rowNumber): void
+  public function __construct(private readonly TestService $service)
+  {
+  }
   ```
 
+- Methods `prepareRecord()`, `revertChanges()`, `save()`, `dispatchEvents()`, `getEntity()` and property `$updatedEntities` were removed from `AbstractImportConfiguration`. If you overrode them to change the way of import, move this logic e.g. to listener of `RecordImportedSuccessfullyEvent` or Doctrine events.
+- Method `getNewEntity(MatrixRecord $record): object` is public now and it was added to `ImportConfigurationInterface`. If you override it, change its visibility to `public`. If your configuration implements `ImportConfigurationInterface` directly, add this method (see [Configuration](docs/configuration.md#creating-new-entities)).
+- Entity manager is selected by class of entity, so entities managed by other entity manager than the default one can be imported too. Previously default entity manager was always used.
+- Exception thrown by listener of `RecordImportedSuccessfullyEvent` is no longer replaced by `DatabaseException`, data is already saved when events are dispatched.
 - Argument `array $allowedColumns` of `Matrix::getHeaderInfo()` is required. If you override `prepareMatrixEditView()` in your controller, pass allowed columns to it:
 
   ```php
@@ -193,7 +188,7 @@
 
 - Classes which are not extension points are final now: `BatchEntityImportBundle`, `TemplateExtension`, `DatabaseEntityUniqueValidator`, `MatrixRecordUniqueValidator`, `RelatedEntityExistsValidator`, `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper` and `EncodingHelper`. If you extend one of them, use composition (e.g. decoration of service) instead.
 - `TemplateExtension` and `PropertyExistenceChecker` are readonly classes.
-- Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper`, `AbstractValidator` and classes from `JG\BatchEntityImportBundle\Import` namespace (`ImportHandler`, `ImportResult`, `ImportStep`, `ImportMessage`) are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
+- Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper`, `EntityManagerHelper`, `AbstractValidator` and classes from `JG\BatchEntityImportBundle\Import` namespace (`ImportHandler`, `EntityImporter`, `ImportResult`, `ImportStep`, `ImportMessage`, `ImportedColumn`) are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
 - Support of translatable entities (`knplabs/doctrine-behaviors`) was moved to internal `EntityTranslationHelper`. Nothing changes in the way translated columns are imported.
 
 ## Exceptions

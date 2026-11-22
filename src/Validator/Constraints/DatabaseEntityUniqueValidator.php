@@ -7,10 +7,10 @@ namespace JG\BatchEntityImportBundle\Validator\Constraints;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
+use JG\BatchEntityImportBundle\Utils\EntityManagerHelper;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
@@ -32,7 +32,7 @@ final class DatabaseEntityUniqueValidator extends AbstractValidator
         // Results are cached only for single validation. Validator is a shared service,
         // so results kept longer would be reused for other constraints, fields and requests.
         $duplicationResults = [];
-        $entityManager = $this->getEntityManager($constraint->entityClassName);
+        $entityManager = EntityManagerHelper::getEntityManager($this->managerRegistry, $constraint->entityClassName);
 
         foreach ($value->getRecords() as $index => $record) {
             $matrixDataToCompare = $this->getMatrixRecordDataToCompare($record, $constraint->fields);
@@ -46,22 +46,6 @@ final class DatabaseEntityUniqueValidator extends AbstractValidator
                 $this->addErrorToMatrixRecord($record, $constraint, $index, $constraint->fields);
             }
         }
-    }
-
-    /**
-     * Manager is taken from registry, so entities managed by other manager than the default one are supported too.
-     *
-     * @throws InvalidArgumentException
-     */
-    private function getEntityManager(string $class): EntityManagerInterface
-    {
-        // checked before asking registry, which would throw ReflectionException for not existing class
-        $manager = \class_exists($class) ? $this->managerRegistry->getManagerForClass($class) : null;
-        if (!$manager instanceof EntityManagerInterface) {
-            throw new InvalidArgumentException(\sprintf('Class "%s" is not a managed Doctrine entity.', $class));
-        }
-
-        return $manager;
     }
 
     protected function validateArguments(Matrix $value, Constraint $constraint): void

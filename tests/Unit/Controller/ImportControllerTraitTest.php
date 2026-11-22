@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Unit\Controller;
 
+use Doctrine\Persistence\ManagerRegistry;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
+use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ImportControllerTraitTest extends TestCase
@@ -52,6 +56,7 @@ class ImportControllerTraitTest extends TestCase
             $this->createStub(ValidatorInterface::class),
             $this->createStub(TranslatorInterface::class),
             new MatrixFactory(),
+            new EntityImporter($this->createStub(ManagerRegistry::class), $this->createStub(EventDispatcherInterface::class), $this->createStub(RelatedEntityFinder::class)),
         );
         $controller = $this->createController([]);
         $controller->setImportHandler($handler);
