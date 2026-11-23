@@ -55,7 +55,7 @@
   }
   ```
 
-- Methods `prepareRecord()`, `revertChanges()`, `save()`, `dispatchEvents()`, `getEntity()` and property `$updatedEntities` were removed from `AbstractImportConfiguration`. If you overrode them to change the way of import, move this logic e.g. to listener of `RecordImportedSuccessfullyEvent` or Doctrine events.
+- Methods `prepareRecord()`, `revertChanges()`, `save()`, `dispatchEvents()`, `getEntity()` and property `$updatedEntities` were removed from `AbstractImportConfiguration`. If you overrode them to change the way of import, move this logic to listeners of new events: `RecordValueEvent` (e.g. to convert values), `RecordPreparedEvent` (e.g. to change entity before it is saved) or `AfterImportEvent` (see [Events](docs/events.md)).
 - New method `getOverrideEntityFieldDefinition(): ?FormFieldDefinition` was added to `ImportConfigurationInterface`, it defines field used to select overridden entity in the preview (see [Updating entities](docs/updating-entities.md#field-used-to-select-entity)). `AbstractImportConfiguration` returns `null`, which means select with all entities, as before. If your configuration implements `ImportConfigurationInterface` directly, add this method.
 - Method `getNewEntity(MatrixRecord $record): object` is public now and it was added to `ImportConfigurationInterface`. If you override it, change its visibility to `public`. If your configuration implements `ImportConfigurationInterface` directly, add this method (see [Configuration](docs/configuration.md#creating-new-entities)).
 - Entity manager is selected by class of entity, so entities managed by other entity manager than the default one can be imported too. Previously default entity manager was always used.

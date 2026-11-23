@@ -1,8 +1,9 @@
 # Updating entities
 
-If you want to update your entities:
-- Set `allowOverrideEntity` to `true` in your import configuration file. 
-- Then in your import file:
+Updating entities is enabled by default (see `allowOverrideEntity()` in [Configuration class](configuration.md#show--hide-entity-override-column)).
+In the preview every record has additional column, where entity which should be updated by this record can be selected.
+
+To select entities already in your import file:
   - Add `entity_id` in header and:
     - Add entity ID to row
     - Leave it empty (if you want to set it manually or import it as new record)

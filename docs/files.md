@@ -55,8 +55,6 @@ so when number of sent fields reaches this limit, data is not saved and error me
 
 Number of fields is about `number of rows * (number of columns + 1)`. To import bigger files, increase `max_input_vars` in PHP configuration.
 
-This check can be changed by overriding `isRequestDataTruncated()` method in your controller.
-
 ## Translatable columns
 
 This bundle supports KnpLabs Translatable behavior.
@@ -69,6 +67,53 @@ To use this feature, every column with translatable values should be suffixed wi
 If suffix will be added to non-translatable entity, field will be skipped.
 
 If suffix will be added to translatable entity, but field will not be found in translation class, field will be skipped.
+
+## Changing the way of reading files
+
+Files are read by `MatrixFactory` service. To change it (e.g. to import other sheet than active one, or to rename columns),
+decorate this service. Example below renames columns, so file can have headers in other language than names of properties:
+
+```php
+namespace App\Import;
+
+use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+
+#[AsDecorator(MatrixFactory::class)]
+final class HeaderAliasesMatrixFactory extends MatrixFactory
+{
+    private const array ALIASES = ['imie' => 'first_name', 'nazwisko' => 'last_name'];
+
+    public function __construct(#[AutowireDecorated] private readonly MatrixFactory $inner)
+    {
+        parent::__construct();
+    }
+
+    public function createFromUploadedFile(UploadedFile $file, ?string $csvFallbackEncoding = null): Matrix
+    {
+        $matrix = $this->inner->createFromUploadedFile($file, $csvFallbackEncoding);
+        $rename = static fn (string $name): string => self::ALIASES[$name] ?? $name;
+
+        return new Matrix(
+            array_map($rename, $matrix->getHeader()),
+            array_map(
+                static fn (MatrixRecord $record): array => [
+                    ...array_combine(array_map($rename, array_keys($record->getData())), $record->getData()),
+                    // identifier of entity is not a part of data, so it has to be passed again
+                    'entity_id' => $record->entityId,
+                ],
+                $matrix->getRecords(),
+            ),
+        );
+    }
+}
+```
+
+Data sent from the preview is read by `createFromPostData()` method, it has names of columns which are already changed.
 
 ## Full example of CSV file
 
