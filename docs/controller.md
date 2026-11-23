@@ -54,19 +54,6 @@ or encoding of CSV files (see [Import files](files.md#encoding)).
 
 ## Events
 
-### RecordImportedSuccessfullyEvent
-
-For each successfully processed record, event `RecordImportedSuccessfullyEvent` is dispatched. This event contains two fields:
-- entity class name
-- entity id: integer identifier is passed as it is, other identifiers (e.g. UUID object) are cast to string. For composite identifier only its first value is used.
-
-```php
-readonly class RecordImportedSuccessfullyEvent
-{
-    public function __construct(public string $class, public string|int $id)
-    {
-    }
-}
-```
+Events dispatched during import are described in [Events](events.md).
 
 [Back to README](../README.md)

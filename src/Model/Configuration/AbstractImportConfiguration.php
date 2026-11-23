@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Model\Configuration;
 
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Validator\Constraint;
 
@@ -29,6 +30,11 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
     }
 
     public function getEntityTranslationRelationName(): ?string
+    {
+        return null;
+    }
+
+    public function getOverrideEntityFieldDefinition(): ?FormFieldDefinition
     {
         return null;
     }

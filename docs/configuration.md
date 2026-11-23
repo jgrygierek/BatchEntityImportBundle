@@ -6,6 +6,10 @@ To define how the import function should work, you need to create a configuratio
 
 In the simplest case it will contain only class of used entity.
 
+Configuration should extend `AbstractImportConfiguration`, which provides default values of all options.
+Implementing `ImportConfigurationInterface` directly is not recommended, because new methods (new options of import)
+can be added to this interface in minor versions, without default implementation in your class.
+
 ```php
 namespace App\Model\ImportConfiguration;
 
