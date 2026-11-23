@@ -17,4 +17,30 @@ entity_id,user_name
 10,user_3
 ```
 
+## Field used to select entity
+
+By default entity is selected in the preview by a select with all entities. It is repeated in every row,
+so for bigger tables it is better to use a text field, where entity is found by value of any of its fields (e.g. `id` or `email`).
+Value of `entity_id` column in file is used as value of this field.
+
+```php
+use JG\BatchEntityImportBundle\Form\Type\EntityLookupTextType;
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
+
+public function getOverrideEntityFieldDefinition(): ?FormFieldDefinition
+{
+    return new FormFieldDefinition(EntityLookupTextType::class, ['lookup_field' => 'email']);
+}
+```
+
+```csv
+entity_id,user_name
+john@example.com,user_1
+,user_2
+```
+
+- `EntityLookupTextType` renders a text field, value is validated if entity exists.
+- `EntityLookupType` renders a select, but only fields set in `lookup_field` and `label_field` options are loaded from database, instead of whole entities.
+- Option `class` is set automatically to class of imported entity. Other options are the same as in [Importing relations](relations.md).
+
 [Back to README](../README.md)

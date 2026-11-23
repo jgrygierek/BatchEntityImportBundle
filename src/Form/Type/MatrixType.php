@@ -13,7 +13,12 @@ use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class MatrixType extends AbstractType
+/**
+ * Form used by the bundle in import process, use form type extension to change it.
+ *
+ * @internal
+ */
+final class MatrixType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

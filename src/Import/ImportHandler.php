@@ -147,6 +147,14 @@ final readonly class ImportHandler
     {
         $data = ['records' => array_map(static fn (MatrixRecord $record): array => $record->getData(), $matrix->getRecords())];
 
+        // field to override entity is not a column of file, it is filled already by its form type (e.g. from "entity_id" column)
+        $recordForms = $form->has('records') ? $form->get('records') : [];
+        foreach ($recordForms as $index => $recordForm) {
+            if ($recordForm->has('entity') && isset($data['records'][$index])) {
+                $data['records'][$index]['entity'] = $recordForm->get('entity')->getViewData();
+            }
+        }
+
         $csrfTokenManager = $form->getConfig()->getOption('csrf_token_manager');
         if ($csrfTokenManager instanceof CsrfTokenManagerInterface) {
             $tokenId = $form->getConfig()->getOption('csrf_token_id');

@@ -9,7 +9,11 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use InvalidArgumentException;
+use JG\BatchEntityImportBundle\Event\AfterImportEvent;
+use JG\BatchEntityImportBundle\Event\BeforeImportEvent;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
+use JG\BatchEntityImportBundle\Event\RecordPreparedEvent;
+use JG\BatchEntityImportBundle\Event\RecordValueEvent;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
@@ -64,13 +68,17 @@ final readonly class EntityImporter
         /** @var array<int, object> $touchedEntities entities changed so far, indexed by object id */
         $touchedEntities = [];
 
+        $this->eventDispatcher->dispatch(new BeforeImportEvent($configuration, $matrix));
+
         try {
             foreach (array_values($matrix->getRecords()) as $index => $record) {
                 $entity = $record->getEntity() ?? $configuration->getNewEntity($record);
                 $touchedEntities[spl_object_id($entity)] = $entity;
 
                 // number of record, starting from 1, as in the preview, used in error messages
-                $this->setValues($entity, $record, $columns, $index + 1);
+                $rowNumber = $index + 1;
+                $this->setValues($configuration, $entity, $record, $columns, $rowNumber);
+                $this->eventDispatcher->dispatch(new RecordPreparedEvent($configuration, $record, $entity, $rowNumber));
 
                 $entityManager->persist($entity);
                 EntityTranslationHelper::mergeNewTranslations($entity);
@@ -93,6 +101,7 @@ final readonly class EntityImporter
 
         // outside of the block above, data is already saved, so exception thrown by listener is not reported as error of database
         $this->dispatchEvents($entityManager, $entityClass, $importedEntities);
+        $this->eventDispatcher->dispatch(new AfterImportEvent($configuration, $importedEntities));
     }
 
     /**
@@ -129,7 +138,7 @@ final readonly class EntityImporter
      * @throws MatrixRecordInvalidDataTypeException
      * @throws MatrixRecordRelatedEntityNotFoundException
      */
-    private function setValues(object $entity, MatrixRecord $record, array $columns, int $rowNumber): void
+    private function setValues(ImportConfigurationInterface $configuration, object $entity, MatrixRecord $record, array $columns, int $rowNumber): void
     {
         foreach ($record->getData() as $name => $value) {
             $column = $columns[$name] ?? null;
@@ -142,7 +151,8 @@ final readonly class EntityImporter
             // translated column is imported only to translatable entity, otherwise it is not imported at all (see Matrix::getHeaderInfo())
             $target = null !== $column->locale ? EntityTranslationHelper::getTranslation($entity, $column->locale) : $entity;
             if (null !== $target) {
-                $this->setValue($target, $column, $value, $rowNumber);
+                $event = $this->eventDispatcher->dispatch(new RecordValueEvent($configuration, $record, $target, $name, $rowNumber, $value));
+                $this->setValue($target, $column, $event->getValue(), $rowNumber);
             }
         }
     }

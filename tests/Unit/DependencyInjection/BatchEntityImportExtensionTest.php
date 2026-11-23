@@ -6,6 +6,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\DependencyInjection;
 
 use Generator;
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
+use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
@@ -83,6 +84,12 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
     {
         $this->assertContainerBuilderHasService(MatrixFactory::class);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(MatrixFactory::class, 0, new Reference(CsvDelimiterDetector::class));
+    }
+
+    public function testMatrixRecordTypeIsService(): void
+    {
+        $this->assertContainerBuilderHasServiceDefinitionWithTag(MatrixRecordType::class, 'form.type');
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(MatrixRecordType::class, 0, new Reference(RelatedEntityFinder::class));
     }
 
     public function testImportHandlerIsService(): void

@@ -6,9 +6,11 @@ namespace JG\BatchEntityImportBundle\Form\Type;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use InvalidArgumentException;
 use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -25,9 +27,21 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class MatrixRecordType extends AbstractType
+/**
+ * Form used by the bundle in import process, use form type extension to change it.
+ *
+ * @internal
+ */
+final class MatrixRecordType extends AbstractType
 {
+    private const string ENTITY_FIELD = 'entity';
+
+    public function __construct(private readonly RelatedEntityFinder $relatedEntityFinder)
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         /** @var ImportConfigurationInterface $configuration */
@@ -35,7 +49,10 @@ class MatrixRecordType extends AbstractType
         $fieldDefinitions = $configuration->getFieldsDefinitions();
 
         if ($configuration->allowOverrideEntity()) {
-            $this->addEntityField($builder, $configuration->getEntityClassName(), $configuration->getEntityTranslationRelationName());
+            $entityFieldDefinition = $configuration->getOverrideEntityFieldDefinition();
+            null === $entityFieldDefinition
+                ? $this->addEntityField($builder, $configuration->getEntityClassName(), $configuration->getEntityTranslationRelationName())
+                : $this->addEntityLookupField($builder, $configuration->getEntityClassName(), $entityFieldDefinition);
         }
 
         $builder->addEventListener(
@@ -69,7 +86,7 @@ class MatrixRecordType extends AbstractType
     {
         $builder
             ->add(
-                'entity',
+                self::ENTITY_FIELD,
                 EntityType::class,
                 [
                     'class' => $entityClassName,
@@ -87,6 +104,71 @@ class MatrixRecordType extends AbstractType
                     },
                 ],
             );
+    }
+
+    /**
+     * Entity is found by value of "lookup_field", so only this value is rendered in the preview, not all entities.
+     *
+     * @throws InvalidArgumentException when definition does not use one of entity lookup types
+     */
+    private function addEntityLookupField(FormBuilderInterface $builder, string $entityClassName, FormFieldDefinition $definition): void
+    {
+        if (!is_a($definition->getClass(), AbstractEntityLookupType::class, true)) {
+            throw new InvalidArgumentException(\sprintf('Field used to override entity has to be "%s" or "%s", "%s" given.', EntityLookupType::class, EntityLookupTextType::class, $definition->getClass()));
+        }
+
+        $builder->add(self::ENTITY_FIELD, $definition->getClass(), [
+            ...$definition->getOptions(),
+            'class' => $entityClassName,
+            'label' => false,
+            'required' => false,
+            // value of field is a scalar, entity is set to record after submit
+            'mapped' => false,
+        ]);
+
+        // after data of record is mapped to fields, otherwise not mapped field would be cleared
+        $builder->addEventListener(FormEvents::POST_SET_DATA, static function (FormEvent $event): void {
+            $record = $event->getData();
+            if ($record instanceof MatrixRecord) {
+                $field = $event->getForm()->get(self::ENTITY_FIELD);
+                $field->setData(self::getLookupValue($record, self::getLookupField($field)));
+            }
+        });
+
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($entityClassName): void {
+            $record = $event->getData();
+            // always set after submit, because of "data_class" option
+            \assert($record instanceof MatrixRecord);
+
+            $field = $event->getForm()->get(self::ENTITY_FIELD);
+            $value = $field->getData();
+            // entity which does not exist is reported by validation of field, record is imported as new entity then
+            $record->setEntity(
+                \is_scalar($value) && '' !== $value ? $this->relatedEntityFinder->find($entityClassName, self::getLookupField($field), $value) : null,
+            );
+        });
+    }
+
+    private static function getLookupField(FormInterface $field): string
+    {
+        $lookupField = $field->getConfig()->getOption('lookup_field');
+
+        return \is_string($lookupField) ? $lookupField : RelatedEntityFinder::DEFAULT_LOOKUP_FIELD;
+    }
+
+    /**
+     * Value of "entity_id" column in file is treated as value of lookup field.
+     */
+    private static function getLookupValue(MatrixRecord $record, string $lookupField): string|int|null
+    {
+        $entity = $record->getEntity();
+        if (null === $entity) {
+            return $record->entityId;
+        }
+
+        $value = PropertyAccess::createPropertyAccessor()->getValue($entity, $lookupField);
+
+        return \is_int($value) || \is_string($value) ? $value : null;
     }
 
     /**

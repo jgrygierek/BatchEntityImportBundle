@@ -11,7 +11,11 @@ use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\ManagerRegistry;
 use Generator;
 use InvalidArgumentException;
+use JG\BatchEntityImportBundle\Event\AfterImportEvent;
+use JG\BatchEntityImportBundle\Event\BeforeImportEvent;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
+use JG\BatchEntityImportBundle\Event\RecordPreparedEvent;
+use JG\BatchEntityImportBundle\Event\RecordValueEvent;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
 use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
@@ -23,8 +27,10 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use stdClass;
 use Stringable;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImporterTest extends TestCase
@@ -36,11 +42,9 @@ class EntityImporterTest extends TestCase
     public function testIdentifierOfEntityInEvent(array $identifier, string|int $expectedId): void
     {
         $events = [];
-        $eventDispatcher = $this->createStub(EventDispatcherInterface::class);
-        $eventDispatcher->method('dispatch')->willReturnCallback(static function (object $event) use (&$events): object {
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(RecordImportedSuccessfullyEvent::class, static function (RecordImportedSuccessfullyEvent $event) use (&$events): void {
             $events[] = $event;
-
-            return $event;
         });
 
         $this->createImporter($this->createEntityManager($identifier), $eventDispatcher)->import($this->createMatrix(), new BaseConfiguration());
@@ -68,8 +72,10 @@ class EntityImporterTest extends TestCase
     public function testExceptionOfListenerIsNotReportedAsDatabaseError(): void
     {
         $exception = new ConnectionLost(new PDOException('lost'), null);
-        $eventDispatcher = $this->createStub(EventDispatcherInterface::class);
-        $eventDispatcher->method('dispatch')->willThrowException($exception);
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(RecordImportedSuccessfullyEvent::class, static function () use ($exception): never {
+            throw $exception;
+        });
 
         $entityManager = $this->createEntityManager(['id' => 1]);
         $entityManager->expects($this->once())->method('flush');
@@ -85,7 +91,7 @@ class EntityImporterTest extends TestCase
         $entityManager->method('flush')->willThrowException(new ConnectionLost(new PDOException('lost'), null));
 
         $this->expectException(DatabaseException::class);
-        $this->createImporter($entityManager, $this->createStub(EventDispatcherInterface::class))->import($this->createMatrix(), new BaseConfiguration());
+        $this->createImporter($entityManager, new EventDispatcher())->import($this->createMatrix(), new BaseConfiguration());
     }
 
     public function testNewEntityIsCreatedByConfiguration(): void
@@ -94,18 +100,7 @@ class EntityImporterTest extends TestCase
         $entityManager = $this->createEntityManager(['id' => 1]);
         $entityManager->expects($this->once())->method('persist')->with($this->identicalTo($entity));
 
-        $configuration = new class($entity) extends BaseConfiguration {
-            public function __construct(private readonly TestEntity $entity)
-            {
-            }
-
-            public function getNewEntity(MatrixRecord $record): object
-            {
-                return $this->entity;
-            }
-        };
-
-        $this->createImporter($entityManager, $this->createStub(EventDispatcherInterface::class))->import($this->createMatrix(), $configuration);
+        $this->createImporter($entityManager, new EventDispatcher())->import($this->createMatrix(), $this->createConfiguration($entity));
 
         self::assertSame('value', $entity->getTestPrivateProperty());
     }
@@ -126,13 +121,99 @@ class EntityImporterTest extends TestCase
         };
 
         $this->expectExceptionObject(new InvalidArgumentException(\sprintf('Class "%s" is not a managed Doctrine entity.', $class)));
-        $this->createImporter($this->createEntityManager([]), $this->createStub(EventDispatcherInterface::class))->import(new Matrix(), $configuration);
+        $this->createImporter($this->createEntityManager([]), new EventDispatcher())->import(new Matrix(), $configuration);
     }
 
     public static function notManagedClassProvider(): Generator
     {
         yield 'class without manager' => [self::class];
         yield 'not existing class' => ['App\Entity\NotExisting'];
+    }
+
+    public function testEventsAreDispatchedInOrder(): void
+    {
+        $configuration = new BaseConfiguration();
+        $matrix = new Matrix(['test_private_property', 'test_public_property'], [
+            ['test_private_property' => 'a', 'test_public_property' => 'b'],
+            ['test_private_property' => 'c', 'test_public_property' => 'd'],
+        ]);
+
+        $events = [];
+        $eventDispatcher = new EventDispatcher();
+        foreach ([BeforeImportEvent::class, RecordValueEvent::class, RecordPreparedEvent::class, RecordImportedSuccessfullyEvent::class, AfterImportEvent::class] as $eventClass) {
+            $eventDispatcher->addListener($eventClass, static function (object $event) use (&$events): void {
+                $events[] = $event;
+            });
+        }
+
+        $this->createImporter($this->createEntityManager(['id' => 1]), $eventDispatcher)->import($matrix, $configuration);
+
+        self::assertSame([
+            BeforeImportEvent::class,
+            RecordValueEvent::class,
+            RecordValueEvent::class,
+            RecordPreparedEvent::class,
+            RecordValueEvent::class,
+            RecordValueEvent::class,
+            RecordPreparedEvent::class,
+            RecordImportedSuccessfullyEvent::class,
+            RecordImportedSuccessfullyEvent::class,
+            AfterImportEvent::class,
+        ], array_map(static fn (object $event): string => $event::class, $events));
+
+        self::assertInstanceOf(BeforeImportEvent::class, $events[0]);
+        self::assertSame($configuration, $events[0]->configuration);
+        self::assertSame($matrix, $events[0]->matrix);
+
+        self::assertInstanceOf(RecordValueEvent::class, $events[4]);
+        self::assertSame($configuration, $events[4]->configuration);
+        self::assertSame($matrix->getRecords()[1], $events[4]->record);
+        self::assertSame('test_private_property', $events[4]->columnName);
+        self::assertSame(2, $events[4]->rowNumber);
+        self::assertSame('c', $events[4]->getValue());
+
+        self::assertInstanceOf(RecordPreparedEvent::class, $events[6]);
+        self::assertSame($events[4]->entity, $events[6]->entity);
+        self::assertSame(2, $events[6]->rowNumber);
+
+        self::assertInstanceOf(RecordPreparedEvent::class, $events[3]);
+        self::assertInstanceOf(AfterImportEvent::class, $events[9]);
+        self::assertSame([$events[3]->entity, $events[6]->entity], $events[9]->entities);
+    }
+
+    public function testValueIsChangedByListener(): void
+    {
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(RecordValueEvent::class, static function (RecordValueEvent $event): void {
+            $event->setValue(strtoupper((string) $event->getValue()));
+        });
+        $eventDispatcher->addListener(RecordPreparedEvent::class, static function (RecordPreparedEvent $event): void {
+            self::assertInstanceOf(TestEntity::class, $event->entity);
+            self::assertSame('VALUE', $event->entity->getTestPrivateProperty());
+            $event->entity->testPublicProperty = 'set by listener';
+        });
+
+        $entity = new TestEntity();
+        $this->createImporter($this->createEntityManager(['id' => 1]), $eventDispatcher)->import($this->createMatrix(), $this->createConfiguration($entity));
+
+        self::assertSame('VALUE', $entity->getTestPrivateProperty());
+        self::assertSame('set by listener', $entity->testPublicProperty);
+    }
+
+    public function testExceptionOfListenerBeforeSaveRevertsImport(): void
+    {
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(RecordPreparedEvent::class, static function (): never {
+            throw new RuntimeException('Invalid record.');
+        });
+
+        $entityManager = $this->createEntityManager(['id' => 1]);
+        // entity is not persisted yet, when listener is called, and import is not saved
+        $entityManager->expects($this->never())->method('persist');
+        $entityManager->expects($this->never())->method('flush');
+
+        $this->expectExceptionObject(new RuntimeException('Invalid record.'));
+        $this->createImporter($entityManager, $eventDispatcher)->import($this->createMatrix(), new BaseConfiguration());
     }
 
     private function createImporter(EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): EntityImporter
@@ -156,6 +237,20 @@ class EntityImporterTest extends TestCase
         $entityManager->method('getUnitOfWork')->willReturn($unitOfWork);
 
         return $entityManager;
+    }
+
+    private function createConfiguration(TestEntity $entity): BaseConfiguration
+    {
+        return new class($entity) extends BaseConfiguration {
+            public function __construct(private readonly TestEntity $entity)
+            {
+            }
+
+            public function getNewEntity(MatrixRecord $record): object
+            {
+                return $this->entity;
+            }
+        };
     }
 
     private function createMatrix(): Matrix

@@ -56,10 +56,11 @@ JG\BatchEntityImportBundle\BatchEntityImportBundle::class => ['all' => true],
 ## Documentation
 
 * [Configuration class](docs/configuration.md) - entity to import, types of fields, validation, allowed columns and file extensions.
-* [Controller](docs/controller.md) - controller with import actions, events dispatched after import.
+* [Controller](docs/controller.md) - controller with import actions.
 * [Import files](docs/files.md) - rules for header and rows, CSV delimiter and encoding, size limit, translatable columns, full example of file.
 * [Overriding templates](docs/templates.md) - global and controller-specific templates, main layout, additional data.
-* [Updating entities](docs/updating-entities.md) - updating existing records instead of inserting new ones.
+* [Updating entities](docs/updating-entities.md) - updating existing records instead of inserting new ones, field used to select them.
+* [Events](docs/events.md) - events dispatched during import, converting values (e.g. dates) and changing entities before saving.
 * [Importing data to array field](docs/array-fields.md) - values with separator imported as array.
 * [Importing relations](docs/relations.md) - `ManyToOne` and `OneToOne` relations imported by value of any field.
 * [Upgrade notes](UPGRADE.md) - changes between versions.

@@ -11,7 +11,12 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class FileImportType extends AbstractType
+/**
+ * Form used by the bundle in import process, use form type extension to change it.
+ *
+ * @internal
+ */
+final class FileImportType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

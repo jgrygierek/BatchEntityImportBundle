@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Form\Type\EntityLookupTextType;
 use JG\BatchEntityImportBundle\Form\Type\EntityLookupType;
+use JG\BatchEntityImportBundle\Form\Type\MatrixRecordType;
 use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
@@ -104,6 +105,10 @@ final class BatchEntityImportBundle extends AbstractBundle
             ->arg('$relatedEntityFinder', service(RelatedEntityFinder::class))
             ->tag('form.type')
             ->tag('kernel.reset', ['method' => 'reset']);
+
+        $services->set(MatrixRecordType::class)
+            ->args([service(RelatedEntityFinder::class)])
+            ->tag('form.type');
 
         $services->set(EntityLookupTextType::class)
             ->arg('$relatedEntityFinder', service(RelatedEntityFinder::class))

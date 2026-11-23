@@ -8,6 +8,13 @@ use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Validator\Constraint;
 
+/**
+ * Configuration of single import.
+ *
+ * It is recommended to extend AbstractImportConfiguration instead of implementing this interface directly.
+ * New methods (new options of import) can be added to this interface in minor versions,
+ * and AbstractImportConfiguration always provides their default implementation.
+ */
 interface ImportConfigurationInterface
 {
     /**
@@ -34,6 +41,16 @@ interface ImportConfigurationInterface
      * Use this method to pass a relation name to entity translation.
      */
     public function getEntityTranslationRelationName(): ?string;
+
+    /**
+     * Field used in the preview to select entity which is overridden by record (when allowOverrideEntity() returns true).
+     *
+     * By default (null) it is a select with all entities, which is heavy for big tables, because it is repeated in every row.
+     * Definition with EntityLookupTextType renders a text field, and entity is found by value typed in it.
+     * Definition with EntityLookupType renders a lighter select, especially with "label_field" option.
+     * Option "class" is set automatically. Value of "entity_id" column in file is treated as value of "lookup_field".
+     */
+    public function getOverrideEntityFieldDefinition(): ?FormFieldDefinition;
 
     /**
      * Use this method to pass constraints to the main Matrix form.
