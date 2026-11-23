@@ -84,6 +84,8 @@ This bundle provides two new validators.
 
 Names of fields should be the same as names of columns in your uploaded file. With one exception! If name contains spaces, you should use underscores instead.
 
+`DatabaseEntityUnique` uses entity manager which manages given class of entity, so it works also with entities which are not managed by the default entity manager.
+
 ```php
 use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 use JG\BatchEntityImportBundle\Validator\Constraints\MatrixRecordUnique;
@@ -124,13 +126,13 @@ public function getNewEntity(MatrixRecord $record): object
 
 ## Show & hide entity override column
 
-If you want to hide/show an entity column that allows you to override entity `default: true`,
-you have to override this method in your import configuration.
+Column which allows to select entity overridden by record (see [Updating entities](updating-entities.md)) is shown by default.
+If you want to hide it, so records are always imported as new entities, override this method in your import configuration:
 
 ```php
 public function allowOverrideEntity(): bool
 {
-    return true;
+    return false;
 }
 ```
 
@@ -171,6 +173,7 @@ However, if you want to change it, you can override this method in your import c
 If you use **KnpLabs Translatable** extension for your entity, probably you will notice increased number of queries, because of Lazy Loading.
 
 To optimize this, you can use `getEntityTranslationRelationName()` method to pass the relation name to the translation.
+It is used by the default select of overridden entity (see [Updating entities](updating-entities.md#field-used-to-select-entity)).
 
 ```php
 public function getEntityTranslationRelationName(): ?string

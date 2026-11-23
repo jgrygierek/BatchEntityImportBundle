@@ -57,6 +57,10 @@ Then you just have to override it in bundle directory, or change a path to layou
 If you want to add some specific data to the rendered view, just override these methods in your controller:
 
 ```php
+use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Response;
+
 protected function prepareSelectFileView(FormInterface $form): Response
 {
     return $this->prepareView(

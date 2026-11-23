@@ -7,6 +7,7 @@ This is just an example, depending on your needs you can inject services in diff
 Class of import configuration is set by `#[AsImportController]` attribute. Controller has to be registered as autoconfigured service (default in Symfony), and configuration has to be registered as a service too. If something is wrong (e.g. configuration is not a service), you will see an error already when container is built.
 
 The attribute has to be added to class of controller itself, it is not inherited from parent class.
+Controller which uses `ImportControllerTrait` has to extend `AbstractController`.
 
 ```php
 namespace App\Controller;
