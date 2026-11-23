@@ -22,6 +22,7 @@
 ## Twig
 
 - `TemplateExtension` no longer extends `Twig\Extension\AbstractExtension`, function `batch_entity_import_template` is registered by `#[AsTwigFunction]` attribute. Nothing changes in templates. Method `getFunctions()` was removed.
+- Form in `select_file.html.twig` is sent to the current route together with its parameters, so import can be used under route with parameters (e.g. `/import/{type}`). Previously parameters were lost and route could not be generated. If you override this template, pass `app.request.attributes.get('_route_params')` to `path()` too.
 
 ## Import configuration
 
@@ -60,6 +61,8 @@
 - Method `getNewEntity(MatrixRecord $record): object` is public now and it was added to `ImportConfigurationInterface`. If you override it, change its visibility to `public`. If your configuration implements `ImportConfigurationInterface` directly, add this method (see [Configuration](docs/configuration.md#creating-new-entities)).
 - Entity manager is selected by class of entity, so entities managed by other entity manager than the default one can be imported too. Previously default entity manager was always used.
 - Exception thrown by listener of `RecordImportedSuccessfullyEvent` is no longer replaced by `DatabaseException`, data is already saved when events are dispatched.
+- Column is imported only when its value can be set from outside of entity: by public setter, or directly to public property, which is not static, readonly, with asymmetric visibility (e.g. `public private(set)`) or virtual property without `set` hook. Other columns are marked in preview as unknown and skipped during import. Previously such column was shown as imported, and import failed with error 500.
+- Setter which is not public is no longer called. When entity has public property and not public setter with the same name, value is set directly to the property.
 - Argument `array $allowedColumns` of `Matrix::getHeaderInfo()` is required. If you override `prepareMatrixEditView()` in your controller, pass allowed columns to it:
 
   ```php
@@ -132,6 +135,11 @@
 - Argument `bool $manualSubmit` of `prepareMatrixEditView()` was removed, form is always submitted by handler already. If you override this method, remove the argument and the call of `manualSubmitMatrixForm()`.
 - Methods `createMatrixForm()`, `manualSubmitMatrixForm()`, `setErrorAsFlash()`, `isRequestDataTruncated()` and `getMaxInputVars()` were removed from `ImportControllerTrait`, their logic is in `ImportHandler`. Constraints of matrix are still taken from `getMatrixConstraints()` of import configuration.
 
+## Preview
+
+- Entity selected by `entity_id` column is set to the record already in the preview, also for default select of entities. Previously it was only marked as selected in the select, so constraints (e.g. `DatabaseEntityUnique`) reported record which updates entity with its own values as a duplicate, until the preview was sent.
+- Value of `entity_id` column which does not match any entity is reported in the preview as invalid choice. Previously such record was silently imported as new entity.
+
 ## Matrix factory
 
 - `MatrixFactory` is a service, and its methods are no longer static. Inject the service, where you need it:
@@ -187,12 +195,22 @@
   $id = (string) $event->id;
   ```
 
+- Exceptions of this bundle (e.g. `MatrixRecordInvalidDataTypeException`) thrown by listeners of `RecordImportedSuccessfullyEvent` and `AfterImportEvent` are wrapped in `RuntimeException`. Data is already saved then, so they are no longer shown to user as errors of import together with the preview, where the same data could be saved again.
+
+## Form types
+
+- `ArrayTextType` no longer implements `DataTransformerInterface`, methods `transform()` and `reverseTransform()` were removed. They were never used by the form: value is a text in the preview, and it is split into array during import. If you call them in your code, use `explode()` with `ArrayTextType::getSeparator($options)` instead.
+- New static method `ArrayTextType::getSeparator(array $options)` returns separator used in the preview and during import. Empty separator is replaced by default one (`|`), so the help text in the preview shows the separator which is really used.
+- Value `0` of array field is imported as `['0']`. Previously it was imported as empty array, the same as empty value.
+- Value of field with subclass of `ArrayTextType` is imported as array too. Previously only `ArrayTextType` itself was supported, and value of its subclass was passed to entity as a text.
+- Options of array field are resolved by its form type during import, the same way as in the preview. So default separator set in `configureOptions()` of `ArrayTextType` subclass is used also during import. Previously only separator passed in options of `FormFieldDefinition` was used during import, and the preview could show other separator.
+
 ## Final and internal classes
 
 - Classes which are not extension points are final now: `BatchEntityImportBundle`, `TemplateExtension`, `DatabaseEntityUniqueValidator`, `MatrixRecordUniqueValidator`, `RelatedEntityExistsValidator`, `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper` and `EncodingHelper`. If you extend one of them, use composition (e.g. decoration of service) instead.
 - `TemplateExtension` and `PropertyExistenceChecker` are readonly classes.
 - Form types used by the bundle in import process (`FileImportType`, `MatrixType` and `MatrixRecordType`) are final and marked as `@internal`. To change them (e.g. add options or attributes of fields), use [form type extension](https://symfony.com/doc/current/form/create_form_type_extension.html) instead of extending them.
-- `MatrixRecordType` is registered as a service and it gets `RelatedEntityFinder` in constructor, so it can't be created by `new` without arguments anymore. Form types used in your field definitions (`EntityLookupType`, `EntityLookupTextType`, `ArrayTextType`) are not changed and they can be still extended.
+- `MatrixRecordType` is registered as a service and it gets `RelatedEntityFinder` in constructor, so it can't be created by `new` without arguments anymore. Form types used in your field definitions (`EntityLookupType`, `EntityLookupTextType`, `ArrayTextType`) can be still extended, see also [Form types](#form-types).
 - Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper`, `EntityManagerHelper`, `AbstractValidator` and classes from `JG\BatchEntityImportBundle\Import` namespace (`ImportHandler`, `EntityImporter`, `ImportResult`, `ImportStep`, `ImportMessage`, `ImportedColumn`) are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
 - Support of translatable entities (`knplabs/doctrine-behaviors`) was moved to internal `EntityTranslationHelper`. Nothing changes in the way translated columns are imported.
 

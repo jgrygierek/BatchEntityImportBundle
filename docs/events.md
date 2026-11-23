@@ -11,6 +11,9 @@ Each event, except `RecordImportedSuccessfullyEvent`, contains import configurat
 | `RecordImportedSuccessfullyEvent` | for each record, after data is saved in database | data is already saved |
 | `AfterImportEvent` | once, after all `RecordImportedSuccessfullyEvent` events | data is already saved |
 
+Exceptions of this bundle (e.g. `MatrixRecordInvalidDataTypeException`) are shown to user as errors of import, together with the preview to correct data.
+In listeners of `RecordImportedSuccessfullyEvent` and `AfterImportEvent` data is already saved, so such exceptions are wrapped in `RuntimeException` and they are not shown to user.
+
 All events are in `JG\BatchEntityImportBundle\Event` namespace.
 
 ## Converting values

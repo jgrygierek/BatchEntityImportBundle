@@ -2,6 +2,11 @@ test_controller.with_attribute.import:
     controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute::import
     path: /jg_batch_entity_import_bundle/import
 
+# the same import, under route with parameter
+test_controller.with_attribute.import_with_parameter:
+    controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute::import
+    path: /jg_batch_entity_import_bundle/import_with_parameter/{type}
+
 test_controller.with_attribute.import_save:
     controller: JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute::importSave
     path: /jg_batch_entity_import_bundle/import_save

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Unit\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Generator;
 use JG\BatchEntityImportBundle\Controller\ImportControllerTrait;
 use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
@@ -12,8 +13,10 @@ use JG\BatchEntityImportBundle\Model\Configuration\ImportConfigurationInterface;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use LogicException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormRegistryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -40,6 +43,20 @@ class ImportControllerTraitTest extends TestCase
         $controller->selectFileTemplateName();
     }
 
+    #[DataProvider('csvFallbackEncodingProvider')]
+    public function testCsvFallbackEncodingIsTakenFromParameter(mixed $parameter, ?string $expected): void
+    {
+        $controller = $this->createController(['batch_entity_import.csv_fallback_encoding' => $parameter]);
+
+        self::assertSame($expected, $controller->csvFallbackEncoding());
+    }
+
+    public static function csvFallbackEncodingProvider(): Generator
+    {
+        yield 'encoding' => ['CP1250', 'CP1250'];
+        yield 'not set' => [null, null];
+    }
+
     public function testConfigurationSetByContainerIsUsed(): void
     {
         $configuration = $this->createStub(ImportConfigurationInterface::class);
@@ -56,7 +73,12 @@ class ImportControllerTraitTest extends TestCase
             $this->createStub(ValidatorInterface::class),
             $this->createStub(TranslatorInterface::class),
             new MatrixFactory(),
-            new EntityImporter($this->createStub(ManagerRegistry::class), $this->createStub(EventDispatcherInterface::class), $this->createStub(RelatedEntityFinder::class)),
+            new EntityImporter(
+                $this->createStub(ManagerRegistry::class),
+                $this->createStub(EventDispatcherInterface::class),
+                $this->createStub(RelatedEntityFinder::class),
+                $this->createStub(FormRegistryInterface::class),
+            ),
         );
         $controller = $this->createController([]);
         $controller->setImportHandler($handler);
@@ -115,6 +137,11 @@ class ImportControllerTraitTest extends TestCase
             public function matrixEditTemplateName(): string
             {
                 return $this->getMatrixEditTemplateName();
+            }
+
+            public function csvFallbackEncoding(): ?string
+            {
+                return $this->getCsvFallbackEncoding();
             }
 
             protected function getParameter(string $name): mixed

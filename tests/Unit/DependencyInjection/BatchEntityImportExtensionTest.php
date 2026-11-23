@@ -71,7 +71,7 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
     {
         $this->container->register(BaseConfiguration::class, BaseConfiguration::class);
         $this->container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true);
-        $this->container->compile();
+        $this->container->compile(true);
 
         $calls = $this->container->getDefinition(ControllerWithAttribute::class)->getMethodCalls();
         self::assertEquals([
@@ -108,6 +108,7 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(EntityImporter::class, 0, new Reference('doctrine'));
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(EntityImporter::class, 1, new Reference('event_dispatcher'));
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(EntityImporter::class, 2, new Reference(RelatedEntityFinder::class));
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(EntityImporter::class, 3, new Reference('form.registry'));
     }
 
     public function testDatabaseEntityUniqueValidatorUsesManagerRegistry(): void
@@ -122,14 +123,14 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $this->setKernelParameters($container);
         new BatchEntityImportBundle()->getContainerExtension()?->load([], $container);
         // services of FrameworkBundle used by services of bundle
-        foreach (['form.factory', 'validator', 'translator', 'doctrine', 'event_dispatcher'] as $id) {
+        foreach (['form.factory', 'form.registry', 'validator', 'translator', 'doctrine', 'event_dispatcher'] as $id) {
             $container->register($id)->setSynthetic(true);
         }
         $container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true)->setPublic(true);
 
         $this->expectException(ServiceNotFoundException::class);
         $this->expectExceptionMessage(\sprintf('The service "%s" has a dependency on a non-existent service "%s".', ControllerWithAttribute::class, BaseConfiguration::class));
-        $container->compile();
+        $container->compile(true);
     }
 
     /**

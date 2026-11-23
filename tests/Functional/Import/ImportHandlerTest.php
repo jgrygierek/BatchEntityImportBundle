@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Functional\Import;
 
 use Doctrine\ORM\EntityManagerInterface;
+use JG\BatchEntityImportBundle\Event\AfterImportEvent;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Import\ImportMessage;
 use JG\BatchEntityImportBundle\Import\ImportResult;
@@ -15,6 +17,8 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use LogicException;
+use RuntimeException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -132,6 +136,61 @@ class ImportHandlerTest extends AbstractWebTestCase
         self::assertCount(1, $this->getEntityManager()->getRepository(TestEntity::class)->findAll());
     }
 
+    public function testEntityFromEntityIdColumnIsSetInPreview(): void
+    {
+        $entity = $this->importEntity(['test_private_property' => 'a', 'test_public_property' => 'b', 'test-private-property2' => 'c']);
+
+        $result = $this->handleCsv(\sprintf("entity_id,test_private_property,test_public_property,test-private-property2\n%d,a,b,c\n", $entity->getId()));
+
+        self::assertSame(ImportStep::EDIT_MATRIX, $result->getStep());
+        self::assertSame($entity, $result->getMatrix()->getRecords()[0]->getEntity());
+        // record updates entity with its own values, so it is not a duplicate
+        self::assertTrue($result->getForm()->isValid(), (string) $result->getForm()->getErrors(true));
+        self::assertSame((string) $entity->getId(), $result->getForm()->createView()['records'][0]['entity']->vars['value']);
+    }
+
+    public function testNewRecordWithValuesOfExistingEntityIsDuplicateInPreview(): void
+    {
+        $this->importEntity(['test_private_property' => 'a', 'test_public_property' => 'b', 'test-private-property2' => 'c']);
+
+        $result = $this->handleCsv("entity_id,test_private_property,test_public_property,test-private-property2\n,a,b,c\n");
+
+        self::assertSame(ImportStep::EDIT_MATRIX, $result->getStep());
+        self::assertNull($result->getMatrix()->getRecords()[0]->getEntity());
+        self::assertFalse($result->getForm()->isValid());
+    }
+
+    public function testNotExistingEntityFromEntityIdColumnIsReportedInPreview(): void
+    {
+        $result = $this->handleCsv("entity_id,test_private_property,test_public_property,test-private-property2\n999,a,b,c\n");
+
+        self::assertSame(ImportStep::EDIT_MATRIX, $result->getStep());
+        self::assertNull($result->getMatrix()->getRecords()[0]->getEntity());
+        $entityField = $result->getForm()->get('records')->get('0')->get('entity');
+        self::assertFalse($entityField->isValid());
+        self::assertSame('999', $entityField->getViewData());
+    }
+
+    /**
+     * Preview is not shown again, when data is already saved, so user can't save the same data twice.
+     */
+    public function testExceptionOfThisBundleThrownAfterSaveIsNotShownAsErrorOfImport(): void
+    {
+        self::getService(EventDispatcherInterface::class, 'event_dispatcher')->addListener(AfterImportEvent::class, static function (): never {
+            throw new MatrixRecordInvalidDataTypeException(1, 'test_private_property');
+        });
+        $records = [['test_private_property' => 'a', 'test_public_property' => 'b', 'test-private-property2' => 'c']];
+
+        try {
+            $this->handler->handleSave($this->createSaveRequest($records), $this->configuration, self::SAVE_URL);
+            self::fail('Exception was not thrown.');
+        } catch (RuntimeException $runtimeException) {
+            self::assertInstanceOf(MatrixRecordInvalidDataTypeException::class, $runtimeException->getPrevious());
+        }
+
+        self::assertCount(1, $this->getEntityManager()->getRepository(TestEntity::class)->findAll());
+    }
+
     public function testFinishedResultHasNoForm(): void
     {
         $result = ImportResult::finished([]);
@@ -160,6 +219,31 @@ class ImportHandlerTest extends AbstractWebTestCase
         );
 
         return $this->handler->handleFile($request, $this->configuration, self::SAVE_URL);
+    }
+
+    private function handleCsv(string $content): ImportResult
+    {
+        $path = sys_get_temp_dir() . '/batch_entity_import_handler_test.csv';
+        file_put_contents($path, $content);
+
+        try {
+            return $this->handleFile($path);
+        } finally {
+            unlink($path);
+        }
+    }
+
+    /**
+     * @param array<string, string> $values
+     */
+    private function importEntity(array $values): TestEntity
+    {
+        self::assertTrue($this->handler->handleSave($this->createSaveRequest([$values]), $this->configuration, self::SAVE_URL)->isImported());
+
+        $entity = $this->getEntityManager()->getRepository(TestEntity::class)->findOneBy(['testPrivateProperty' => $values['test_private_property']]);
+        self::assertInstanceOf(TestEntity::class, $entity);
+
+        return $entity;
     }
 
     /**

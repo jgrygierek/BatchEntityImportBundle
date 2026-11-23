@@ -6,8 +6,10 @@ namespace JG\BatchEntityImportBundle\Service;
 
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use JG\BatchEntityImportBundle\Utils\EntityTranslationHelper;
+use PropertyHookType;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionProperty;
 
 /**
  * @internal
@@ -47,13 +49,31 @@ final readonly class PropertyExistenceChecker
     }
 
     /**
+     * Value is set by public setter, or directly to property, which can be written from outside of the class
+     * (the same rules are used by EntityImporter). Otherwise column is skipped, instead of error during import.
+     *
      * @param ReflectionClass<covariant object> $entity
      */
     private function isPropertyWritable(ReflectionClass $entity, string $name): bool
     {
         $setterName = ColumnNameHelper::getSetterName($name);
+        if ($entity->hasMethod($setterName) && $entity->getMethod($setterName)->isPublic()) {
+            return true;
+        }
 
-        return ($entity->hasProperty($name) && $entity->getProperty($name)->isPublic())
-            || ($entity->hasMethod($setterName) && $entity->getMethod($setterName)->isPublic());
+        return $entity->hasProperty($name) && self::isWritableFromOutside($entity->getProperty($name));
+    }
+
+    /**
+     * Public property can't be written from outside of the class, when it is readonly, has asymmetric visibility
+     * (e.g. "public private(set)"), or it is virtual property with hooks, but without "set" hook.
+     */
+    private static function isWritableFromOutside(ReflectionProperty $property): bool
+    {
+        if (!$property->isPublic() || $property->isStatic() || $property->isReadOnly() || $property->isPrivateSet() || $property->isProtectedSet()) {
+            return false;
+        }
+
+        return !$property->isVirtual() || $property->hasHook(PropertyHookType::Set);
     }
 }

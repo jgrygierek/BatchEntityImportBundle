@@ -38,7 +38,4 @@ return RectorConfig::configure()
         StringClassNameToClassConstantRector::class => [
             __DIR__ . '/src/Utils/EntityTranslationHelper.php',
         ],
-    ])
-    ->withSymfonyContainerXml(
-        __DIR__ . '/var/cache/dev/App_KernelDevDebugContainer.xml',
-    );
+    ]);

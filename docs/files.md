@@ -12,7 +12,7 @@ First row of file is a header with names of columns.
 - Names have to be unique. File with duplicated names is rejected.
 - Name can be suffixed with locale (e.g. `name:en`), see [Translatable columns](#translatable-columns).
 - Names `entity` and `entity_id` are reserved, see [Updating entities](updating-entities.md).
-- Column is imported when entity has public property or setter with the same name (`first_name`, `first-name`, `firstName` and `FirstName` are all mapped to `firstName` property and `setFirstName()` method). Other columns are marked in preview as unknown and they are skipped during import. The same applies to columns which are not on the list of [allowed columns](configuration.md#allowed-columns).
+- Column is imported when entity has public setter or public property with the same name (`first_name`, `first-name`, `firstName` and `FirstName` are all mapped to `firstName` property and `setFirstName()` method). Property has to be writable from outside of entity, so readonly properties, properties with asymmetric visibility (e.g. `public private(set)`) and virtual properties without `set` hook are not imported. Other columns are marked in preview as unknown and they are skipped during import. The same applies to columns which are not on the list of [allowed columns](configuration.md#allowed-columns).
 
 ## Rows
 

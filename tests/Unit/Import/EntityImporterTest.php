@@ -16,14 +16,20 @@ use JG\BatchEntityImportBundle\Event\BeforeImportEvent;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Event\RecordPreparedEvent;
 use JG\BatchEntityImportBundle\Event\RecordValueEvent;
+use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
+use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
+use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
+use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Form\Type\CustomArrayTextType;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Model\PropertyAccessEntity;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -31,7 +37,12 @@ use RuntimeException;
 use stdClass;
 use Stringable;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Form\Extension\Core\CoreExtension;
+use Symfony\Component\Form\FormRegistry;
+use Symfony\Component\Form\PreloadedExtension;
+use Symfony\Component\Form\ResolvedFormTypeFactory;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class EntityImporterTest extends TestCase
 {
@@ -83,6 +94,38 @@ class EntityImporterTest extends TestCase
         // data is already saved, so original exception of listener is thrown, not DatabaseException
         $this->expectExceptionObject($exception);
         $this->createImporter($entityManager, $eventDispatcher)->import($this->createMatrix(), new BaseConfiguration());
+    }
+
+    /**
+     * Data is already saved, so exception of this bundle can't be reported as error of import,
+     * otherwise the preview would be shown again and the same data could be saved twice.
+     */
+    #[DataProvider('eventAfterSaveProvider')]
+    public function testExceptionOfThisBundleThrownAfterSaveIsNotReportedAsErrorOfImport(string $eventClass): void
+    {
+        $exception = new MatrixRecordInvalidDataTypeException(1, 'test_private_property');
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener($eventClass, static function () use ($exception): never {
+            throw $exception;
+        });
+
+        $entityManager = $this->createEntityManager(['id' => 1]);
+        $entityManager->expects($this->once())->method('flush');
+
+        try {
+            $this->createImporter($entityManager, $eventDispatcher)->import($this->createMatrix(), new BaseConfiguration());
+            self::fail('Exception was not thrown.');
+        } catch (RuntimeException $runtimeException) {
+            self::assertNotInstanceOf(BatchEntityImportExceptionInterface::class, $runtimeException);
+            self::assertSame($exception, $runtimeException->getPrevious());
+            self::assertStringContainsString('Data is already saved', $runtimeException->getMessage());
+        }
+    }
+
+    public static function eventAfterSaveProvider(): Generator
+    {
+        yield [RecordImportedSuccessfullyEvent::class];
+        yield [AfterImportEvent::class];
     }
 
     public function testErrorOfDatabaseDuringFlush(): void
@@ -216,14 +259,152 @@ class EntityImporterTest extends TestCase
         $this->createImporter($entityManager, $eventDispatcher)->import($this->createMatrix(), new BaseConfiguration());
     }
 
+    /**
+     * Columns which can't be written from outside of the class are skipped, instead of error, which can't be shown to user.
+     */
+    public function testOnlyPropertiesWritableFromOutsideAreImported(): void
+    {
+        $entity = new PropertyAccessEntity();
+        $configuration = new class($entity) extends AbstractImportConfiguration {
+            public function __construct(private readonly PropertyAccessEntity $entity)
+            {
+            }
+
+            public function getEntityClassName(): string
+            {
+                return PropertyAccessEntity::class;
+            }
+
+            public function getNewEntity(MatrixRecord $record): PropertyAccessEntity
+            {
+                return $this->entity;
+            }
+        };
+        $columns = [
+            'public_property',
+            'upper_case_property',
+            'property_with_protected_setter',
+            'static_property',
+            'readonly_property',
+            'private_set_property',
+            'protected_set_property',
+            'get_only_property',
+            'private_property_with_protected_setter',
+        ];
+        $matrix = new Matrix($columns, [array_fill_keys($columns, 'value')]);
+
+        $this->createImporter($this->createEntityManager(['id' => 1]), new EventDispatcher())->import($matrix, $configuration);
+
+        self::assertSame('value', $entity->publicProperty);
+        self::assertSame('VALUE', $entity->upperCaseProperty);
+        // setter is not public, so value is set directly to property
+        self::assertSame('value', $entity->propertyWithProtectedSetter);
+        self::assertSame('', PropertyAccessEntity::$staticProperty);
+        self::assertSame('readonly', $entity->readonlyProperty);
+        self::assertSame('', $entity->privateSetProperty);
+        self::assertSame('', $entity->protectedSetProperty);
+        self::assertSame('get only', $entity->getOnlyProperty);
+        self::assertSame('', $entity->getPrivatePropertyWithProtectedSetter());
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     * @param array<string> $expected
+     */
+    #[DataProvider('arrayValueProvider')]
+    public function testArrayValueIsSplitBySeparator(array $options, string $value, array $expected): void
+    {
+        self::assertSame($expected, $this->importArrayValue(ArrayTextType::class, $options, $value));
+    }
+
+    /**
+     * Type can be extended in application, so value of its subclass is imported as array too,
+     * and options are resolved by the type, the same way as in the preview.
+     *
+     * @param array<string, mixed> $options
+     * @param array<string> $expected
+     */
+    #[DataProvider('subclassArrayValueProvider')]
+    public function testArrayValueOfSubclassIsSplitBySeparator(array $options, array $expected): void
+    {
+        self::assertSame($expected, $this->importArrayValue(CustomArrayTextType::class, $options, 'a;b|c'));
+    }
+
+    public static function subclassArrayValueProvider(): Generator
+    {
+        yield 'default separator of subclass' => [[], ['a', 'b|c']];
+        yield 'separator from field definition' => [['separator' => '|'], ['a;b', 'c']];
+    }
+
+    public static function arrayValueProvider(): Generator
+    {
+        yield 'default separator' => [[], 'a|b|c', ['a', 'b', 'c']];
+        yield 'default separator, empty values' => [[], '||', ['', '', '']];
+        yield 'default separator, empty last value' => [[], 'a|b|', ['a', 'b', '']];
+        yield 'default separator, empty value in the middle' => [[], 'a||c', ['a', '', 'c']];
+        yield 'default separator, empty first value' => [[], '|b|c', ['', 'b', 'c']];
+        yield 'default separator, other separator in value' => [[], 'a;b;c', ['a;b;c']];
+        yield 'empty value' => [[], '', []];
+        yield 'whitespace' => [[], ' ', [' ']];
+        yield 'zero' => [[], '0', ['0']];
+        yield 'zeros' => [[], '0|0', ['0', '0']];
+        yield 'custom separator' => [['separator' => ';'], 'a;b;c', ['a', 'b', 'c']];
+        yield 'custom separator, empty values' => [['separator' => ';'], ';;', ['', '', '']];
+        yield 'custom separator, default separator in value' => [['separator' => ';'], 'a|b|c', ['a|b|c']];
+        yield 'empty separator is replaced by default one' => [['separator' => ''], 'a|b|c', ['a', 'b', 'c']];
+        yield 'null separator is replaced by default one' => [['separator' => null], 'a|b|c', ['a', 'b', 'c']];
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     *
+     * @return array<mixed> value of array field after import
+     */
+    private function importArrayValue(string $fieldClass, array $options, string $value): array
+    {
+        $entity = new TestEntity();
+        $configuration = new class($entity, new FormFieldDefinition($fieldClass, $options)) extends AbstractImportConfiguration {
+            public function __construct(private readonly TestEntity $entity, private readonly FormFieldDefinition $fieldDefinition)
+            {
+            }
+
+            public function getEntityClassName(): string
+            {
+                return TestEntity::class;
+            }
+
+            public function getFieldsDefinitions(): array
+            {
+                return ['test_array_field' => $this->fieldDefinition];
+            }
+
+            public function getNewEntity(MatrixRecord $record): TestEntity
+            {
+                return $this->entity;
+            }
+        };
+        $matrix = new Matrix(['test_array_field'], [['test_array_field' => $value]]);
+
+        $this->createImporter($this->createEntityManager(['id' => 1]), new EventDispatcher())->import($matrix, $configuration);
+
+        return $entity->getTestArrayField();
+    }
+
     private function createImporter(EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher): EntityImporter
     {
         $managerRegistry = $this->createStub(ManagerRegistry::class);
         $managerRegistry->method('getManagerForClass')->willReturnCallback(
-            static fn (string $class): ?EntityManagerInterface => TestEntity::class === $class ? $entityManager : null,
+            static fn (string $class): ?EntityManagerInterface => \in_array($class, [TestEntity::class, PropertyAccessEntity::class], true) ? $entityManager : null,
         );
 
-        return new EntityImporter($managerRegistry, $eventDispatcher, $this->createStub(RelatedEntityFinder::class));
+        // types are resolved the same way as in application, where they are registered as services
+        $translator = $this->createStub(TranslatorInterface::class);
+        $formRegistry = new FormRegistry(
+            [new CoreExtension(), new PreloadedExtension([new ArrayTextType($translator), new CustomArrayTextType($translator)], [])],
+            new ResolvedFormTypeFactory(),
+        );
+
+        return new EntityImporter($managerRegistry, $eventDispatcher, $this->createStub(RelatedEntityFinder::class), $formRegistry);
     }
 
     /**
@@ -246,7 +427,7 @@ class EntityImporterTest extends TestCase
             {
             }
 
-            public function getNewEntity(MatrixRecord $record): object
+            public function getNewEntity(MatrixRecord $record): TestEntity
             {
                 return $this->entity;
             }

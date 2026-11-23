@@ -24,6 +24,9 @@
     </testsuites>
 
     <extensions>
-        <bootstrap class="DG\BypassFinals\PHPUnitExtension"/>
+        <bootstrap class="DG\BypassFinals\PHPUnitExtension">
+            <!-- fixtures with readonly properties, which have to stay readonly (parameter is supported since dg/bypass-finals 1.11) -->
+            <parameter name="denyPaths" value="*/tests/Fixtures/Model/*"/>
+        </bootstrap>
     </extensions>
 </phpunit>

@@ -19,6 +19,10 @@ final readonly class ImportedColumn
         public string $setterName,
         public ?string $locale,
         public ?FormFieldDefinition $fieldDefinition,
+        /**
+         * @var non-empty-string|null separator of array field (ArrayTextType or its subclass), null for other columns
+         */
+        public ?string $arraySeparator = null,
     ) {
     }
 }

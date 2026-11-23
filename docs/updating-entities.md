@@ -8,6 +8,7 @@ To select entities already in your import file:
     - Add entity ID to row
     - Leave it empty (if you want to set it manually or import it as new record)
   - Or if you don't want to add `entity_id` header, you can still manually set each entity to override.
+  - Value of `entity_id` which does not match any entity is reported in the preview as an error.
 
 ## CSV file
 
