@@ -14,6 +14,7 @@ use JG\BatchEntityImportBundle\Event\BeforeImportEvent;
 use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Event\RecordPreparedEvent;
 use JG\BatchEntityImportBundle\Event\RecordValueEvent;
+use JG\BatchEntityImportBundle\Exception\BatchEntityImportExceptionInterface;
 use JG\BatchEntityImportBundle\Exception\DatabaseException;
 use JG\BatchEntityImportBundle\Exception\DatabaseNotUniqueDataException;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
@@ -28,7 +29,10 @@ use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use JG\BatchEntityImportBundle\Utils\EntityManagerHelper;
 use JG\BatchEntityImportBundle\Utils\EntityTranslationHelper;
+use ReflectionMethod;
+use RuntimeException;
 use Stringable;
+use Symfony\Component\Form\FormRegistryInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 use TypeError;
@@ -45,6 +49,7 @@ final readonly class EntityImporter
         private ManagerRegistry $managerRegistry,
         private EventDispatcherInterface $eventDispatcher,
         private RelatedEntityFinder $relatedEntityFinder,
+        private FormRegistryInterface $formRegistry,
     ) {
     }
 
@@ -56,6 +61,7 @@ final readonly class EntityImporter
      * @throws DatabaseNotUniqueDataException when unique constraint in database is violated
      * @throws DatabaseException when data can't be saved in database
      * @throws InvalidArgumentException when entity is not managed by Doctrine ORM
+     * @throws RuntimeException when listener throws exception of this bundle after data is saved
      */
     public function import(Matrix $matrix, ImportConfigurationInterface $configuration): void
     {
@@ -100,8 +106,14 @@ final readonly class EntityImporter
         }
 
         // outside of the block above, data is already saved, so exception thrown by listener is not reported as error of database
-        $this->dispatchEvents($entityManager, $entityClass, $importedEntities);
-        $this->eventDispatcher->dispatch(new AfterImportEvent($configuration, $importedEntities));
+        try {
+            $this->dispatchEvents($entityManager, $entityClass, $importedEntities);
+            $this->eventDispatcher->dispatch(new AfterImportEvent($configuration, $importedEntities));
+        } catch (BatchEntityImportExceptionInterface $batchEntityImportException) {
+            // Exceptions of this bundle are shown to user as errors of import, together with the preview to correct data.
+            // Data is already saved, so the same data could be saved twice. Other exceptions are thrown as they are.
+            throw new RuntimeException(\sprintf('Data is already saved, so exception "%s" thrown by listener after saving can not be reported as error of import: %s', $batchEntityImportException::class, $batchEntityImportException->getMessage()), 0, $batchEntityImportException);
+        }
     }
 
     /**
@@ -119,17 +131,36 @@ final readonly class EntityImporter
                 continue;
             }
 
+            // the same key as in MatrixRecordType, so definition is used also for translated columns, e.g. "name:en"
+            $fieldDefinition = $fieldDefinitions[$name] ?? $fieldDefinitions[ColumnNameHelper::removeTranslationSuffix($name)] ?? null;
             $columns[$name] = new ImportedColumn(
                 name: $name,
                 propertyName: ColumnNameHelper::toCamelCase($name),
                 setterName: ColumnNameHelper::getSetterName($name),
                 locale: ColumnNameHelper::getLocale($name),
-                // the same key as in MatrixRecordType, so definition is used also for translated columns, e.g. "name:en"
-                fieldDefinition: $fieldDefinitions[$name] ?? $fieldDefinitions[ColumnNameHelper::removeTranslationSuffix($name)] ?? null,
+                fieldDefinition: $fieldDefinition,
+                arraySeparator: $this->getArraySeparator($fieldDefinition),
             );
         }
 
         return $columns;
+    }
+
+    /**
+     * Options of field are resolved by its form type, the same way as in the preview,
+     * so default separator set in configureOptions() of ArrayTextType subclass is used too.
+     *
+     * @return non-empty-string|null null when field is not an array field
+     */
+    private function getArraySeparator(?FormFieldDefinition $definition): ?string
+    {
+        if (null === $definition || !is_a($definition->getClass(), ArrayTextType::class, true)) {
+            return null;
+        }
+
+        $options = $this->formRegistry->getType($definition->getClass())->getOptionsResolver()->resolve($definition->getOptions());
+
+        return ArrayTextType::getSeparator($options);
     }
 
     /**
@@ -165,14 +196,24 @@ final readonly class EntityImporter
     private function setValue(object $target, ImportedColumn $column, mixed $value, int $rowNumber): void
     {
         try {
-            if (method_exists($target, $column->setterName)) {
+            // the same rules as in PropertyExistenceChecker: not public setter is skipped, and value is set to public property
+            if (self::hasPublicMethod($target, $column->setterName)) {
                 $target->{$column->setterName}($value);
             } else {
                 $target->{$column->propertyName} = $value;
             }
-        } catch (TypeError $error) {
-            throw new MatrixRecordInvalidDataTypeException($rowNumber, $column->name, $error);
+        } catch (TypeError $typeError) {
+            throw new MatrixRecordInvalidDataTypeException($rowNumber, $column->name, $typeError);
         }
+    }
+
+    /**
+     * is_callable() can't be used, because it returns true for any method of class with __call() method
+     * (e.g. translatable entities of "knplabs/doctrine-behaviors").
+     */
+    private static function hasPublicMethod(object $target, string $method): bool
+    {
+        return method_exists($target, $method) && new ReflectionMethod($target, $method)->isPublic();
     }
 
     /**
@@ -184,24 +225,23 @@ final readonly class EntityImporter
 
         return match (true) {
             null === $definition => $value,
-            ArrayTextType::class === $definition->getClass() => $this->parseArrayValue($definition, $value),
+            null !== $column->arraySeparator => $this->parseArrayValue($column->arraySeparator, $value),
             is_a($definition->getClass(), AbstractEntityLookupType::class, true) => $this->findRelatedEntity($definition, $value, $column->name, $rowNumber),
             default => $value,
         };
     }
 
     /**
+     * @param non-empty-string $separator
+     *
      * @return array<string>
      */
-    private function parseArrayValue(FormFieldDefinition $definition, string|int|float|bool|null $value): array
+    private function parseArrayValue(string $separator, string|int|float|bool|null $value): array
     {
         $value = (string) $value;
-        $separator = $definition->getOptions()['separator'] ?? null;
 
-        // empty value is checked the same way as in ArrayTextType
-        return $value
-            ? explode(\is_string($separator) && '' !== $separator ? $separator : ArrayTextType::DEFAULT_SEPARATOR, $value)
-            : [];
+        // only empty value means empty array, "0" is a value like any other
+        return '' === $value ? [] : explode($separator, $value);
     }
 
     /**

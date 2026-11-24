@@ -115,7 +115,7 @@ class MatrixFactory
     private static function getCsvEncoding(UploadedFile $file, ?string $fallbackEncoding): string
     {
         // Encoding from configuration is checked when container is built, but it can also come
-        // from environment variable or from controller. Without this check, unsupported encoding
+        // from controller (getCsvFallbackEncoding() method). Without this check, unsupported encoding
         // would be reported to the user as unreadable file.
         if (null !== $fallbackEncoding && '' !== $fallbackEncoding && !EncodingHelper::isSupported($fallbackEncoding)) {
             throw new InvalidArgumentException(sprintf('CSV fallback encoding "%s" is not supported.', $fallbackEncoding));

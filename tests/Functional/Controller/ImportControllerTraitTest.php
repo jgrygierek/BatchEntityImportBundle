@@ -184,6 +184,17 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $this->checkDispatchedEvents(0);
     }
 
+    public function testFormWithFileIsSentToRouteWithParameters(): void
+    {
+        $this->client->request('GET', '/jg_batch_entity_import_bundle/import_with_parameter/users');
+
+        self::assertTrue($this->client->getResponse()->isSuccessful());
+        self::assertSame(
+            '/jg_batch_entity_import_bundle/import_with_parameter/users',
+            $this->client->getCrawler()->filterXPath('//form[@name="file_import"]')->attr('action'),
+        );
+    }
+
     public function testImportFileWrongExtension(): void
     {
         $uploadedFile = __DIR__ . '/../../Fixtures/Resources/test_wrong_extension.txt';

@@ -147,11 +147,12 @@ final readonly class ImportHandler
     {
         $data = ['records' => array_map(static fn (MatrixRecord $record): array => $record->getData(), $matrix->getRecords())];
 
-        // field to override entity is not a column of file, it is filled already by its form type (e.g. from "entity_id" column)
+        // field to override entity is not a column of file, its value is taken from "entity_id" column
+        $records = $matrix->getRecords();
         $recordForms = $form->has('records') ? $form->get('records') : [];
         foreach ($recordForms as $index => $recordForm) {
-            if ($recordForm->has('entity') && isset($data['records'][$index])) {
-                $data['records'][$index]['entity'] = $recordForm->get('entity')->getViewData();
+            if ($recordForm->has('entity') && isset($data['records'][$index], $records[$index])) {
+                $data['records'][$index]['entity'] = self::getEntityFieldValue($recordForm->get('entity'), $records[$index]);
             }
         }
 
@@ -162,6 +163,23 @@ final readonly class ImportHandler
         }
 
         $form->submit($data);
+    }
+
+    /**
+     * Field with lookup value (EntityLookupType, EntityLookupTextType) is filled already by its form type.
+     * Default select (EntityType) is mapped to entity of record, which is not set yet, so it is empty.
+     * Identifier from "entity_id" column is submitted then, so entity is set to record already in preview,
+     * and constraints (e.g. DatabaseEntityUnique) know which entity is updated by record.
+     */
+    private static function getEntityFieldValue(FormInterface $field, MatrixRecord $record): mixed
+    {
+        $value = $field->getViewData();
+        if ((null !== $value && '' !== $value) || null === $record->entityId) {
+            return $value;
+        }
+
+        // values of choices are always strings, identifier of entity can be also an integer
+        return trim((string) $record->entityId);
     }
 
     /**

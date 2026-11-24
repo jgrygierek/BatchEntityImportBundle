@@ -14,7 +14,6 @@ use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Utils\ColumnNameHelper;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\ChoiceList\View\ChoiceView;
 use Symfony\Component\Form\Exception\AlreadySubmittedException;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
@@ -23,7 +22,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -185,22 +183,5 @@ final class MatrixRecordType extends AbstractType
         $definition
             ? $event->getForm()->add($columnName, $definition->getClass(), $definition->getOptions())
             : $event->getForm()->add($columnName, TextType::class);
-    }
-
-    public function finishView(FormView $view, FormInterface $form, array $options): void
-    {
-        $record = $form->getData();
-        if (!$record instanceof MatrixRecord || null === $record->entityId || !isset($view['entity'])) {
-            return;
-        }
-
-        // values of choices are always strings, identifier of entity can be also an integer
-        $selectedValue = (string) $record->entityId;
-        $choices = $view['entity']->vars['choices'] ?? [];
-        foreach (is_iterable($choices) ? $choices : [] as $choice) {
-            if ($choice instanceof ChoiceView && $choice->value === $selectedValue) {
-                $choice->attr['selected'] = 'selected';
-            }
-        }
     }
 }

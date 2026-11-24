@@ -5,21 +5,17 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataTransformerInterface;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use UnexpectedValueException;
 
 /**
- * @implements DataTransformerInterface<array<mixed>, string>
+ * Value with separator, e.g. "USER|ADMIN". It is a text in the preview, and it is split into array during import.
  */
-class ArrayTextType extends AbstractType implements DataTransformerInterface
+class ArrayTextType extends AbstractType
 {
     public const DEFAULT_SEPARATOR = '|';
-    private string $separator = self::DEFAULT_SEPARATOR;
 
     public function __construct(private readonly TranslatorInterface $translator)
     {
@@ -33,35 +29,6 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
         ]);
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
-        $separator = $options['separator'] ?? null;
-        $this->separator = \is_string($separator) && '' !== $separator ? $separator : self::DEFAULT_SEPARATOR;
-    }
-
-    public function transform(mixed $value): string
-    {
-        if (!\is_array($value)) {
-            throw new UnexpectedValueException('Only arrays are allowed');
-        }
-
-        return implode($this->separator, array_map(static fn (mixed $item): string => \is_scalar($item) ? (string) $item : '', $value));
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function reverseTransform(mixed $value): array
-    {
-        if (!is_string($value)) {
-            throw new UnexpectedValueException('Only strings are allowed');
-        }
-
-        return $value
-            ? explode($this->separator ?: self::DEFAULT_SEPARATOR, $value)
-            : [];
-    }
-
     public function getBlockPrefix(): string
     {
         return 'array_text';
@@ -71,8 +38,22 @@ class ArrayTextType extends AbstractType implements DataTransformerInterface
     {
         $view->vars['help'] = $this->translator->trans(
             'form.separator',
-            ['%separator%' => $options['separator']],
+            ['%separator%' => self::getSeparator($options)],
             'BatchEntityImportBundle',
         );
+    }
+
+    /**
+     * Separator from options of field, the same one is shown in the preview and used during import.
+     *
+     * @param array<mixed> $options options of field, resolved or not
+     *
+     * @return non-empty-string
+     */
+    public static function getSeparator(array $options): string
+    {
+        $separator = $options['separator'] ?? null;
+
+        return \is_string($separator) && '' !== $separator ? $separator : self::DEFAULT_SEPARATOR;
     }
 }

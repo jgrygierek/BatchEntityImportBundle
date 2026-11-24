@@ -46,7 +46,7 @@
         "twig/twig": "^3.26"
     },
     "require-dev": {
-        "dg/bypass-finals": "^v1.8",
+        "dg/bypass-finals": "^v1.11.0",
         "doctrine/data-fixtures": "^1.7.0|^2.0",
         "doctrine/doctrine-fixtures-bundle": "^3.7.0|^4.3.1",
         "friendsofphp/php-cs-fixer": "^v3.91.3",

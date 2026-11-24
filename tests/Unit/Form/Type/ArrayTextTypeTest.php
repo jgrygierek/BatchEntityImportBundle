@@ -8,16 +8,16 @@ use Generator;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
-use stdClass;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\Form\Test\TypeTestCase;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use UnexpectedValueException;
 
+/**
+ * Splitting value into array during import is tested in EntityImporterTest.
+ */
 class ArrayTextTypeTest extends TypeTestCase
 {
     /**
@@ -56,214 +56,54 @@ class ArrayTextTypeTest extends TypeTestCase
         $this->assertEquals('|', $options['separator']);
     }
 
-    public function testSubmitValidDataBeforeTransform(): void
+    /**
+     * Value is a text in the preview, it is split into array only during import.
+     */
+    public function testSubmittedValueIsText(): void
     {
-        $formData = 'a|b|c';
-        $form = $this->factory->create(ArrayTextType::class);
-        $form->submit($formData);
+        $form = $this->factory->create(ArrayTextType::class, null, ['separator' => ';']);
+        $form->submit('a;b;c');
+
         $this->assertTrue($form->isSynchronized());
-        $this->assertEquals('a|b|c', $form->getData());
+        $this->assertSame('a;b;c', $form->getData());
     }
 
-    #[DataProvider('transformDataProvider')]
-    #[DataProvider('transformDataToEmptyStringProvider')]
-    #[DataProvider('transformDataWithWrongSeparatorProvider')]
-    public function testTransform(string $separator, array $data, string $expected): void
-    {
-        $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createStub(FormBuilderInterface::class), ['separator' => $separator]);
-
-        $this->assertSame($expected, $type->transform($data));
-    }
-
-    public static function transformDataProvider(): Generator
-    {
-        yield ['|', [null], ''];
-        yield ['|', ['a', 'b', 'c'], 'a|b|c'];
-        yield ['|', ['a', 'b', null], 'a|b|'];
-        yield ['|', ['a', '', 'c'], 'a||c'];
-        yield ['|', ['a', null, 'c'], 'a||c'];
-        yield ['|', ['a', '', 'c'], 'a||c'];
-        yield ['|', [null, 'b', 'c'], '|b|c'];
-        yield ['|', ['', 'b', 'c'], '|b|c'];
-        yield ['|', ['', '', ''], '||'];
-        yield [';', [' '], ' '];
-        yield [';', ['a', 'b', 'c'], 'a;b;c'];
-        yield [';', ['a', 'b', null], 'a;b;'];
-        yield [';', ['a', '', 'c'], 'a;;c'];
-        yield [';', ['a', null, 'c'], 'a;;c'];
-        yield [';', ['a', '', 'c'], 'a;;c'];
-        yield [';', [null, 'b', 'c'], ';b;c'];
-        yield [';', ['', 'b', 'c'], ';b;c'];
-        yield [';', ['', '', ''], ';;'];
-    }
-
-    public static function transformDataToEmptyStringProvider(): Generator
-    {
-        yield ['|', [], ''];
-        yield ['|', [''], ''];
-        yield ['|', [null], ''];
-        yield [';', [], ''];
-        yield [';', [''], ''];
-        yield [';', [null], ''];
-    }
-
-    public static function transformDataWithWrongSeparatorProvider(): Generator
-    {
-        yield ['|', ['a;b;c'], 'a;b;c'];
-        yield [';', ['a|b|c'], 'a|b|c'];
-    }
-
-    #[DataProvider('transformDataWithDefaultSeparatorProvider')]
-    #[DataProvider('transformDataWithDefaultSeparatorToEmptyStringProvider')]
-    public function testTransformWithDefaultSeparator(mixed $data, mixed $expected): void
-    {
-        $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
-
-        $this->assertSame($expected, $type->transform($data));
-    }
-
-    public static function transformDataWithDefaultSeparatorProvider(): Generator
-    {
-        yield [[' '], ' '];
-        yield [['a', 'b', 'c'], 'a|b|c'];
-        yield [['a', 'b', null], 'a|b|'];
-        yield [['a', 'b', ''], 'a|b|'];
-        yield [['a', null, 'c'], 'a||c'];
-        yield [['a', '', 'c'], 'a||c'];
-        yield [[null, 'b', 'c'], '|b|c'];
-        yield [['', 'b', 'c'], '|b|c'];
-        yield [['', '', ''], '||'];
-    }
-
-    public static function transformDataWithDefaultSeparatorToEmptyStringProvider(): Generator
-    {
-        yield [[], ''];
-        yield [[''], ''];
-        yield [[null], ''];
-    }
-
-    #[DataProvider('transformWrongValueExceptionDataProvider')]
-    public function testTransformWrongValueException(mixed $value): void
-    {
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Only arrays are allowed');
-
-        $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
-
-        $type->transform($value);
-    }
-
-    public static function transformWrongValueExceptionDataProvider(): Generator
-    {
-        yield [''];
-        yield [1234];
-        yield ['lorem ipsum'];
-        yield [null];
-        yield [new stdClass()];
-    }
-
-    #[DataProvider('reverseTransformDataProvider')]
-    #[DataProvider('reverseTransformDataWithEmptySeparatorProvider')]
-    #[DataProvider('reverseTransformDataWithWrongSeparatorProvider')]
-    public function testReverseTransform(?string $separator, string $data, mixed $expected): void
-    {
-        $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createStub(FormBuilderInterface::class), ['separator' => $separator]);
-
-        $this->assertSame($expected, $type->reverseTransform($data));
-    }
-
-    public static function reverseTransformDataProvider(): Generator
-    {
-        yield ['|', '', []];
-        yield ['|', ' ', [' ']];
-        yield ['|', '||', ['', '', '']];
-        yield ['|', 'a|b|c', ['a', 'b', 'c']];
-        yield ['|', 'a|b|', ['a', 'b', '']];
-        yield ['|', 'a||c', ['a', '', 'c']];
-        yield ['|', '|b|c', ['', 'b', 'c']];
-        yield [';', '', []];
-        yield [';', ' ', [' ']];
-        yield [';', ';;', ['', '', '']];
-        yield [';', 'a;b;c', ['a', 'b', 'c']];
-        yield [';', 'a;b;', ['a', 'b', '']];
-        yield [';', 'a;;c', ['a', '', 'c']];
-        yield [';', ';b;c', ['', 'b', 'c']];
-    }
-
-    public static function reverseTransformDataWithEmptySeparatorProvider(): Generator
-    {
-        yield ['', '', []];
-        yield ['', ' ', [' ']];
-        yield ['', 'a|b|c', ['a', 'b', 'c']];
-        yield ['', 'a;b;c', ['a;b;c']];
-        yield [null, '', []];
-        yield [null, ' ', [' ']];
-        yield [null, 'a|b|c', ['a', 'b', 'c']];
-        yield [null, 'a;b;c', ['a;b;c']];
-    }
-
-    public static function reverseTransformDataWithWrongSeparatorProvider(): Generator
-    {
-        yield ['|', 'a;b;c', ['a;b;c']];
-        yield [';', 'a|b|c', ['a|b|c']];
-    }
-
-    #[DataProvider('reverseTransformDataWithDefaultSeparatorProvider')]
-    public function testReverseTransformWithDefaultSeparator(string $data, mixed $expected): void
-    {
-        $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
-
-        $this->assertSame($expected, $type->reverseTransform($data));
-    }
-
-    public static function reverseTransformDataWithDefaultSeparatorProvider(): Generator
-    {
-        yield ['', []];
-        yield [' ', [' ']];
-        yield ['a|b|c', ['a', 'b', 'c']];
-        yield ['a|b|', ['a', 'b', '']];
-        yield ['a||c', ['a', '', 'c']];
-        yield ['|b|c', ['', 'b', 'c']];
-        yield ['a;b;c', ['a;b;c']];
-        yield ['a;b;', ['a;b;']];
-        yield ['a;;c', ['a;;c']];
-        yield [';b;c', [';b;c']];
-    }
-
-    #[DataProvider('reverseTransformWrongValueExceptionDataProvider')]
-    public function testReverseTransformWrongValueException(mixed $value): void
-    {
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Only strings are allowed');
-
-        $type = new ArrayTextType($this->translator);
-        $type->buildForm($this->createStub(FormBuilderInterface::class), []);
-
-        $type->reverseTransform($value);
-    }
-
-    public static function reverseTransformWrongValueExceptionDataProvider(): Generator
-    {
-        yield [[]];
-        yield [123];
-        yield [null];
-        yield [new stdClass()];
-    }
-
-    public function testBuildView(): void
+    #[DataProvider('separatorProvider')]
+    public function testBuildView(mixed $separator, string $expected): void
     {
         $type = new ArrayTextType($this->translator);
         $view = new FormView();
         $form = $this->createStub(FormInterface::class);
 
-        $type->buildView($view, $form, ['separator' => ';']);
+        $type->buildView($view, $form, ['separator' => $separator]);
 
         $this->assertArrayHasKey('help', $view->vars);
-        $this->assertEquals('separator: ";"', $view->vars['help']);
+        $this->assertEquals(\sprintf('separator: "%s"', $expected), $view->vars['help']);
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    #[DataProvider('separatorOptionsProvider')]
+    public function testGetSeparator(array $options, string $expected): void
+    {
+        $this->assertSame($expected, ArrayTextType::getSeparator($options));
+    }
+
+    public static function separatorProvider(): Generator
+    {
+        yield 'custom separator' => [';', ';'];
+        // separator which can't be used is replaced by default one, the same way as during import
+        yield 'empty separator' => ['', '|'];
+        yield 'null' => [null, '|'];
+    }
+
+    public static function separatorOptionsProvider(): Generator
+    {
+        yield 'custom separator' => [['separator' => ';'], ';'];
+        yield 'empty separator' => [['separator' => ''], '|'];
+        yield 'null' => [['separator' => null], '|'];
+        yield 'not a string' => [['separator' => 1], '|'];
+        yield 'not set' => [[], '|'];
     }
 }

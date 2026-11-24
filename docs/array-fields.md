@@ -14,7 +14,8 @@ If your entity has an array field, and you want to import data from CSV file to 
     - [null, null]
     - ['', null]
   - It is due of mapping CSV data to array:
-    - Empty value in CSV is equal to `[]` 
+    - Empty value in CSV is equal to `[]`
+    - Value `0` in CSV is equal to `['0']`
     - If we have default separator, `|` value in CSV is equal to `['', '']`
 
 ## Entity

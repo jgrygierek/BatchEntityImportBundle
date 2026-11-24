@@ -24,7 +24,7 @@ Importing entities with preview and edit features for Symfony.
 
 | Version | Status | Last release | PHP | Symfony | Documentation |
 |---|---|---|---|---|---|
-| **4.x** | Actively developed | - | >= 8.4 | 7.4, 8.* | [master](docs) |
+| **4.x** | Actively developed | 4.0.0 | >= 8.4 | 7.4, 8.* | [master](docs) |
 | **3.x** | Not maintained | 3.14.0 | >= 8.3 | 6.4, 7.*, 8.\* | [v3.14.0](https://github.com/jgrygierek/BatchEntityImportBundle/tree/v3.14.0/docs) |
 | **2.x** | Not maintained | 2.6.0 | >= 7.4 | 4.4, 5.\*, 6.\* | [v2.6.0](https://github.com/jgrygierek/BatchEntityImportBundle/tree/v2.6.0#readme) |
 | **1.x** | Not maintained | 1.1.5 | >= 7.4 | 4.4, 5.* | [v1.1.5](https://github.com/jgrygierek/BatchEntityImportBundle/tree/v1.1.5#readme) |

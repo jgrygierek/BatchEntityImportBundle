@@ -7,6 +7,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Service;
 use Generator;
 use JG\BatchEntityImportBundle\Service\PropertyExistenceChecker;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Model\PropertyAccessEntity;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -45,5 +46,24 @@ class PropertyExistenceCheckerTest extends TestCase
         yield ['wrongProperty'];
         yield ['test_private_property_no_setter'];
         yield ['testPrivatePropertyNoSetter'];
+    }
+
+    #[DataProvider('propertyAccessProvider')]
+    public function testOnlyPropertiesWritableFromOutsideExist(string $property, bool $expected): void
+    {
+        self::assertSame($expected, new PropertyExistenceChecker(PropertyAccessEntity::class)->propertyExists($property));
+    }
+
+    public static function propertyAccessProvider(): Generator
+    {
+        yield 'public property' => ['public_property', true];
+        yield 'virtual property with set hook' => ['upper_case_property', true];
+        yield 'public property with protected setter' => ['property_with_protected_setter', true];
+        yield 'static property' => ['static_property', false];
+        yield 'readonly property' => ['readonly_property', false];
+        yield 'private(set) property' => ['private_set_property', false];
+        yield 'protected(set) property' => ['protected_set_property', false];
+        yield 'virtual property without set hook' => ['get_only_property', false];
+        yield 'private property with protected setter' => ['private_property_with_protected_setter', false];
     }
 }

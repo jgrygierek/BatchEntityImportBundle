@@ -82,6 +82,7 @@ final class BatchEntityImportBundle extends AbstractBundle
                 service('doctrine'),
                 service('event_dispatcher'),
                 service(RelatedEntityFinder::class),
+                service('form.registry'),
             ]);
 
         $services->set(ImportHandler::class)
