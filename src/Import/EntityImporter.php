@@ -107,7 +107,7 @@ final readonly class EntityImporter
 
         // outside of the block above, data is already saved, so exception thrown by listener is not reported as error of database
         try {
-            $this->dispatchEvents($entityManager, $entityClass, $importedEntities);
+            $this->dispatchEvents($entityManager, $configuration, $importedEntities);
             $this->eventDispatcher->dispatch(new AfterImportEvent($configuration, $importedEntities));
         } catch (BatchEntityImportExceptionInterface $batchEntityImportException) {
             // Exceptions of this bundle are shown to user as errors of import, together with the preview to correct data.
@@ -291,7 +291,7 @@ final readonly class EntityImporter
     /**
      * @param list<object> $entities
      */
-    private function dispatchEvents(EntityManagerInterface $entityManager, string $entityClass, array $entities): void
+    private function dispatchEvents(EntityManagerInterface $entityManager, ImportConfigurationInterface $configuration, array $entities): void
     {
         $unitOfWork = $entityManager->getUnitOfWork();
 
@@ -299,7 +299,7 @@ final readonly class EntityImporter
             $identifierValues = $unitOfWork->getEntityIdentifier($entity);
 
             $this->eventDispatcher->dispatch(
-                new RecordImportedSuccessfullyEvent($entityClass, $this->normalizeIdentifier(\reset($identifierValues))),
+                new RecordImportedSuccessfullyEvent($configuration, $entity, $configuration->getEntityClassName(), $this->normalizeIdentifier(\reset($identifierValues))),
             );
         }
     }

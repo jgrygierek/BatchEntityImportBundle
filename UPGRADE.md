@@ -195,6 +195,17 @@
   $id = (string) $event->id;
   ```
 
+- `RecordImportedSuccessfullyEvent` contains import configuration and imported entity, the same as other events. Its constructor was changed to `__construct(ImportConfigurationInterface $configuration, object $entity, string $class, string|int $id)`. Properties `class` and `id` are not changed, so listeners don't have to be changed. If you create this event in your code (e.g. in tests), pass configuration and entity too:
+
+  ```php
+  // before
+  new RecordImportedSuccessfullyEvent(User::class, 1);
+
+  // after
+  new RecordImportedSuccessfullyEvent($configuration, $user, User::class, 1);
+  ```
+
+- `RecordImportedSuccessfullyEvent` is final and readonly, the same as other events. If you extend it, create your own event and dispatch it from listener instead.
 - Exceptions of this bundle (e.g. `MatrixRecordInvalidDataTypeException`) thrown by listeners of `RecordImportedSuccessfullyEvent` and `AfterImportEvent` are wrapped in `RuntimeException`. Data is already saved then, so they are no longer shown to user as errors of import together with the preview, where the same data could be saved again.
 
 ## Form types
@@ -213,6 +224,12 @@
 - `MatrixRecordType` is registered as a service and it gets `RelatedEntityFinder` in constructor, so it can't be created by `new` without arguments anymore. Form types used in your field definitions (`EntityLookupType`, `EntityLookupTextType`, `ArrayTextType`) can be still extended, see also [Form types](#form-types).
 - Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper`, `EntityManagerHelper`, `AbstractValidator` and classes from `JG\BatchEntityImportBundle\Import` namespace (`ImportHandler`, `EntityImporter`, `ImportResult`, `ImportStep`, `ImportMessage`, `ImportedColumn`) are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
 - Support of translatable entities (`knplabs/doctrine-behaviors`) was moved to internal `EntityTranslationHelper`. Nothing changes in the way translated columns are imported.
+- `FileImport` (model of form with file) is marked as `@internal`, it is used only by internal `FileImportType`.
+- `CsvDelimiterEnum` was moved from `JG\BatchEntityImportBundle\Enums` to `JG\BatchEntityImportBundle\Enum` namespace (the same as other namespaces, in singular) and it is marked as `@internal`. Its method `asValues()` was removed, use `array_column(CsvDelimiterEnum::cases(), 'value')` instead.
+
+## Constants
+
+- Public constants have types: `Matrix::COLUMN_NAME_PATTERN`, `ArrayTextType::DEFAULT_SEPARATOR` and `RelatedEntityFinder::DEFAULT_LOOKUP_FIELD` are `string`. If your class extends `ArrayTextType` or `RelatedEntityFinder` and overrides one of these constants, add the type to it too (`public const string ...`), otherwise PHP throws fatal error.
 
 ## Exceptions
 

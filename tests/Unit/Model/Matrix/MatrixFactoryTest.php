@@ -6,7 +6,7 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Model\Matrix;
 
 use Generator;
 use InvalidArgumentException;
-use JG\BatchEntityImportBundle\Enums\CsvDelimiterEnum;
+use JG\BatchEntityImportBundle\Enum\CsvDelimiterEnum;
 use JG\BatchEntityImportBundle\Exception\FileEncodingException;
 use JG\BatchEntityImportBundle\Exception\FileReadException;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;

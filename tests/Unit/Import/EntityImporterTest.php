@@ -59,9 +59,13 @@ class EntityImporterTest extends TestCase
             $events[] = $event;
         });
 
-        $this->createImporter($this->createEntityManager($identifier), $eventDispatcher)->import($this->createMatrix(), new BaseConfiguration());
+        $configuration = new BaseConfiguration();
+        $this->createImporter($this->createEntityManager($identifier), $eventDispatcher)->import($this->createMatrix(), $configuration);
 
-        self::assertEquals([new RecordImportedSuccessfullyEvent(TestEntity::class, $expectedId)], $events);
+        self::assertCount(1, $events);
+        self::assertSame($configuration, $events[0]->configuration);
+        self::assertInstanceOf(TestEntity::class, $events[0]->entity);
+        self::assertSame(TestEntity::class, $events[0]->class);
         self::assertSame($expectedId, $events[0]->id);
     }
 
@@ -221,6 +225,12 @@ class EntityImporterTest extends TestCase
         self::assertSame(2, $events[6]->rowNumber);
 
         self::assertInstanceOf(RecordPreparedEvent::class, $events[3]);
+        self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $events[7]);
+        self::assertSame($configuration, $events[7]->configuration);
+        self::assertSame($events[3]->entity, $events[7]->entity);
+        self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $events[8]);
+        self::assertSame($events[6]->entity, $events[8]->entity);
+
         self::assertInstanceOf(AfterImportEvent::class, $events[9]);
         self::assertSame([$events[3]->entity, $events[6]->entity], $events[9]->entities);
     }
