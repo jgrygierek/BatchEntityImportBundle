@@ -53,10 +53,12 @@ class ImportConfigurationTest extends AbstractWebTestCase
 
     public function testBasicMethods(): void
     {
-        $config = $this->getMockBuilder(AbstractImportConfiguration::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getEntityClassName'])
-            ->getMock();
+        $config = new class extends AbstractImportConfiguration {
+            public function getEntityClassName(): string
+            {
+                return TestEntity::class;
+            }
+        };
 
         self::assertNull($config->getEntityTranslationRelationName());
         self::assertEmpty($config->getMatrixConstraints());

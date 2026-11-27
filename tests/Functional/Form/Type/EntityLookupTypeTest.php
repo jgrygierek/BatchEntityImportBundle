@@ -153,7 +153,7 @@ class EntityLookupTypeTest extends AbstractWebTestCase
     public function testInvalidLabelField(): void
     {
         $this->expectException(InvalidOptionsException::class);
-        $this->expectExceptionMessage(\sprintf('Field "unknown" does not exist in entity "%s".', TestRelatedEntity::class));
+        $this->expectExceptionMessageIsOrContains(\sprintf('Field "unknown" does not exist in entity "%s".', TestRelatedEntity::class));
 
         $this->factory->create(EntityLookupType::class, null, ['class' => TestRelatedEntity::class, 'label_field' => 'unknown']);
     }
@@ -179,7 +179,7 @@ class EntityLookupTypeTest extends AbstractWebTestCase
     public function testNotExistingClass(): void
     {
         $this->expectException(InvalidOptionsException::class);
-        $this->expectExceptionMessage('Class "App\\NotExistingClass" is not a managed Doctrine entity.');
+        $this->expectExceptionMessageIsOrContains('Class "App\\NotExistingClass" is not a managed Doctrine entity.');
 
         $this->factory->create(EntityLookupType::class, null, ['class' => 'App\\NotExistingClass']);
     }

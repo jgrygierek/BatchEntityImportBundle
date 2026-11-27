@@ -331,7 +331,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
     {
         $this->client->catchExceptions(false);
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage(\sprintf('Import configuration is not set. Add #[AsImportController] attribute to "%s"', ControllerWithoutAttribute::class));
+        $this->expectExceptionMessageIsOrContains(\sprintf('Import configuration is not set. Add #[AsImportController] attribute to "%s"', ControllerWithoutAttribute::class));
         $this->client->request('GET', '/jg_batch_entity_import_bundle/import_without_attribute');
         $this->client->submitForm('btn-submit', ['file_import[file]' => __DIR__ . '/../../Fixtures/Resources/test.csv']);
 

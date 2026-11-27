@@ -6,8 +6,11 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Form\Type;
 
 use JG\BatchEntityImportBundle\Form\Type\FileImportType;
 use JG\BatchEntityImportBundle\Model\FileImport;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use Symfony\Component\Form\Test\TypeTestCase;
 
+// mock of event dispatcher is created by TypeTestCase
+#[AllowMockObjectsWithoutExpectations]
 class FileImportTypeTest extends TypeTestCase
 {
     public function testForm(): void
