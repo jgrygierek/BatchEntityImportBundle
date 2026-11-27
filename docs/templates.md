@@ -42,10 +42,19 @@ protected function getMatrixEditTemplateName(): string
 Block name used in templates is `batch_entity_import_content`, so probably there will be need to override it a bit.
 You can create a new file with content similar to the given example. Then just use it instead of original layout file.
 
+Results of import (success and errors) are shown as flash messages (types `success` and `error`),
+so your layout has to show them, if it does not do it already.
+
 ```twig
-{% extends path/to/your/layout.html.twig %}
+{% extends 'path/to/your/layout.html.twig' %}
 
 {% block your_real_block_name %}
+    {% for label, messages in app.flashes(['success', 'error']) %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
     {% block batch_entity_import_content %}{% endblock %}
 {% endblock %}
 ```

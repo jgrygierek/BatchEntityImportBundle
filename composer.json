@@ -63,6 +63,9 @@
         "symfony/security-bundle": "^7.4|^8.0",
         "symfony/yaml": "^7.4|^8.0"
     },
+    "conflict": {
+        "knplabs/doctrine-behaviors": "<3.0"
+    },
     "suggest": {
         "knplabs/doctrine-behaviors": "Version 3 of this package can be used for translatable records stored in database"
     },

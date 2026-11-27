@@ -8,7 +8,8 @@
 <div>
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div>{{ message }}</div>
+            {# classes of Bootstrap, the same as in other templates of the bundle ("error" is "danger" in Bootstrap) #}
+            <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ message }}</div>
         {% endfor %}
     {% endfor %}
 </div>

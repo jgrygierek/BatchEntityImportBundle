@@ -25,7 +25,8 @@ class UserImportConfiguration extends AbstractImportConfiguration
 }
 ```
 
-Then register it as a service:
+Configuration has to be registered as a service. With default `config/services.yaml` of Symfony application
+(all classes from `src/` are registered) nothing has to be done. Otherwise register it manually:
 
 ```yaml
 services:
@@ -160,6 +161,8 @@ public function getAllowedColumns(): array
 
 By default, allowed file extensions are set to `'csv', 'xls', 'xlsx', 'ods'`.
 However, if you want to change it, you can override this method in your import configuration.
+File is read by PhpSpreadsheet reader with the same name as extension (e.g. `Csv` for `csv`), so extension without such reader (e.g. `txt`)
+causes exception when file is uploaded. To read other files, see [Changing the way of reading files](files.md#changing-the-way-of-reading-files).
 
 ```php
   public function getAllowedFileExtensions(): array

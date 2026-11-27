@@ -42,7 +42,7 @@ john@example.com,user_1
 ```
 
 - `EntityLookupTextType` renders a text field, value is validated if entity exists.
-- `EntityLookupType` renders a select, but only fields set in `lookup_field` and `label_field` options are loaded from database, instead of whole entities.
+- `EntityLookupType` renders a select. With `label_field` option only fields set in `lookup_field` and `label_field` options are loaded from database, instead of whole entities.
 - Option `class` is set automatically to class of imported entity. Other options are the same as in [Importing relations](relations.md).
 
 [Back to README](../README.md)

@@ -58,29 +58,61 @@ class MatrixFactory
      * Rows which are not arrays, and columns with invalid names or not scalar values can be sent
      * only in modified request, so such data is treated as no data at all.
      *
+     * Rows of preview have the same columns. When rows with different columns are sent anyway (modified request,
+     * or field which is not sent when it is empty, e.g. checkbox), header contains columns of all rows,
+     * and missing values are empty. So each record has value for each column of header.
+     *
      * @param array<mixed> $data
      */
     public function createFromPostData(array $data): Matrix
     {
-        $header = null;
+        /** @var array<string|int, true> $columns names of columns as keys, in order in which they appear */
+        $columns = [];
+        /** @var list<array<string|int, scalar|null>> $rows rows with values already checked */
         $rows = [];
         foreach ($data as $row) {
             if (!\is_array($row)) {
                 return new Matrix();
             }
 
+            $checkedRow = [];
             foreach ($row as $name => $value) {
                 if ((null !== $value && !\is_scalar($value)) || !self::isPostColumnNameValid($name)) {
                     return new Matrix();
                 }
+
+                $columns[$name] = true;
+                $checkedRow[$name] = $value;
             }
 
-            /** @var array<string, scalar|null> $row */
-            $header ??= array_keys($row);
-            $rows[] = $row;
+            $rows[] = $checkedRow;
         }
 
-        return new Matrix($header ?? [], $rows);
+        // numeric name of column (e.g. "0") is an integer key in PHP, it is a name like any other
+        $header = array_map(strval(...), array_keys($columns));
+
+        $records = [];
+        foreach ($rows as $row) {
+            $records[] = self::addMissingColumns($header, $row);
+        }
+
+        return new Matrix($header, $records);
+    }
+
+    /**
+     * @param array<string> $header
+     * @param array<scalar|null> $row
+     *
+     * @return array<string, scalar|null> values in order of header
+     */
+    private static function addMissingColumns(array $header, array $row): array
+    {
+        $result = [];
+        foreach ($header as $name) {
+            $result[$name] = $row[$name] ?? null;
+        }
+
+        return $result;
     }
 
     /**

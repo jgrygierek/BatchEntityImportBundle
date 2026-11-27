@@ -146,6 +146,22 @@ class MatrixFactoryTest extends TestCase
         self::assertCount($recordsNumber, $matrix->getRecords());
     }
 
+    public function testCreateFromPostDataWithDifferentColumnsInRows(): void
+    {
+        $matrix = new MatrixFactory()->createFromPostData([
+            ['name' => 'a', 'description' => 'b'],
+            ['name' => 'c'],
+            ['0' => 'd', 'name' => 'e'],
+        ]);
+
+        // columns of all rows, in order in which they appear
+        self::assertSame(['name', 'description', '0'], $matrix->getHeader());
+        // each record has value for each column of header, missing values are empty
+        self::assertSame(['name' => 'a', 'description' => 'b', '0' => null], $matrix->getRecords()[0]->getData());
+        self::assertSame(['name' => 'c', 'description' => null, '0' => null], $matrix->getRecords()[1]->getData());
+        self::assertSame(['name' => 'e', 'description' => null, '0' => 'd'], $matrix->getRecords()[2]->getData());
+    }
+
     public static function postContentProvider(): Generator
     {
         yield [[['aaaa', 'bbbb', '123'], ['xxxx', 'yyyy', '456']], true, 2];

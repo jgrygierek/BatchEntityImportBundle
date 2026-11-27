@@ -10,7 +10,7 @@
   - `doctrine/collections`: 2.2,
   - `doctrine/persistence`: 3.3.1,
   - `symfony/event-dispatcher-contracts`, `symfony/service-contracts` and `symfony/translation-contracts`: 3.5.
-- Optional `knplabs/doctrine-behaviors` (translatable entities) is supported only in version 3, version 2 can't be installed with Symfony 7.4 and Doctrine ORM 3.
+- Optional `knplabs/doctrine-behaviors` (translatable entities) is supported only in version 3, version 2 can't be installed with Symfony 7.4 and Doctrine ORM 3. Older versions are listed in `conflict` section of `composer.json`, so they can't be installed together with the bundle.
 - `doctrine/doctrine-bundle` is now listed in requirements of bundle, because its services depend on it. It is installed in typical Symfony application, so usually nothing has to be changed in your project.
 
 ## Bundle
@@ -139,6 +139,8 @@
 
 - Entity selected by `entity_id` column is set to the record already in the preview, also for default select of entities. Previously it was only marked as selected in the select, so constraints (e.g. `DatabaseEntityUnique`) reported record which updates entity with its own values as a duplicate, until the preview was sent.
 - Value of `entity_id` column which does not match any entity is reported in the preview as invalid choice. Previously such record was silently imported as new entity.
+- When records sent from the preview have different columns (e.g. field which is not sent when it is empty, like checkbox), header contains columns of all records and missing values are empty. Previously only columns of the first record were in header, so columns of the preview were misaligned and constraints of matrix (e.g. `DatabaseEntityUnique`) could trigger PHP warning.
+- Flash messages in default layout have Bootstrap classes `alert alert-success` and `alert alert-danger`, the same as other elements of templates (e.g. `btn`, `table`).
 
 ## Matrix factory
 

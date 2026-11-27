@@ -8,11 +8,21 @@
          failOnPhpunitDeprecation="true"
          failOnPhpunitNotice="true"
          failOnPhpunitWarning="true"
+         failOnDirectDeprecation="true"
 >
-    <source>
+    <!-- Symfony and Doctrine trigger deprecations with "@", without this option they would not be reported at all.
+         Only deprecations triggered by code of the bundle (direct) fail tests, not these of other packages (indirect). -->
+    <source ignoreSuppressionOfDeprecations="true">
         <include>
             <directory>./src/</directory>
         </include>
+        <!-- helpers which call trigger_error(), so deprecation is reported for code which called deprecated API -->
+        <deprecationTrigger>
+            <function>trigger_deprecation</function>
+            <method>Doctrine\Deprecations\Deprecation::trigger</method>
+            <method>Doctrine\Deprecations\Deprecation::triggerIfCalledFromOutside</method>
+            <method>Doctrine\Deprecations\Deprecation::delegateTriggerToBackend</method>
+        </deprecationTrigger>
     </source>
     <php>
         <env name="KERNEL_CLASS" value="JG\BatchEntityImportBundle\Tests\TestKernel"/>
