@@ -15,7 +15,7 @@ use Symfony\Contracts\Service\ResetInterface;
  */
 class RelatedEntityFinder implements ResetInterface
 {
-    public const DEFAULT_LOOKUP_FIELD = 'id';
+    public const string DEFAULT_LOOKUP_FIELD = 'id';
 
     /** @var array<string, array<string, object|null>> */
     private array $cache = [];

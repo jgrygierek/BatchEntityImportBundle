@@ -16,7 +16,7 @@ class Matrix
      * Name of column is used as a name of form field, so it has to start with letter, digit or underscore.
      * Modifier "D" is needed, because without it name ending with new line would be valid too.
      */
-    public const COLUMN_NAME_PATTERN = '/^\w[\w -]*(:\w+)?$/D';
+    public const string COLUMN_NAME_PATTERN = '/^\w[\w -]*(:\w+)?$/D';
     private const string RESERVED_ENTITY_COLUMN_NAME = 'entity';
     private const string RESERVED_ENTITY_ID_COLUMN_NAME = 'entity_id';
     /**

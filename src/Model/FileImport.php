@@ -8,6 +8,11 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
+/**
+ * Model of form with file (FileImportType), used only by the bundle in import process.
+ *
+ * @internal
+ */
 class FileImport
 {
     #[Assert\File]

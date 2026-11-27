@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Unit\Service;
 
 use Generator;
-use JG\BatchEntityImportBundle\Enums\CsvDelimiterEnum;
+use JG\BatchEntityImportBundle\Enum\CsvDelimiterEnum;
 use JG\BatchEntityImportBundle\Service\CsvDelimiterDetector;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Service;
 
-use JG\BatchEntityImportBundle\Enums\CsvDelimiterEnum;
+use JG\BatchEntityImportBundle\Enum\CsvDelimiterEnum;
 
 /**
  * @internal

@@ -99,6 +99,8 @@ class ImportConfigurationTest extends AbstractWebTestCase
         self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[0]);
         self::assertSame(TestEntity::class, $dispatchedEvents[0]->class);
         self::assertSame(1, $dispatchedEvents[0]->id);
+        self::assertSame($repository->find(1), $dispatchedEvents[0]->entity);
+        self::assertSame($config, $dispatchedEvents[0]->configuration);
 
         self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[1]);
         self::assertSame(TestEntity::class, $dispatchedEvents[1]->class);

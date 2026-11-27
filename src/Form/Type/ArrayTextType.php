@@ -15,7 +15,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class ArrayTextType extends AbstractType
 {
-    public const DEFAULT_SEPARATOR = '|';
+    public const string DEFAULT_SEPARATOR = '|';
 
     public function __construct(private readonly TranslatorInterface $translator)
     {

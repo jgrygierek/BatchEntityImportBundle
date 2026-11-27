@@ -1,7 +1,7 @@
 # Events
 
 Events are dispatched during import, so you can react to it or change imported data.
-Each event, except `RecordImportedSuccessfullyEvent`, contains import configuration, so listener can check which import is running.
+Each event contains import configuration, so listener can check which import is running.
 
 | Event | When | Exception thrown by listener |
 |---|---|---|
@@ -78,7 +78,9 @@ public function onRecordPrepared(RecordPreparedEvent $event): void
 
 ## RecordImportedSuccessfullyEvent
 
-For each successfully saved record, event `RecordImportedSuccessfullyEvent` is dispatched. This event contains two fields:
+For each successfully saved record, event `RecordImportedSuccessfullyEvent` is dispatched. This event contains:
+- `configuration` - import configuration,
+- `entity` - imported entity,
 - `class` - entity class name,
 - `id` - entity id: integer identifier is passed as it is, other identifiers (e.g. UUID object) are cast to string. For composite identifier only its first value is used.
 
