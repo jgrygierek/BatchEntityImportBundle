@@ -129,7 +129,7 @@ class BatchEntityImportExtensionTest extends AbstractExtensionTestCase
         $container->register(ControllerWithAttribute::class, ControllerWithAttribute::class)->setAutoconfigured(true)->setPublic(true);
 
         $this->expectException(ServiceNotFoundException::class);
-        $this->expectExceptionMessage(\sprintf('The service "%s" has a dependency on a non-existent service "%s".', ControllerWithAttribute::class, BaseConfiguration::class));
+        $this->expectExceptionMessageIs(\sprintf('The service "%s" has a dependency on a non-existent service "%s".', ControllerWithAttribute::class, BaseConfiguration::class));
         $container->compile(true);
     }
 

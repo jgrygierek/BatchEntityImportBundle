@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.4/phpunit.xsd"
          backupGlobals="false"
          colors="true"
          bootstrap="vendor/autoload.php"
+         failOnPhpunitDeprecation="true"
+         failOnPhpunitNotice="true"
+         failOnPhpunitWarning="true"
 >
     <source>
         <include>
@@ -14,8 +17,6 @@
     <php>
         <env name="KERNEL_CLASS" value="JG\BatchEntityImportBundle\Tests\TestKernel"/>
         <env name="SHELL_VERBOSITY" value="-1"/>
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
-        <server name="SYMFONY_PHPUNIT_VERSION" value="11.5.44"/>
     </php>
     <testsuites>
         <testsuite name="Project Test Suite">

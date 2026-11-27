@@ -132,7 +132,7 @@ class MatrixFactoryTest extends TestCase
      */
     public function testCreateFromUploadedFileWrongExtension(): void
     {
-        $this->expectExceptionMessage('Reader for extension Txt is not supported by PhpOffice.');
+        $this->expectExceptionMessageIs('Reader for extension Txt is not supported by PhpOffice.');
 
         $file = new UploadedFile(__DIR__ . '/../../../Fixtures/Resources/test_wrong_extension.txt', 'test_wrong_extension.txt');
         new MatrixFactory()->createFromUploadedFile($file);

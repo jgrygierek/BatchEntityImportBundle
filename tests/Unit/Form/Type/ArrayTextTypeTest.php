@@ -6,8 +6,9 @@ namespace JG\BatchEntityImportBundle\Tests\Unit\Form\Type;
 
 use Generator;
 use JG\BatchEntityImportBundle\Form\Type\ArrayTextType;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\PreloadedExtension;
@@ -18,16 +19,15 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * Splitting value into array during import is tested in EntityImporterTest.
  */
+// mock of event dispatcher is created by TypeTestCase
+#[AllowMockObjectsWithoutExpectations]
 class ArrayTextTypeTest extends TypeTestCase
 {
-    /**
-     * @var MockObject&TranslatorInterface
-     */
-    private MockObject $translator;
+    private Stub&TranslatorInterface $translator;
 
     protected function setUp(): void
     {
-        $this->translator = $this->createMock(TranslatorInterface::class);
+        $this->translator = $this->createStub(TranslatorInterface::class);
         $this->translator
             ->method('trans')
             ->willReturnCallback(static fn ($key, $params): string => sprintf('separator: "%s"', $params['%separator%'] ?? ''));

@@ -32,6 +32,7 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Form\Type\CustomArrayTextType;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Model\PropertyAccessEntity;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;
@@ -88,7 +89,7 @@ class EntityImporterTest extends TestCase
             throw $exception;
         });
 
-        $entityManager = $this->createEntityManager(['id' => 1]);
+        $entityManager = $this->createEntityManagerMock(['id' => 1]);
         $entityManager->expects($this->once())->method('flush');
 
         // data is already saved, so original exception of listener is thrown, not DatabaseException
@@ -109,7 +110,7 @@ class EntityImporterTest extends TestCase
             throw $exception;
         });
 
-        $entityManager = $this->createEntityManager(['id' => 1]);
+        $entityManager = $this->createEntityManagerMock(['id' => 1]);
         $entityManager->expects($this->once())->method('flush');
 
         try {
@@ -140,7 +141,7 @@ class EntityImporterTest extends TestCase
     public function testNewEntityIsCreatedByConfiguration(): void
     {
         $entity = new TestEntity();
-        $entityManager = $this->createEntityManager(['id' => 1]);
+        $entityManager = $this->createEntityManagerMock(['id' => 1]);
         $entityManager->expects($this->once())->method('persist')->with($this->identicalTo($entity));
 
         $this->createImporter($entityManager, new EventDispatcher())->import($this->createMatrix(), $this->createConfiguration($entity));
@@ -250,7 +251,7 @@ class EntityImporterTest extends TestCase
             throw new RuntimeException('Invalid record.');
         });
 
-        $entityManager = $this->createEntityManager(['id' => 1]);
+        $entityManager = $this->createEntityManagerMock(['id' => 1]);
         // entity is not persisted yet, when listener is called, and import is not saved
         $entityManager->expects($this->never())->method('persist');
         $entityManager->expects($this->never())->method('flush');
@@ -410,14 +411,35 @@ class EntityImporterTest extends TestCase
     /**
      * @param array<string, mixed> $identifier
      */
-    private function createEntityManager(array $identifier): EntityManagerInterface&MockObject
+    private function createEntityManager(array $identifier): EntityManagerInterface&Stub
+    {
+        $entityManager = $this->createStub(EntityManagerInterface::class);
+        $this->configureEntityManager($entityManager, $identifier);
+
+        return $entityManager;
+    }
+
+    /**
+     * Used only by tests which check calls of entity manager.
+     *
+     * @param array<string, mixed> $identifier
+     */
+    private function createEntityManagerMock(array $identifier): EntityManagerInterface&MockObject
+    {
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->configureEntityManager($entityManager, $identifier);
+
+        return $entityManager;
+    }
+
+    /**
+     * @param array<string, mixed> $identifier
+     */
+    private function configureEntityManager(EntityManagerInterface&Stub $entityManager, array $identifier): void
     {
         $unitOfWork = $this->createStub(UnitOfWork::class);
         $unitOfWork->method('getEntityIdentifier')->willReturn($identifier);
-        $entityManager = $this->createMock(EntityManagerInterface::class);
         $entityManager->method('getUnitOfWork')->willReturn($unitOfWork);
-
-        return $entityManager;
     }
 
     private function createConfiguration(TestEntity $entity): BaseConfiguration

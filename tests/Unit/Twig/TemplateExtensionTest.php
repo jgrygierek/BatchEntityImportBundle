@@ -24,7 +24,7 @@ class TemplateExtensionTest extends TestCase
 
     public function testWrongTemplateException(): void
     {
-        $this->expectExceptionMessage('Template wrong_template not found.');
+        $this->expectExceptionMessageIs('Template wrong_template not found.');
 
         $extension = new TemplateExtension([]);
         $extension->getTemplate('wrong_template');

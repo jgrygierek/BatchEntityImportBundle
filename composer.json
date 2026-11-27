@@ -55,7 +55,7 @@
         "phpstan/phpstan-doctrine": "^2.0.11",
         "phpstan/phpstan-phpunit": "^2.0.8",
         "phpstan/phpstan-symfony": "^2.0.8",
-        "phpunit/phpunit": "11.5.56",
+        "phpunit/phpunit": "13.4.8",
         "rector/rector": "2.8.5",
         "roave/security-advisories": "dev-latest",
         "symfony/browser-kit": "^7.4|^8.0",

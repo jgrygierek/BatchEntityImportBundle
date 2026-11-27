@@ -91,7 +91,7 @@ class ImportControllerTraitTest extends TestCase
         $controller = $this->createController([]);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Import handler is not set. Add #[AsImportController] attribute to');
+        $this->expectExceptionMessageIsOrContains('Import handler is not set. Add #[AsImportController] attribute to');
         $controller->importHandler();
     }
 
@@ -100,7 +100,7 @@ class ImportControllerTraitTest extends TestCase
         $controller = $this->createController([]);
 
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Import configuration is not set. Add #[AsImportController] attribute to');
+        $this->expectExceptionMessageIsOrContains('Import configuration is not set. Add #[AsImportController] attribute to');
         $controller->importConfiguration();
     }
 

@@ -42,6 +42,9 @@ jobs:
                     php-version: ${{ matrix.php }}
                     tools: composer:v2, flex
                     coverage: pcov
+                    # assertions are disabled in production php.ini, without them assert() in code is not checked by tests
+                    # and its line is reported as not covered
+                    ini-values: zend.assertions=1
 
             -   name: Get composer cache directory
                 id: composer-cache

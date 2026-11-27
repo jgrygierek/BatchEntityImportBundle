@@ -44,7 +44,7 @@ class RelatedEntityExistsValidatorTest extends ConstraintValidatorTestCase
 
     public function testEntityNotFound(): void
     {
-        $this->finderMock->method('find')->willReturn(null);
+        $this->finderMock->expects(self::once())->method('find')->willReturn(null);
 
         $constraint = $this->createConstraint();
         $this->validator->validate('unknown', $constraint);
@@ -66,6 +66,7 @@ class RelatedEntityExistsValidatorTest extends ConstraintValidatorTestCase
 
     public function testInvalidConstraint(): void
     {
+        $this->finderMock->expects(self::never())->method('find');
         $this->expectException(UnexpectedTypeException::class);
 
         $this->validator->validate('first', new Blank());
@@ -73,6 +74,7 @@ class RelatedEntityExistsValidatorTest extends ConstraintValidatorTestCase
 
     public function testInvalidValue(): void
     {
+        $this->finderMock->expects(self::never())->method('find');
         $this->expectException(UnexpectedValueException::class);
 
         $this->validator->validate(new stdClass(), $this->createConstraint());
