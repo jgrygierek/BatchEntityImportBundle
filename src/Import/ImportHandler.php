@@ -117,6 +117,11 @@ final readonly class ImportHandler
             return ImportResult::finished([$this->createErrorMessage('error.data.not_found')]);
         }
 
+        // data sent from preview has columns of valid file, so other columns can be sent only in modified request
+        if (!$this->hasImportableColumns($matrix, $configuration)) {
+            return ImportResult::finished([$this->createErrorMessage('error.file.no_importable_columns')]);
+        }
+
         $form = $this->createMatrixForm($matrix, $configuration, $saveActionUrl);
         $form->handleRequest($request);
 
@@ -147,12 +152,19 @@ final readonly class ImportHandler
             return 'error.file.entity_id_not_allowed';
         }
 
-        // otherwise new entities would be created without any value from file
-        if (!\in_array(true, $matrix->getHeaderInfo($configuration->getEntityClassName(), $configuration->getAllowedColumns()), true)) {
+        if (!$this->hasImportableColumns($matrix, $configuration)) {
             return 'error.file.no_importable_columns';
         }
 
         return null;
+    }
+
+    /**
+     * Checked for file and for data sent from preview, otherwise new entities would be created without any value from file.
+     */
+    private function hasImportableColumns(Matrix $matrix, ImportConfigurationInterface $configuration): bool
+    {
+        return \in_array(true, $matrix->getHeaderInfo($configuration->getEntityClassName(), $configuration->getAllowedColumns()), true);
     }
 
     private function createMatrixForm(Matrix $matrix, ImportConfigurationInterface $configuration, string $saveActionUrl): FormInterface
