@@ -5,14 +5,18 @@ on:
         branches: [ master ]
     pull_request:
 
+# workflow only reads the repository, token does not need other permissions
+permissions:
+    contents: read
+
 jobs:
     code-style:
-        name: PHP CS Fixer, PHPStan
+        name: PHP CS Fixer, PHPStan, Rector
         runs-on: ubuntu-latest
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@v6
+                uses: actions/checkout@v7
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
@@ -21,23 +25,15 @@ jobs:
                     tools: composer:v2
                     coverage: none
 
-            -   name: Get composer cache directory
-                id: composer-cache
-                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-            -   name: Cache composer dependencies
-                uses: actions/cache@v5
-                with:
-                    path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-composer-code-style-${{ hashFiles('composer.json') }}
-                    restore-keys: ${{ runner.os }}-composer-code-style-
-
             # optional package, its classes are used in code, so it is needed for static analysis
             -   name: Require knplabs/doctrine-behaviors
                 run: composer require --dev --no-update "knplabs/doctrine-behaviors:^3.0"
 
+            # caches downloaded packages and runs "composer update" (lock file is not committed)
             -   name: Install dependencies
-                run: composer update --no-progress --optimize-autoloader
+                uses: ramsey/composer-install@v4
+                with:
+                    dependency-versions: highest
 
             # tools are installed by composer, so the same versions are used locally and in CI
             -   name: Run PHP CS Fixer
@@ -46,3 +42,7 @@ jobs:
             -   name: Run PHPStan
                 if: ${{ !cancelled() }}
                 run: composer phpstan
+
+            -   name: Run Rector
+                if: ${{ !cancelled() }}
+                run: composer rector
