@@ -26,7 +26,7 @@ interface ImportConfigurationInterface
 
     /**
      * Allows to update existing entities: entity overridden by record is selected in the preview,
-     * or by "entity_id" column of file. Otherwise file with "entity_id" column is rejected.
+     * or by "entity_id" column of file. Otherwise file with values in "entity_id" column is rejected.
      */
     public function allowOverrideEntity(): bool;
 

@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 class ImportAllowedColumnsControllerTest extends AbstractWebTestCase
 {
     private const string URL = '/jg_batch_entity_import_bundle/import_allowed_columns';
+    private const string SAVE_URL = '/jg_batch_entity_import_bundle/import_save_allowed_columns';
     private KernelBrowser $client;
 
     protected function setUp(): void
@@ -87,6 +88,30 @@ class ImportAllowedColumnsControllerTest extends AbstractWebTestCase
 
         self::assertStringContainsString('None of the columns of the file can be imported.', $this->client->getResponse()->getContent());
         self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+        self::assertSame([], $this->getRepository()->findAll());
+    }
+
+    /**
+     * Preview of valid file never sends data without allowed columns, so it can be sent only in modified request.
+     * Without the check new entities would be created without any value from file.
+     */
+    public function testDataWithoutAllowedColumnsSentFromPreviewIsRejected(): void
+    {
+        // valid file, only to get CSRF token from the preview, so data is rejected because of columns, not because of token
+        $this->submitFile(__DIR__ . '/../../Fixtures/Resources/test.csv');
+        $token = $this->client->getCrawler()->filterXPath('//input[@name="matrix[_token]"]')->attr('value');
+        self::assertNotEmpty($token);
+
+        $this->client->request('POST', self::SAVE_URL, [
+            'matrix' => ['records' => [['test_public_property' => 'value_1', 'unknown_column' => 'value_2']], '_token' => $token],
+        ]);
+
+        self::assertTrue($this->client->getResponse()->isRedirect(self::URL));
+        $this->client->followRedirect();
+        self::assertSame(
+            'None of the columns of the file can be imported.',
+            $this->client->getCrawler()->filterXPath('//div[@class="alert alert-danger"]')->text(),
+        );
         self::assertSame([], $this->getRepository()->findAll());
     }
 
