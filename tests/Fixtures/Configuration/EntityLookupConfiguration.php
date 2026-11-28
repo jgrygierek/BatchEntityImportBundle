@@ -12,6 +12,8 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestRelatedEntity;
 
 class EntityLookupConfiguration extends AbstractImportConfiguration
 {
+    use AllTestEntityColumnsAllowedTrait;
+
     public function getEntityClassName(): string
     {
         return TestEntity::class;

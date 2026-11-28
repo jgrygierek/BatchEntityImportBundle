@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests;
 
+use Composer\InstalledVersions;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\ORM\Configuration;
 use JG\BatchEntityImportBundle\BatchEntityImportBundle;
@@ -53,8 +54,10 @@ class TestKernel extends Kernel
             $loader->load(__DIR__ . '/KnpLabs/config/config.yaml');
         }
 
-        // native lazy objects are supported since ORM 3.4, older versions still use proxies
-        if (\method_exists(Configuration::class, 'enableNativeLazyObjects')) {
+        // native lazy objects are supported since ORM 3.4, older versions still use proxies;
+        // since DoctrineBundle 3.1 they are always enabled, and the option is deprecated
+        if (\method_exists(Configuration::class, 'enableNativeLazyObjects')
+            && \version_compare((string) InstalledVersions::getVersion('doctrine/doctrine-bundle'), '3.1', '<')) {
             $container->extension('doctrine', [
                 'orm' => ['enable_native_lazy_objects' => true],
             ]);

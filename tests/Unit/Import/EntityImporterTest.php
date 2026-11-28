@@ -26,6 +26,7 @@ use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\AllTestEntityColumnsAllowedTrait;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Form\Type\CustomArrayTextType;
@@ -157,6 +158,8 @@ class EntityImporterTest extends TestCase
     public function testNotManagedEntityException(string $class): void
     {
         $configuration = new class($class) extends AbstractImportConfiguration {
+            use AllTestEntityColumnsAllowedTrait;
+
             public function __construct(private readonly string $class)
             {
             }
@@ -276,21 +279,6 @@ class EntityImporterTest extends TestCase
     public function testOnlyPropertiesWritableFromOutsideAreImported(): void
     {
         $entity = new PropertyAccessEntity();
-        $configuration = new class($entity) extends AbstractImportConfiguration {
-            public function __construct(private readonly PropertyAccessEntity $entity)
-            {
-            }
-
-            public function getEntityClassName(): string
-            {
-                return PropertyAccessEntity::class;
-            }
-
-            public function getNewEntity(MatrixRecord $record): PropertyAccessEntity
-            {
-                return $this->entity;
-            }
-        };
         $columns = [
             'public_property',
             'upper_case_property',
@@ -302,6 +290,30 @@ class EntityImporterTest extends TestCase
             'get_only_property',
             'private_property_with_protected_setter',
         ];
+        $configuration = new class($entity, $columns) extends AbstractImportConfiguration {
+            /**
+             * @param array<string> $columns
+             */
+            public function __construct(private readonly PropertyAccessEntity $entity, private readonly array $columns)
+            {
+            }
+
+            public function getEntityClassName(): string
+            {
+                return PropertyAccessEntity::class;
+            }
+
+            public function getAllowedColumns(): array
+            {
+                // all columns are allowed, so only access to properties decides if column is imported
+                return $this->columns;
+            }
+
+            public function getNewEntity(MatrixRecord $record): PropertyAccessEntity
+            {
+                return $this->entity;
+            }
+        };
         $matrix = new Matrix($columns, [array_fill_keys($columns, 'value')]);
 
         $this->createImporter($this->createEntityManager(['id' => 1]), new EventDispatcher())->import($matrix, $configuration);
@@ -375,6 +387,8 @@ class EntityImporterTest extends TestCase
     {
         $entity = new TestEntity();
         $configuration = new class($entity, new FormFieldDefinition($fieldClass, $options)) extends AbstractImportConfiguration {
+            use AllTestEntityColumnsAllowedTrait;
+
             public function __construct(private readonly TestEntity $entity, private readonly FormFieldDefinition $fieldDefinition)
             {
             }

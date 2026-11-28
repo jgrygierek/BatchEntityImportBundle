@@ -1,7 +1,8 @@
 # Updating entities
 
-Updating entities is enabled by default (see `allowOverrideEntity()` in [Configuration class](configuration.md#show--hide-entity-override-column)).
-In the preview every record has additional column, where entity which should be updated by this record can be selected.
+Updating entities is disabled by default, enable it by `allowOverrideEntity()` method (see [Configuration class](configuration.md#updating-existing-entities)).
+Then in the preview every record has additional column, where entity which should be updated by this record can be selected.
+When updating is disabled, file with values in `entity_id` column is rejected, so such records are never imported as new entities by mistake.
 
 To select entities already in your import file:
   - Add `entity_id` in header and:

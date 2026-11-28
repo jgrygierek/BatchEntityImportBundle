@@ -4,9 +4,10 @@ To define how the import function should work, you need to create a configuratio
 
 ## Basic configuration class
 
-In the simplest case it will contain only class of used entity.
+In the simplest case it will contain only class of used entity and list of columns which can be imported
+(see [Allowed columns](#allowed-columns)). There is no default value for them.
 
-Configuration should extend `AbstractImportConfiguration`, which provides default values of all options.
+Configuration should extend `AbstractImportConfiguration`, which provides default values of all other options.
 Implementing `ImportConfigurationInterface` directly is not recommended, because new methods (new options of import)
 can be added to this interface in minor versions, without default implementation in your class.
 
@@ -21,6 +22,11 @@ class UserImportConfiguration extends AbstractImportConfiguration
     public function getEntityClassName(): string
     {
         return User::class;
+    }
+
+    public function getAllowedColumns(): array
+    {
+        return ['user_name', 'age', 'email'];
     }
 }
 ```
@@ -125,25 +131,26 @@ public function getNewEntity(MatrixRecord $record): object
 }
 ```
 
-## Show & hide entity override column
+## Updating existing entities
 
-Column which allows to select entity overridden by record (see [Updating entities](updating-entities.md)) is shown by default.
-If you want to hide it, so records are always imported as new entities, override this method in your import configuration:
+By default records are always imported as new entities, and file with values in `entity_id` column is rejected.
+To allow updating existing entities (see [Updating entities](updating-entities.md)), override this method in your import configuration:
 
 ```php
 public function allowOverrideEntity(): bool
 {
-    return false;
+    return true;
 }
 ```
 
+Then user who prepares the file can update any entity of imported class, and the default select in the preview
+shows all of them. Allow it only for users who should be able to do it.
+
 ## Allowed columns
 
-By default every column of file is imported, if entity has public property or setter with the same name.
-It means that user who prepares the file can set any of such properties, also these which should not be changed by import (e.g. roles or password of user).
-
-**It is recommended to always define the list of allowed columns**, especially when files are prepared by users who should not be able to change every property of entity.
-To do it, override this method in your import configuration:
+Every configuration has to define list of columns which can be imported. Column is imported only when it is on this list,
+and entity has public property or setter with the same name. So user who prepares the file can't set properties
+which should not be changed by import (e.g. roles or password of user).
 
 ```php
 public function getAllowedColumns(): array
@@ -155,7 +162,7 @@ public function getAllowedColumns(): array
 - Columns which are not on the list are treated the same way as unknown columns: they are marked in preview and skipped during import.
 - Names are compared the same way as names of columns with names of properties, so `first_name`, `first-name`, `first name` and `firstName` mean the same column.
 - Locale of translated column is ignored, so `name` allows also `name:en` and `name:pl`.
-- Empty array (default value) means that all columns are allowed. So if you build the list dynamically (e.g. it depends on role of user), make sure that it is never empty.
+- Empty array means that no column can be imported. File without any column which can be imported is rejected, so new entities are never created without values from file.
 
 ## Set allowed file extensions
 

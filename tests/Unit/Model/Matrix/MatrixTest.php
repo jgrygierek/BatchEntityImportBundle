@@ -79,7 +79,8 @@ class MatrixTest extends AbstractValidationTestCase
 
         $matrix = new Matrix(array_keys($expected));
 
-        self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class, []));
+        // all columns are allowed, so only entity decides if column is imported
+        self::assertSame($expected, $matrix->getHeaderInfo(TestEntity::class, array_keys($expected)));
     }
 
     #[DataProvider('allowedColumnsProvider')]
@@ -92,9 +93,9 @@ class MatrixTest extends AbstractValidationTestCase
 
     public static function allowedColumnsProvider(): Generator
     {
-        yield 'empty list, all columns are allowed' => [
+        yield 'empty list, no column is allowed' => [
             [],
-            ['test_public_property' => true, 'test_private_property' => true, 'unknown_column_name' => false],
+            ['test_public_property' => false, 'test_private_property' => false, 'unknown_column_name' => false],
         ];
         yield 'only one column is allowed' => [
             ['test_public_property'],

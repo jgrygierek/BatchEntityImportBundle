@@ -75,7 +75,7 @@ class Matrix
      * Returns information which columns will be imported: column has to be allowed, and entity has to have a property for it.
      *
      * @param class-string $className
-     * @param array<string> $allowedColumns list of names of columns which can be imported, empty list means that all columns are allowed
+     * @param array<string> $allowedColumns list of names of columns which can be imported
      *
      * @return array<string, bool>
      */
@@ -87,8 +87,7 @@ class Matrix
         $allowedProperties = array_map(ColumnNameHelper::toCamelCase(...), $allowedColumns);
 
         foreach ($this->header as $name) {
-            $isAllowed = [] === $allowedProperties || \in_array(ColumnNameHelper::toCamelCase($name), $allowedProperties, true);
-            $info[$name] = $isAllowed && $checker->propertyExists($name);
+            $info[$name] = \in_array(ColumnNameHelper::toCamelCase($name), $allowedProperties, true) && $checker->propertyExists($name);
         }
 
         return $info;

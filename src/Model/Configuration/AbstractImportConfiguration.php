@@ -9,22 +9,14 @@ use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use Symfony\Component\Validator\Constraint;
 
 /**
- * Default values of configuration, only class of entity has to be defined.
+ * Default values of configuration. Class of entity and list of allowed columns have to be defined,
+ * there is no safe default value for them.
  * Configuration only describes import, data is saved by the bundle, so configuration has no dependencies
  * and its constructor can be used to inject any services.
  */
 abstract class AbstractImportConfiguration implements ImportConfigurationInterface
 {
     public function getFieldsDefinitions(): array
-    {
-        return [];
-    }
-
-    /**
-     * By default all columns are allowed. It is recommended to override this method,
-     * especially when file is prepared by user who should not be able to change every property of entity.
-     */
-    public function getAllowedColumns(): array
     {
         return [];
     }
@@ -58,9 +50,13 @@ abstract class AbstractImportConfiguration implements ImportConfigurationInterfa
         return new $class();
     }
 
+    /**
+     * By default records are always imported as new entities. Updating existing entities has to be enabled explicitly,
+     * because user who prepares the file can select any entity in the preview.
+     */
     public function allowOverrideEntity(): bool
     {
-        return true;
+        return false;
     }
 
     /**

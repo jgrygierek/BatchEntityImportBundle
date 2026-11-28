@@ -13,6 +13,8 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestRelatedEntity;
 
 class RelationsConfiguration extends AbstractImportConfiguration
 {
+    use AllTestEntityColumnsAllowedTrait;
+
     public function getEntityClassName(): string
     {
         return TestEntity::class;

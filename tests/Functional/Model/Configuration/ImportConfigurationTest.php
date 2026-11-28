@@ -18,6 +18,7 @@ use JG\BatchEntityImportBundle\Model\Matrix\Matrix;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\AllowedColumnsConfiguration;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\AllTestEntityColumnsAllowedTrait;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupTextConfiguration;
@@ -56,8 +57,15 @@ class ImportConfigurationTest extends AbstractWebTestCase
             {
                 return TestEntity::class;
             }
+
+            public function getAllowedColumns(): array
+            {
+                return ['test_private_property'];
+            }
         };
 
+        self::assertFalse($config->allowOverrideEntity());
+        self::assertNull($config->getOverrideEntityFieldDefinition());
         self::assertNull($config->getEntityTranslationRelationName());
         self::assertEmpty($config->getMatrixConstraints());
         self::assertEmpty($config->getFieldsDefinitions());
@@ -278,11 +286,6 @@ class ImportConfigurationTest extends AbstractWebTestCase
         }
     }
 
-    public function testAllColumnsAreAllowedByDefault(): void
-    {
-        self::assertSame([], new BaseConfiguration()->getAllowedColumns());
-    }
-
     public function testInvalidDataTypeExceptionContainsPosition(): void
     {
         $matrix = new Matrix(
@@ -490,6 +493,8 @@ class ImportConfigurationTest extends AbstractWebTestCase
         $this->entityManager->flush();
 
         $config = new class extends AbstractImportConfiguration {
+            use AllTestEntityColumnsAllowedTrait;
+
             public function getEntityClassName(): string
             {
                 return TestEntity::class;

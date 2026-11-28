@@ -10,6 +10,14 @@
                 <source>error.data.truncated</source>
                 <target>Zbyt dużo danych. Liczba przesłanych pól osiągnęła limit %limit% (ustawienie PHP &quot;max_input_vars&quot;), więc część danych zostałaby utracona. Zaimportuj mniejszy plik lub zwiększ limit.</target>
             </trans-unit>
+            <trans-unit id="error.file.entity_id_not_allowed">
+                <source>error.file.entity_id_not_allowed</source>
+                <target>Kolumna &quot;entity_id&quot; nie może zostać użyta, ponieważ ten import nie pozwala na aktualizację istniejących rekordów.</target>
+            </trans-unit>
+            <trans-unit id="error.file.no_importable_columns">
+                <source>error.file.no_importable_columns</source>
+                <target>Żadna z kolumn pliku nie może zostać zaimportowana.</target>
+            </trans-unit>
             <trans-unit id="exception.database.data.not_unique">
                 <source>exception.database.data.not_unique</source>
                 <target>Nie można zapisać danych do bazy. Podane dane nie są unikalne.</target>

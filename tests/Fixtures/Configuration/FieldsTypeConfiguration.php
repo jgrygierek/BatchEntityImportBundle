@@ -14,6 +14,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class FieldsTypeConfiguration extends AbstractImportConfiguration
 {
+    use AllTestEntityColumnsAllowedTrait;
+
     public function getEntityClassName(): string
     {
         return TestEntity::class;
