@@ -9,18 +9,16 @@ use JG\BatchEntityImportBundle\Event\RecordImportedSuccessfullyEvent;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestRelatedEntity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\ImportEventRecorder;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImportRelationsControllerTest extends AbstractWebTestCase
 {
     private const string URL = '/jg_batch_entity_import_bundle/import_relations';
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
-    /** @var TestableEventDispatcher */
-    private EventDispatcherInterface $eventDispatcher;
+    private ImportEventRecorder $eventRecorder;
 
     protected function setUp(): void
     {
@@ -33,8 +31,8 @@ class ImportRelationsControllerTest extends AbstractWebTestCase
         $this->entityManager->persist(new TestRelatedEntity('second'));
         $this->entityManager->flush();
 
-        $this->eventDispatcher = self::getTestableEventDispatcher();
-        $this->eventDispatcher->resetDispatchedEvents();
+        $this->eventRecorder = self::getEventRecorder();
+        $this->eventRecorder->reset();
     }
 
     public function testImportRelations(): void
@@ -60,7 +58,7 @@ class ImportRelationsControllerTest extends AbstractWebTestCase
         self::assertTrue($this->client->getResponse()->isSuccessful());
         self::assertStringContainsString('Related entity &quot;unknown&quot; not found.', $this->getResponseContent());
         self::assertEmpty($this->getImportedEntities());
-        self::assertFalse($this->eventDispatcher->hasEvent(RecordImportedSuccessfullyEvent::class));
+        self::assertFalse($this->eventRecorder->hasEvent(RecordImportedSuccessfullyEvent::class));
 
         // fixing value in preview
         $this->client->submitForm('btn-submit', [
@@ -79,7 +77,7 @@ class ImportRelationsControllerTest extends AbstractWebTestCase
             ],
             $this->getImportedEntities(),
         );
-        self::assertCount(3, $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class));
+        self::assertCount(3, $this->eventRecorder->getEventsFor(RecordImportedSuccessfullyEvent::class));
     }
 
     public function testChangeRelationsInPreview(): void
@@ -118,7 +116,7 @@ class ImportRelationsControllerTest extends AbstractWebTestCase
         self::assertTrue($this->client->getResponse()->isSuccessful());
         self::assertFalse($this->client->getResponse()->isRedirect());
         self::assertEmpty($this->getImportedEntities());
-        self::assertFalse($this->eventDispatcher->hasEvent(RecordImportedSuccessfullyEvent::class));
+        self::assertFalse($this->eventRecorder->hasEvent(RecordImportedSuccessfullyEvent::class));
     }
 
     private function submitSelectFileForm(): void

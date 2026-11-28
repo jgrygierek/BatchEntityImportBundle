@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace JG\BatchEntityImportBundle\Tests\Functional;
 
-use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\ImportEventRecorder;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 abstract class AbstractWebTestCase extends WebTestCase
@@ -40,17 +39,11 @@ abstract class AbstractWebTestCase extends WebTestCase
     }
 
     /**
-     * In debug mode TestableEventDispatcher is decorated by TraceableEventDispatcher,
-     * which forwards calls of not existing methods to it by __call().
-     *
-     * @return TestableEventDispatcher
+     * Events of the bundle dispatched so far (in all requests of test client).
      */
-    protected static function getTestableEventDispatcher(): EventDispatcherInterface
+    protected static function getEventRecorder(): ImportEventRecorder
     {
-        /** @var TestableEventDispatcher $eventDispatcher */
-        $eventDispatcher = self::getService(EventDispatcherInterface::class, 'event_dispatcher');
-
-        return $eventDispatcher;
+        return self::getService(ImportEventRecorder::class);
     }
 
     protected function createCustomClient(KernelInterface $kernel): KernelBrowser

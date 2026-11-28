@@ -19,15 +19,7 @@ services:
     Psr\Container\ContainerInterface:
         alias: service_container
 
-    event_dispatcher:
-        public: true
-        class: JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher
-        decorates: ~
-        arguments:
-            - '@test.inner_dispatcher'
-
-    test.inner_dispatcher:
-        class: Symfony\Component\EventDispatcher\EventDispatcher
+    JG\BatchEntityImportBundle\Tests\Fixtures\Event\ImportEventRecorder: ~
 
 framework:
     test: true
