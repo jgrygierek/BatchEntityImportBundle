@@ -18,6 +18,7 @@ use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 
 class ImportControllerTraitTest extends AbstractWebTestCase
@@ -184,6 +185,33 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $this->checkDispatchedEvents(0);
     }
 
+    /**
+     * Records duplicated only within the file are not found by DatabaseEntityUnique (it checks only data in database),
+     * so unique constraint of database is violated during saving. Entity manager is closed then,
+     * and preview with error has to be still rendered, so user can correct data and send it again.
+     */
+    public function testUniqueConstraintOfDatabaseViolatedDuringSave(): void
+    {
+        $this->submitSelectFileForm(__DIR__ . '/../../Fixtures/Resources/test.csv');
+
+        // "test_private_property" is unique in database, the same value is already in the first record
+        $this->client->submitForm('btn-submit', ['matrix[records][1][test_private_property]' => 'test1']);
+
+        $response = $this->client->getResponse();
+        self::assertTrue($response->isSuccessful());
+        self::assertStringContainsString('save data to database. Data is not unique.', $response->getContent());
+        self::assertStringContainsString('id="btn-submit"', $response->getContent());
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        $this->checkDispatchedEvents(0);
+
+        // the same preview is sent again with corrected value
+        $this->client->submitForm('btn-submit', ['matrix[records][1][test_private_property]' => 'test2']);
+
+        $this->checkData();
+        $this->assertEntityValues(['test2', 'lorem ipsum 2', 'qwerty2', ['arr_val_1', 'arr_val_2', 'arr_val_3']], self::DEFAULT_RECORDS_NUMBER + 2);
+        $this->checkDispatchedEvents(self::NEW_RECORDS_NUMBER);
+    }
+
     public function testFormWithFileIsSentToRouteWithParameters(): void
     {
         $this->client->request('GET', '/jg_batch_entity_import_bundle/import_with_parameter/users');
@@ -292,7 +320,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
 
         self::assertTrue($this->client->getResponse()->isRedirect(self::URL));
         $this->client->followRedirect();
-        self::assertStringContainsString('Data not found', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('Data not found', $this->client->getCrawler()->filterXPath('//div[@class="alert alert-danger"]')->text());
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
         $this->checkDispatchedEvents(0);
     }
@@ -314,6 +342,30 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         ]);
 
         self::assertTrue($this->client->getResponse()->isSuccessful());
+        self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
+        $this->checkDispatchedEvents(0);
+    }
+
+    /**
+     * Rows of preview always have the same columns, so different columns can be sent only in modified request.
+     * Missing value must not cause error of validators (e.g. DatabaseEntityUnique) or misaligned columns in preview.
+     */
+    public function testRecordsWithDifferentColumnsDoNotCauseError(): void
+    {
+        $this->client->request('POST', '/jg_batch_entity_import_bundle/import_save', [
+            'matrix' => ['records' => [
+                ['test_private_property' => 'a', 'test_public_property' => 'b', 'test-private-property2' => 'c'],
+                ['test_private_property' => 'd', 'test-private-property2' => 'e'],
+                ['test_private_property' => 'f', 'test_public_property' => 'g', 'test-private-property2' => 'h', 'test_array_field' => 'i'],
+            ]],
+        ]);
+
+        self::assertTrue($this->client->getResponse()->isSuccessful());
+        // header contains all columns, and each record has field for each of them
+        // "entity" column and 4 columns of data
+        $rows = $this->client->getCrawler()->filterXPath('//table//tr');
+        self::assertSame(5, $rows->first()->filterXPath('.//th')->count());
+        self::assertSame([5, 5, 5], $rows->slice(1)->each(static fn (Crawler $row): int => $row->filterXPath('.//td')->count()));
         self::assertCount(self::DEFAULT_RECORDS_NUMBER, $this->getRepository()->findAll());
         $this->checkDispatchedEvents(0);
     }
@@ -355,7 +407,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         self::assertTrue($this->client->getResponse()->isRedirect(self::URL));
         $this->client->followRedirect();
         self::assertTrue($this->client->getResponse()->isSuccessful());
-        self::assertStringContainsString('Data has been imported', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('Data has been imported', $this->client->getCrawler()->filterXPath('//div[@class="alert alert-success"]')->text());
         self::assertCount(self::DEFAULT_RECORDS_NUMBER + $newRecordsNumber, $repository->findAll());
     }
 

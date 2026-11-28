@@ -5,25 +5,18 @@ If your entity has an array field, and you want to import data from CSV file to 
 - Default separator is set to `|`.
 - Only one-dimensional arrays are allowed.
 - Keys are not allowed.
-- **IMPORTANT!** There are limitations:
-  - There is no possibility to import array with one empty element, for example:
-    - ['']
-    - [null]
-  - But arrays with at least 2 such elements are allowed:
-    - ['', '']
-    - [null, null]
-    - ['', null]
-  - It is due of mapping CSV data to array:
-    - Empty value in CSV is equal to `[]`
-    - Value `0` in CSV is equal to `['0']`
-    - If we have default separator, `|` value in CSV is equal to `['', '']`
+- Elements of array are always strings.
+- **IMPORTANT!** Array with one empty element (`['']`) can't be imported, because value is split by separator:
+  - Empty value is imported as `[]`.
+  - Value `0` is imported as `['0']`.
+  - Value `|` (with default separator) is imported as `['', '']`, so arrays with at least 2 empty elements are possible.
 
 ## Entity
 
 - Allowed entity field types:
   - `json`
-  - `array`
-  - `simple_array`
+  - `simple_array` (values can't contain comma, because it is used as separator in database)
+- Entity needs public setter (or public property), the same as for other columns.
 
 ```php
 namespace App\Entity;
@@ -35,6 +28,14 @@ class User
 {
     #[ORM\Column(type: 'json')]
     private array $roles = [];
+
+    /**
+     * @param array<string> $roles
+     */
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
+    }
 }
 ```
 
