@@ -5,6 +5,10 @@ on:
         branches: [ master ]
     pull_request:
 
+# workflow only reads the repository, token does not need other permissions
+permissions:
+    contents: read
+
 jobs:
     tests:
         name: PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}, ${{ matrix.dependencies }}${{ matrix.knplabs && ', KnpLabs' || '' }}
@@ -23,10 +27,12 @@ jobs:
                         symfony: '7.4.*'
                         dependencies: lowest
                         knplabs: true
+                    # coverage is measured only once, in the job which runs all tests (also these of KnpLabs)
                     -   php: '8.6'
                         symfony: '8.*'
                         dependencies: highest
                         knplabs: true
+                        coverage: true
 
         env:
             # used by symfony/flex, without it packages from different versions of Symfony could be mixed
@@ -34,40 +40,35 @@ jobs:
 
         steps:
             -   name: Checkout
-                uses: actions/checkout@v6
+                uses: actions/checkout@v7
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: ${{ matrix.php }}
                     tools: composer:v2, flex
-                    coverage: pcov
+                    coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
                     # assertions are disabled in production php.ini, without them assert() in code is not checked by tests
                     # and its line is reported as not covered
                     ini-values: zend.assertions=1
-
-            -   name: Get composer cache directory
-                id: composer-cache
-                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-            -   name: Cache composer dependencies
-                uses: actions/cache@v5
-                with:
-                    path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-${{ matrix.dependencies }}-${{ hashFiles('composer.json') }}
-                    restore-keys: ${{ runner.os }}-composer-${{ matrix.php }}-${{ matrix.symfony }}-
 
             -   name: Require knplabs/doctrine-behaviors
                 if: matrix.knplabs
                 run: composer require --dev --no-update "knplabs/doctrine-behaviors:^3.0"
 
+            # caches downloaded packages and runs "composer update" (lock file is not committed)
             -   name: Install dependencies
-                run: composer update --no-progress --optimize-autoloader ${{ matrix.dependencies == 'lowest' && '--prefer-lowest' || '' }}
+                uses: ramsey/composer-install@v4
+                with:
+                    dependency-versions: ${{ matrix.dependencies }}
+                    custom-cache-suffix: symfony-${{ matrix.symfony }}
 
             -   name: Run tests
-                run: composer tests-cov
+                run: ${{ matrix.coverage && 'composer tests-cov' || 'composer tests' }}
 
             -   name: Upload coverage report
-                uses: codecov/codecov-action@v5
+                if: matrix.coverage
+                uses: codecov/codecov-action@v7
                 with:
+                    files: coverage.xml
                     token: ${{ secrets.CODECOV_TOKEN }}
