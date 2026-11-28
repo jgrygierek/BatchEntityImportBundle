@@ -10,6 +10,14 @@
                 <source>error.data.truncated</source>
                 <target>Too much data. Number of sent fields reached the limit of %limit% (PHP &quot;max_input_vars&quot; setting), so part of the data would be lost. Import smaller file or increase the limit.</target>
             </trans-unit>
+            <trans-unit id="error.file.entity_id_not_allowed">
+                <source>error.file.entity_id_not_allowed</source>
+                <target>Column &quot;entity_id&quot; can not be used, because updating existing records is not allowed in this import.</target>
+            </trans-unit>
+            <trans-unit id="error.file.no_importable_columns">
+                <source>error.file.no_importable_columns</source>
+                <target>None of the columns of the file can be imported.</target>
+            </trans-unit>
             <trans-unit id="exception.database.data.not_unique">
                 <source>exception.database.data.not_unique</source>
                 <target>Can't save data to database. Data is not unique.</target>

@@ -12,6 +12,16 @@ use JG\BatchEntityImportBundle\Validator\Constraints\DatabaseEntityUnique;
 
 class BaseConfiguration extends AbstractImportConfiguration
 {
+    use AllTestEntityColumnsAllowedTrait;
+
+    /**
+     * Updating of entities is tested with this configuration.
+     */
+    public function allowOverrideEntity(): bool
+    {
+        return true;
+    }
+
     public function getEntityClassName(): string
     {
         return TestEntity::class;

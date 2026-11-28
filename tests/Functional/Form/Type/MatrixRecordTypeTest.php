@@ -57,7 +57,8 @@ class MatrixRecordTypeTest extends AbstractWebTestCase
 
         self::assertTrue($form->isSynchronized());
 
-        self::assertSame(TestEntity::class, $form->get('entity')->getConfig()->getOption('class'));
+        // updating entities is not allowed by default, so there is no field to select entity
+        self::assertFalse($form->has('entity'));
         self::assertInstanceOf(IntegerType::class, $form->get('age')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextType::class, $form->get('name')->getConfig()->getType()->getInnerType());
         self::assertInstanceOf(TextareaType::class, $form->get('description')->getConfig()->getType()->getInnerType());

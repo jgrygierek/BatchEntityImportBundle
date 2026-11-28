@@ -16,6 +16,7 @@ use JG\BatchEntityImportBundle\Model\Configuration\AbstractImportConfiguration;
 use JG\BatchEntityImportBundle\Model\Form\FormFieldDefinition;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\AllTestEntityColumnsAllowedTrait;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -155,6 +156,8 @@ class OverrideEntityFieldTest extends AbstractWebTestCase
     private function createConfiguration(string $fieldClass, array $options): AbstractImportConfiguration
     {
         return new class($fieldClass, $options) extends AbstractImportConfiguration {
+            use AllTestEntityColumnsAllowedTrait;
+
             /**
              * @param array<string, mixed> $options
              */
@@ -165,6 +168,11 @@ class OverrideEntityFieldTest extends AbstractWebTestCase
             public function getEntityClassName(): string
             {
                 return TestEntity::class;
+            }
+
+            public function allowOverrideEntity(): bool
+            {
+                return true;
             }
 
             public function getOverrideEntityFieldDefinition(): FormFieldDefinition

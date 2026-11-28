@@ -27,14 +27,27 @@
 ## Import configuration
 
 - It is recommended to extend `AbstractImportConfiguration` instead of implementing `ImportConfigurationInterface` directly. New methods (new options of import) can be added to this interface in minor versions of 4.x, and only `AbstractImportConfiguration` is guaranteed to provide their default implementation.
-- Method `getAllowedColumns()` was moved to `ImportConfigurationInterface`, and `AllowedColumnsConfigurationInterface` was removed. If your configuration extends `AbstractImportConfiguration`, only remove the interface from `implements`, if you added it there. If your configuration implements `ImportConfigurationInterface` directly, add the method (empty array means that all columns are allowed):
+- Method `getAllowedColumns()` was moved to `ImportConfigurationInterface`, and `AllowedColumnsConfigurationInterface` was removed. Remove the interface from `implements` of your configuration, if you added it there.
+- **List of allowed columns is required.** `AbstractImportConfiguration` no longer implements `getAllowedColumns()`, so configuration without this method can't be loaded (PHP fatal error about abstract method). Previously all columns were allowed by default, so user who prepared the file could set any property with public setter (e.g. roles or password of user). Add the method with columns which should be imported:
 
   ```php
   public function getAllowedColumns(): array
   {
-      return [];
+      return ['user_name', 'age', 'email'];
   }
   ```
+
+- Empty list of allowed columns means that no column can be imported. Previously it meant that all columns were allowed. File without any column which can be imported is rejected with error message, so new entities are never created without values from file.
+- **Updating entities is disabled by default.** `AbstractImportConfiguration::allowOverrideEntity()` returns `false`, so the preview has no column to select entity, and records are imported as new entities. If your import updates existing entities (by `entity_id` column or by selecting entity in the preview), enable it:
+
+  ```php
+  public function allowOverrideEntity(): bool
+  {
+      return true;
+  }
+  ```
+
+- When updating entities is disabled, file with values in `entity_id` column is rejected with error message. Previously such column was silently ignored, and records were imported as new entities.
 
 - Import configuration only describes import now, data is saved by the bundle (by new internal `JG\BatchEntityImportBundle\Import\EntityImporter` service). Method `import()` was removed from `ImportConfigurationInterface` and `AbstractImportConfiguration`.
 - `AbstractImportConfiguration` has no constructor anymore, so `EntityManagerInterface` and `EventDispatcherInterface` are not passed to it. If your configuration overrides constructor, remove the call of parent constructor and arguments which were passed only to it:

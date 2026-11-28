@@ -85,6 +85,11 @@ final readonly class ImportHandler
             return ImportResult::selectFile($form, $this->getErrorMessages($errors));
         }
 
+        $configurationError = $this->getConfigurationError($matrix, $configuration);
+        if (null !== $configurationError) {
+            return ImportResult::selectFile($form, [$this->createErrorMessage($configurationError)]);
+        }
+
         $matrixForm = $this->createMatrixForm($matrix, $configuration, $saveActionUrl);
         // form is submitted, so errors of data from file are shown already in preview
         $this->submitMatrixForm($matrixForm, $matrix);
@@ -128,6 +133,26 @@ final readonly class ImportHandler
         }
 
         return ImportResult::editMatrix($form, $matrix, [...$messages, ...$this->getErrorMessages($form->getErrors())]);
+    }
+
+    /**
+     * File which can't be imported with given configuration is rejected, instead of being imported only partially.
+     *
+     * @return string|null translation key of error
+     */
+    private function getConfigurationError(Matrix $matrix, ImportConfigurationInterface $configuration): ?string
+    {
+        // otherwise records which should update entities would be silently imported as new entities
+        if (!$configuration->allowOverrideEntity() && array_any($matrix->getRecords(), static fn (MatrixRecord $record): bool => null !== $record->entityId && '' !== trim((string) $record->entityId))) {
+            return 'error.file.entity_id_not_allowed';
+        }
+
+        // otherwise new entities would be created without any value from file
+        if (!\in_array(true, $matrix->getHeaderInfo($configuration->getEntityClassName(), $configuration->getAllowedColumns()), true)) {
+            return 'error.file.no_importable_columns';
+        }
+
+        return null;
     }
 
     private function createMatrixForm(Matrix $matrix, ImportConfigurationInterface $configuration, string $saveActionUrl): FormInterface

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Functional\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
@@ -34,7 +35,6 @@ class ImportAllowedColumnsControllerTest extends AbstractWebTestCase
         );
         self::assertSame(
             [
-                'Override record',
                 'test_private_property',
                 'Unknown field test-private-property2',
                 'Unknown field test_public_property',
@@ -58,5 +58,62 @@ class ImportAllowedColumnsControllerTest extends AbstractWebTestCase
             self::assertSame('', $item->getTestPrivateProperty2());
             self::assertSame([], $item->getTestArrayField());
         }
+    }
+
+    /**
+     * Updating entities is not allowed by default, so records which should update entities
+     * are not silently imported as new entities.
+     */
+    public function testFileWithEntityIdIsRejectedWhenUpdatingIsNotAllowed(): void
+    {
+        $this->submitFile(__DIR__ . '/../../Fixtures/Resources/test_updated_data.csv');
+
+        self::assertStringContainsString('Column &quot;entity_id&quot; can not be used', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+        self::assertSame([], $this->getRepository()->findAll());
+    }
+
+    public function testFileWithEmptyEntityIdIsAcceptedWhenUpdatingIsNotAllowed(): void
+    {
+        $this->submitFileWithContent("test_private_property,entity_id\nvalue_1,\nvalue_2,\n");
+
+        self::assertStringContainsString('id="btn-submit"', $this->client->getResponse()->getContent());
+        self::assertStringNotContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+    }
+
+    public function testFileWithoutAllowedColumnsIsRejected(): void
+    {
+        $this->submitFileWithContent("test_public_property,unknown_column\nvalue_1,value_2\n");
+
+        self::assertStringContainsString('None of the columns of the file can be imported.', $this->client->getResponse()->getContent());
+        self::assertStringContainsString('id="file_import_file"', $this->client->getResponse()->getContent());
+        self::assertSame([], $this->getRepository()->findAll());
+    }
+
+    private function submitFile(string $path): void
+    {
+        $this->client->request('GET', self::URL);
+        $this->client->submitForm('btn-submit', ['file_import[file]' => $path]);
+        self::assertTrue($this->client->getResponse()->isSuccessful());
+    }
+
+    private function submitFileWithContent(string $content): void
+    {
+        $path = sys_get_temp_dir() . '/batch_entity_import_allowed_columns.csv';
+        file_put_contents($path, $content);
+
+        try {
+            $this->submitFile($path);
+        } finally {
+            unlink($path);
+        }
+    }
+
+    /**
+     * @return EntityRepository<TestEntity>
+     */
+    private function getRepository(): EntityRepository
+    {
+        return self::getService(EntityManagerInterface::class, 'doctrine.orm.entity_manager')->getRepository(TestEntity::class);
     }
 }

@@ -25,7 +25,8 @@ interface ImportConfigurationInterface
     public function getEntityClassName(): string;
 
     /**
-     * Allow to override entity in the edit view.
+     * Allows to update existing entities: entity overridden by record is selected in the preview,
+     * or by "entity_id" column of file. Otherwise file with "entity_id" column is rejected.
      */
     public function allowOverrideEntity(): bool;
 
@@ -60,20 +61,20 @@ interface ImportConfigurationInterface
     public function getMatrixConstraints(): array;
 
     /**
-     * Use this method to limit columns which can be imported.
+     * Columns which can be imported. Column is imported only when it is on this list,
+     * and entity has public property or setter with the same name.
      *
-     * Without it every column of file is imported, if entity has public property or setter with the same name.
-     * So user who prepares the file can set any of such properties, also these which should not be changed
+     * List is required, so user who prepares the file can't set properties which should not be changed
      * by import (e.g. roles or password of user).
      *
      * Columns which are not on the list are treated the same way as unknown columns:
-     * they are marked in preview and skipped during import.
+     * they are marked in preview and skipped during import. File without any column which can be imported is rejected.
      *
      * Names are compared the same way as names of columns with names of properties, so "first_name", "first-name",
      * "first name" and "firstName" mean the same column. Locale of translated column is ignored,
      * so "name" allows also "name:en" and "name:pl".
      *
-     * @return array<string> list of names of columns, empty list means that all columns are allowed
+     * @return array<string> list of names of columns, empty list means that no column can be imported
      */
     public function getAllowedColumns(): array;
 
