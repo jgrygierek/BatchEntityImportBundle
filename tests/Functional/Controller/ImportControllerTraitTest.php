@@ -12,14 +12,13 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithAttribute;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Controller\ControllerWithoutAttribute;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\ImportEventRecorder;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 
 class ImportControllerTraitTest extends AbstractWebTestCase
 {
@@ -27,7 +26,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
     private const int NEW_RECORDS_NUMBER = 30;
     private const string URL = '/jg_batch_entity_import_bundle/import';
     private KernelBrowser $client;
-    private TestableEventDispatcher|TraceableEventDispatcher $eventDispatcher;
+    private ImportEventRecorder $eventRecorder;
 
     protected function setUp(): void
     {
@@ -37,8 +36,8 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $databaseLoader->reload();
         $databaseLoader->loadFixtures();
 
-        $this->eventDispatcher = self::$kernel->getContainer()->get('event_dispatcher');
-        $this->eventDispatcher->resetDispatchedEvents();
+        $this->eventRecorder = self::getEventRecorder();
+        $this->eventRecorder->reset();
     }
 
     public function testInsertNewData(): void
@@ -156,7 +155,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
         $this->checkDispatchedEvents(self::NEW_RECORDS_NUMBER);
 
         // update existing data
-        $this->eventDispatcher->resetDispatchedEvents();
+        $this->eventRecorder->reset();
         $this->submitSelectFileForm(__DIR__ . '/../../Fixtures/Resources/test_updated_data.csv');
 
         $this->client->submitForm('btn-submit', [
@@ -429,7 +428,7 @@ class ImportControllerTraitTest extends AbstractWebTestCase
 
     private function checkDispatchedEvents(int $expectedNumber): void
     {
-        $dispatchedEvents = $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class);
+        $dispatchedEvents = $this->eventRecorder->getEventsFor(RecordImportedSuccessfullyEvent::class);
         self::assertCount($expectedNumber, $dispatchedEvents);
         foreach ($dispatchedEvents as $event) {
             self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $event);

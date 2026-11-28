@@ -23,11 +23,10 @@ use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupConfigur
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\EntityLookupTextConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestRelatedEntity;
-use JG\BatchEntityImportBundle\Tests\Fixtures\Event\TestableEventDispatcher;
+use JG\BatchEntityImportBundle\Tests\Fixtures\Event\ImportEventRecorder;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Throwable;
 use TypeError;
 
@@ -35,17 +34,16 @@ class ImportConfigurationTest extends AbstractWebTestCase
 {
     private EntityManagerInterface $entityManager;
     private EntityImporter $importer;
-    /** @var TestableEventDispatcher */
-    private EventDispatcherInterface $eventDispatcher;
+    private ImportEventRecorder $eventRecorder;
 
     protected function setUp(): void
     {
         self::bootKernel();
 
         $this->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
-        $this->eventDispatcher = self::getTestableEventDispatcher();
+        $this->eventRecorder = self::getEventRecorder();
         $this->importer = self::getService(EntityImporter::class);
-        $this->eventDispatcher->resetDispatchedEvents();
+        $this->eventRecorder->reset();
 
         $databaseLoader = self::$kernel->getContainer()->get(DatabaseLoader::class);
         $databaseLoader->reload();
@@ -93,7 +91,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         self::assertSame('value_4', $item->getTestPrivateProperty());
         self::assertSame('public_value_2', $item->testPublicProperty);
 
-        $dispatchedEvents = $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class);
+        $dispatchedEvents = $this->eventRecorder->getEventsFor(RecordImportedSuccessfullyEvent::class);
         self::assertCount(2, $dispatchedEvents);
 
         self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[0]);
@@ -229,7 +227,7 @@ class ImportConfigurationTest extends AbstractWebTestCase
         } catch (Throwable $throwable) {
         }
         self::assertInstanceOf($expectedExceptionClass, $throwable);
-        self::assertFalse($this->eventDispatcher->hasEvent(RecordImportedSuccessfullyEvent::class));
+        self::assertFalse($this->eventRecorder->hasEvent(RecordImportedSuccessfullyEvent::class));
     }
 
     public static function exceptionCheckProvider(): Generator
@@ -462,18 +460,18 @@ class ImportConfigurationTest extends AbstractWebTestCase
             ['test_private_property', 'test_related_entity'],
             [['test_private_property' => 'value_1', 'test_related_entity' => 'first']],
         ), $config);
-        self::assertCount(1, $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class));
+        self::assertCount(1, $this->eventRecorder->getEventsFor(RecordImportedSuccessfullyEvent::class));
 
         // simulates next request in long-running process: related entity cached in first import is detached now
         $this->entityManager->clear();
-        $this->eventDispatcher->resetDispatchedEvents();
+        $this->eventRecorder->reset();
 
         $this->importer->import(new Matrix(
             ['test_private_property', 'test_related_entity'],
             [['test_private_property' => 'value_2', 'test_related_entity' => 'first']],
         ), $config);
 
-        $dispatchedEvents = $this->eventDispatcher->getEventsFor(RecordImportedSuccessfullyEvent::class);
+        $dispatchedEvents = $this->eventRecorder->getEventsFor(RecordImportedSuccessfullyEvent::class);
         self::assertCount(1, $dispatchedEvents);
         self::assertInstanceOf(RecordImportedSuccessfullyEvent::class, $dispatchedEvents[0]);
         self::assertSame(2, $dispatchedEvents[0]->id);

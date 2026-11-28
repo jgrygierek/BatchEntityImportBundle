@@ -5,26 +5,35 @@ declare(strict_types=1);
 namespace JG\BatchEntityImportBundle\Tests\Functional\Import;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use JG\BatchEntityImportBundle\Event\AfterImportEvent;
 use JG\BatchEntityImportBundle\Exception\MatrixRecordInvalidDataTypeException;
+use JG\BatchEntityImportBundle\Import\EntityImporter;
 use JG\BatchEntityImportBundle\Import\ImportHandler;
 use JG\BatchEntityImportBundle\Import\ImportMessage;
 use JG\BatchEntityImportBundle\Import\ImportResult;
 use JG\BatchEntityImportBundle\Import\ImportStep;
+use JG\BatchEntityImportBundle\Model\Matrix\MatrixFactory;
 use JG\BatchEntityImportBundle\Model\Matrix\MatrixRecord;
+use JG\BatchEntityImportBundle\Service\RelatedEntityFinder;
 use JG\BatchEntityImportBundle\Tests\DatabaseLoader;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Configuration\BaseConfiguration;
 use JG\BatchEntityImportBundle\Tests\Fixtures\Entity\TestEntity;
 use JG\BatchEntityImportBundle\Tests\Functional\AbstractWebTestCase;
 use LogicException;
 use RuntimeException;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormRegistryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Handler is used directly, without controller.
@@ -176,19 +185,44 @@ class ImportHandlerTest extends AbstractWebTestCase
      */
     public function testExceptionOfThisBundleThrownAfterSaveIsNotShownAsErrorOfImport(): void
     {
-        self::getService(EventDispatcherInterface::class, 'event_dispatcher')->addListener(AfterImportEvent::class, static function (): never {
+        // listener is added to separate dispatcher, because listeners of compiled dispatcher
+        // can't be changed in runtime (deprecated since Symfony 8.2)
+        $eventDispatcher = new EventDispatcher();
+        $eventDispatcher->addListener(AfterImportEvent::class, static function (): never {
             throw new MatrixRecordInvalidDataTypeException(1, 'test_private_property');
         });
+        $handler = $this->createHandlerWithEventDispatcher($eventDispatcher);
         $records = [['test_private_property' => 'a', 'test_public_property' => 'b', 'test-private-property2' => 'c']];
 
         try {
-            $this->handler->handleSave($this->createSaveRequest($records), $this->configuration, self::SAVE_URL);
+            $handler->handleSave($this->createSaveRequest($records), $this->configuration, self::SAVE_URL);
             self::fail('Exception was not thrown.');
         } catch (RuntimeException $runtimeException) {
             self::assertInstanceOf(MatrixRecordInvalidDataTypeException::class, $runtimeException->getPrevious());
         }
 
         self::assertCount(1, $this->getEntityManager()->getRepository(TestEntity::class)->findAll());
+    }
+
+    /**
+     * The same services as in the container, only event dispatcher is different.
+     */
+    private function createHandlerWithEventDispatcher(EventDispatcherInterface $eventDispatcher): ImportHandler
+    {
+        $entityImporter = new EntityImporter(
+            self::getService(ManagerRegistry::class, 'doctrine'),
+            $eventDispatcher,
+            self::getService(RelatedEntityFinder::class),
+            self::getService(FormRegistryInterface::class, 'form.registry'),
+        );
+
+        return new ImportHandler(
+            self::getService(FormFactoryInterface::class, 'form.factory'),
+            self::getService(ValidatorInterface::class, 'validator'),
+            self::getService(TranslatorInterface::class, 'translator'),
+            self::getService(MatrixFactory::class),
+            $entityImporter,
+        );
     }
 
     public function testFinishedResultHasNoForm(): void
