@@ -11,8 +11,6 @@ use Symfony\Component\Form\FormInterface;
 /**
  * Result of single step of import, it does not depend on HTTP response,
  * so it can be presented in any way (rendered view, redirect, JSON, etc.).
- *
- * @internal used by ImportControllerTrait, it is not covered by backward compatibility promise yet
  */
 final readonly class ImportResult
 {

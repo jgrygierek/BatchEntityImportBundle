@@ -6,8 +6,6 @@ namespace JG\BatchEntityImportBundle\Import;
 
 /**
  * Next step of import, which should be shown to user.
- *
- * @internal used by ImportControllerTrait, it is not covered by backward compatibility promise yet
  */
 enum ImportStep
 {

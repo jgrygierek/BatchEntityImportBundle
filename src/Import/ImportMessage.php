@@ -6,8 +6,6 @@ namespace JG\BatchEntityImportBundle\Import;
 
 /**
  * Translated message for user, e.g. to be shown as flash message.
- *
- * @internal used by ImportControllerTrait, it is not covered by backward compatibility promise yet
  */
 final readonly class ImportMessage
 {
