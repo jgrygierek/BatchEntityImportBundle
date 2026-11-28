@@ -32,7 +32,7 @@ class DatabaseEntityUnique extends Constraint
             throw new InvalidArgumentException('Option "entityClassName" should not be empty.');
         }
 
-        parent::__construct(null, $groups, $payload);
+        parent::__construct(groups: $groups, payload: $payload);
 
         $this->message = $message ?? $this->message;
     }

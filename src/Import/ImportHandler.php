@@ -31,7 +31,8 @@ use Traversable;
 /**
  * Logic of import, independent of controller. Configuration is passed to each method, so one handler is used for all imports.
  *
- * @internal used by ImportControllerTrait, it is not covered by backward compatibility promise yet
+ * It is used by ImportControllerTrait, and it can be used directly by controller which presents results in other way
+ * (e.g. other templates or JSON). Use it as a service, its constructor is not a part of public API.
  */
 final readonly class ImportHandler
 {

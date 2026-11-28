@@ -1,5 +1,18 @@
 # UPGRADE TO 4.0
 
+## Quick migration
+
+Most applications need only these steps. Details and all other changes are described in sections below.
+
+1. Update requirements: PHP 8.4, Symfony 7.4 or 8, Doctrine ORM 3.3 and DBAL 4 (see [Requirements](#requirements)).
+2. In controllers, replace `ImportConfigurationAutoInjectInterface`, `ImportConfigurationAutoInjectTrait` and `getImportConfigurationClassName()` with `#[AsImportController(configuration: ...)]` attribute, and remove validator and translator from arguments of `doImport()` and `doImportSave()` (see [Controller](#controller)).
+3. Add `getAllowedColumns()` with list of imported columns to every import configuration, it is required now (see [Import configuration](#import-configuration)).
+4. If your import updates existing entities, return `true` from `allowOverrideEntity()` of its configuration, updating is disabled by default now.
+5. If your configuration overrides constructor, don't pass entity manager and event dispatcher to parent constructor. If it overrides methods which saved data (e.g. `prepareRecord()` or `save()`), move this logic to listeners of new events (see [Events](#events)).
+6. If you use `MatrixFactory` directly, inject it as a service, its methods are no longer static (see [Matrix factory](#matrix-factory)).
+7. Pass options of `MatrixRecordUnique` and `DatabaseEntityUnique` constraints as named arguments (see [Validation constraints](#validation-constraints)).
+8. If you override `select_file.html.twig` template, pass route parameters to `path()` (see [Twig](#twig)).
+
 ## Requirements
 
 - PHP 8.3 is no longer supported. Minimal required version is PHP 8.4.
@@ -117,7 +130,7 @@
 - Controller has also new public method `setImportHandler(ImportHandler $importHandler)`, called by container for controller with `#[AsImportController]` attribute. If your controller is not autoconfigured, call this method in definition of service too (service `JG\BatchEntityImportBundle\Import\ImportHandler`).
 - Tags `batch_entity_import.configuration` and `batch_entity_import.controller` are no longer added to import configurations and controllers, and `AutoConfigureControllerCompilerPass` was removed.
 - Configuration can not be selected in runtime by `getImportConfigurationClassName()` anymore. If one controller was used for many imports, create separate controller for each configuration.
-- Logic of import was moved from controller to new internal `JG\BatchEntityImportBundle\Import\ImportHandler` service. `ImportControllerTrait` only shows its results (renders views, redirects and adds flash messages), so behaviour of controller is not changed.
+- Logic of import was moved from controller to new `JG\BatchEntityImportBundle\Import\ImportHandler` service. `ImportControllerTrait` only shows its results (renders views, redirects and adds flash messages), so behaviour of controller is not changed.
 - Validator and translator are no longer passed to `doImport()` and `doImportSave()`, remove them from actions of your controller:
 
   ```php
@@ -237,7 +250,8 @@
 - `TemplateExtension` and `PropertyExistenceChecker` are readonly classes.
 - Form types used by the bundle in import process (`FileImportType`, `MatrixType` and `MatrixRecordType`) are final and marked as `@internal`. To change them (e.g. add options or attributes of fields), use [form type extension](https://symfony.com/doc/current/form/create_form_type_extension.html) instead of extending them.
 - `MatrixRecordType` is registered as a service and it gets `RelatedEntityFinder` in constructor, so it can't be created by `new` without arguments anymore. Form types used in your field definitions (`EntityLookupType`, `EntityLookupTextType`, `ArrayTextType`) can be still extended, see also [Form types](#form-types).
-- Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper`, `EntityManagerHelper`, `AbstractValidator` and classes from `JG\BatchEntityImportBundle\Import` namespace (`ImportHandler`, `EntityImporter`, `ImportResult`, `ImportStep`, `ImportMessage`, `ImportedColumn`) are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
+- Classes `CsvDelimiterDetector`, `PropertyExistenceChecker`, `ColumnNameHelper`, `EncodingHelper`, `EntityTranslationHelper`, `EntityManagerHelper`, `AbstractValidator`, `EntityImporter` and `ImportedColumn` are marked as `@internal`. They are not covered by backward compatibility promise, so they should not be used in your application.
+- `ImportHandler` service and its results (`ImportResult`, `ImportStep`, `ImportMessage`) are covered by backward compatibility promise. They can be used directly by controller which presents results in other way than `ImportControllerTrait` (see [Controller](docs/controller.md#using-import-handler-directly)).
 - Support of translatable entities (`knplabs/doctrine-behaviors`) was moved to internal `EntityTranslationHelper`. Nothing changes in the way translated columns are imported.
 - `FileImport` (model of form with file) is marked as `@internal`, it is used only by internal `FileImportType`.
 - `CsvDelimiterEnum` was moved from `JG\BatchEntityImportBundle\Enums` to `JG\BatchEntityImportBundle\Enum` namespace (the same as other namespaces, in singular) and it is marked as `@internal`. Its method `asValues()` was removed, use `array_column(CsvDelimiterEnum::cases(), 'value')` instead.

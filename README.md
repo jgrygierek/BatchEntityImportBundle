@@ -10,7 +10,8 @@
 Importing entities with preview and edit features for Symfony.
 
 * Data can be **viewed and edited** before saving to database.
-* Supports **inserting** new records and **updating** existing ones.
+* Supports **inserting** new records and **updating** existing ones (updating has to be enabled in configuration).
+* Only columns allowed in configuration are imported, so file can't change other properties of entity.
 * Supported extensions: **CSV, XLS, XLSX, ODS**.
 * Supports translations from **KnpLabs Translatable** extension.
 * Import can be adjusted in configuration class (fields, validation, allowed columns, creating entities), in controller (templates, views) and by events (e.g. converting values to dates).
